@@ -4,7 +4,7 @@ This is a generic python Sitools2 tool
 pySitools2 tool has been designed to perform all operations available within Sitools2.
 The code defines several classes SitoolsInstance, Field, Query, Dataset and Project. 
 
-Examples of application : 
+Examples of application :<br> 
 1)sdo_client_idoc.py , the medoc-sdo python specific client to request and retrieve SDO data from IAS (Institut d'Astrophysique Spatiale)
 see http://sdo.ias.u-psud.fr/python/sdo_client_idoc.html
 
