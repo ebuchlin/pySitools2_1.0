@@ -1,5 +1,6 @@
 #############################################  How to use python sdo_client_idoc.py  ######################################################
 #version  1.0 #############################################################################################################################
+#Author PAblo ALINGERY#####################################################################################################################
 
 This module has been designed to give python programmers an easy way to interrogate medoc-sdo.ias.u-psud.fr interface & to get data from it.
 
