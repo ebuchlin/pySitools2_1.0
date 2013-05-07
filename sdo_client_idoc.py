@@ -5,7 +5,7 @@ You can make a search with the following entries : a date range , a wavelenghth 
 You will have as a result a list of Sdo_data objets on which you can apply the method display() that will give you for each 
 the recnum, the sunum, the date_obs, the wavelength, the ias_location, the exptime and t_rec_index 
 For each result you will be able to call metadata_search() method in order to have the metadata information.
-@author: Pablo ALINGERY for IAS 28-08-2012
+@author: Pablo ALINGERY for IAS  07-05-2013
 """
 __version__ = "1.0"
 __license__ = "GPL"
