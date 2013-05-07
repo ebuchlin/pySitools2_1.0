@@ -1,6 +1,6 @@
 pySitools2_1.0
 ==============
-This is a generic python Sitools2 tool<br>
+This is a generic python Sitools2 client<br>
 pySitools2 tool has been designed to perform all operations available within Sitools2.<br>
 The code defines several classes SitoolsInstance, Field, Query, Dataset and Project. 
 
