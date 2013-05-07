@@ -1,7 +1,7 @@
 #! /usr/bin/python
 """
 
-@author: Pablo ALINGERY 
+@author: Pablo ALINGERY for IAS 07-05-2013
 """
 
 from sdo_client_idoc import *
