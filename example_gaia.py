@@ -1,7 +1,7 @@
 #! /usr/bin/python
 """
 
-@author: Pablo ALINGERY for IAS 28-08-2012
+@author: Pablo ALINGERY for IAS 07-05-2013
 """
 from gaia_client_idoc import *
 
