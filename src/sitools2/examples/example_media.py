@@ -4,7 +4,7 @@
 @author: Pablo ALINGERY for IAS 07-05-2013
 """
 
-from sdo_client_idoc import *
+from sitools2.clients.sdo_client_idoc import *
 
 d1 = datetime(2011,01,01,0,0,0)
 d2 = d1 + timedelta(minutes=20)

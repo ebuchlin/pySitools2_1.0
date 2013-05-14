@@ -15,7 +15,7 @@ __maintainer__="Pablo ALINGERY"
 __email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
 
 
-from pySitools2_idoc import *
+from sitools2.core.pySitools2 import *
 
 
 def get(MEDIA_DATA_LIST=[], TARGET_DIR=None, **kwds) :

@@ -3,7 +3,7 @@
 
 @author: Pablo ALINGERY for IAS 07-05-2013
 """
-from gaia_client_idoc import *
+from sitools2.clients.gaia_client_idoc import *
 
 d1 = datetime(2012,8,10,0,0,0)
 d2 = d1 + timedelta(days=1)
@@ -15,7 +15,7 @@ gaia_data_list = search( DATES=[d1,d2], nb_res_max=1 )
 
 #the fastest way to retrieve data
 #PS : The directory 'results' has to be created !
-get(GAIA_LIST=gaia_data_list, TARGET_DIR="results")
+get(GAIA_LIST=gaia_data_list, TARGET_DIR="/tmp")
 
 #specify TYPE you want to  retrieve , it should be in list 'temp','em','width','chi2' (TYPE=['all'] will do as well ), FILENAME would be the default one 
 #get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", TYPE=['temp','em'])

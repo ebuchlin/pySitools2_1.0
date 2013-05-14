@@ -21,7 +21,6 @@ __email__="pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
 
 import sys
 from datetime import *
-import os,time
 
 try :
 	import urllib
@@ -32,7 +31,7 @@ try :
 except:
 	sys.exit ("Import failed in module pySitools2_idoc :\n\tsimplejson module is required")
 try :
-	from xml.dom.minidom import parse, parseString
+	from xml.dom.minidom import parseString
 
 except:
 	sys.exit ("Import failed in module pySitools2_idoc :\n\txml.dom.minidom module is required")
@@ -452,6 +451,4 @@ class Project():
 				data.append(Dataset(ds_url))
 	except :
 		print "Error in Project.dataset_list() :\nCannot dataset %s is protected\nContact admin for more info" % url
-	return data	
-
-
+	return data
