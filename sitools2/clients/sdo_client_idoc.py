@@ -25,7 +25,7 @@ For each result you will be able to call metadata_search() method in order to ha
 @author: Pablo ALINGERY for IAS  07-05-2013
 """
 __version__ = "1.0"
-__license__ = "GPL"
+__license__ = "GPLV3"
 __author__ ="Pablo ALINGERY"
 __credit__=["Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
