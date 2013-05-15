@@ -1,4 +1,21 @@
 #! /usr/bin/python
+
+#    SITools2 client for Python
+#    Copyright (C) 2013 - Institut d'astrophysique spatiale
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 
 @author: Pablo ALINGERY for IAS 07-05-2013
@@ -16,7 +33,7 @@ sdo_data_list = search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['1 min'] )
 
 #The fastest way to retrieve data
 #PS : The directory 'results' has to be created !
-get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
+get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='/tmp', DECOMPRESS=True)
 
 #Need to get a tar ball or zip file do sthg like :
 #get_selection(MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_download_file.tar")
