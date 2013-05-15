@@ -1,4 +1,21 @@
 # -*- coding: utf-8 -*-
+
+#    SITools2 client for Python
+#    Copyright (C) 2013 - Institut d'astrophysique spatiale
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 This is a generic python Sitools2 tool
 pySitools2 tool has been designed to perform all operations available within Sitools2.
@@ -12,7 +29,7 @@ see http://sdo.ias.u-psud.fr/python/sdo_client_idoc.html
 @author: Pablo ALINGERY for IAS 28-08-2012
 """
 __version__ = "1.0"
-__license__ = "GPLV3"
+__license__ = "GPL"
 __author__ ="Pablo ALINGERY"
 __credit__=["Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
@@ -25,19 +42,16 @@ from datetime import *
 try :
 	import urllib
 except:
-	sys.stderr.write("Import failed in module pySitools2_idoc :\n\turllib module is required\n")
-	raise ImportError
+	sys.exit ("Import failed in module pySitools2_idoc :\n\turllib module is required")
 try :
 	import simplejson
 except:
-	sys.stderr.write("Import failed in module pySitools2_idoc :\n\tsimplejson module is required\n")
-	raise ImportError
+	sys.exit ("Import failed in module pySitools2_idoc :\n\tsimplejson module is required")
 try :
 	from xml.dom.minidom import parseString
 
 except:
-	sys.stderr.write("Import failed in module pySitools2_idoc :\n\txml.dom.minidom module is required\n")
-	raise ImportError
+	sys.exit ("Import failed in module pySitools2_idoc :\n\txml.dom.minidom module is required")
 
 class Sitools2Instance() :
     """"Define an install of Sitools2.
@@ -52,8 +66,7 @@ class Sitools2Instance() :
 		simplejson.load(urllib.urlopen(url+"/sitools/portal"))
 	except:
 		err_mess="Error in Sitools2Instance.__init__() :\nSitools2 instance %s not available please contact admin for more info\n" % url
-		sys.stderr.write(err_mess)
-		raise Exception
+		sys.exit(err_mess)
 #List all projects available for that SitoolsInstance
     def list_project(self, **kwargs):
 	sitools_url=self.instanceUrl
@@ -63,8 +76,7 @@ class Sitools2Instance() :
 	})
 	url=sitools_url+'/sitools/portal/projects'+'?'+urllib.urlencode(kwargs)
 	result =simplejson.load(urllib.urlopen(url))
-	out_mess= "%s projects detected\n" % result['total']
-	sys.stdout.write(out_mess)
+	print "%s projects detected" % result['total']
 	projects=result['data']
 	for i,project in enumerate(projects) :
 		p_url=sitools_url+project['sitoolsAttachementForUsers']
@@ -72,9 +84,7 @@ class Sitools2Instance() :
 		try :
 			data.append(Project(p_url))
 		except :
-			out_mess="Error in Sitools2Instance.list_project() :\nCannot create object project %s, %s protected \nContact admin for more info\n" % (project['name'],p_url)
-			sys.stdout.write(out_mess)
-			raise Exception
+			print "Error in Sitools2Instance.list_project() :\nCannot create object project %s, %s protected \nContact admin for more info\n" % (project['name'],p_url)
 	return data
 
 class Field():
@@ -126,13 +136,11 @@ class Query():
 #Compute attribute from client request
     def compute_attributes(self,param_list) :
 	if type(param_list[0]).__name__ !='list':
-		mess_err="Error in Query.compute_attributes() :\nQuery first argument type is : %s\nQuery first argument type should be : list\n" % type(param_list[0]).__name__
-		sys.stderr.write(mess_err)
-		raise Exception
+		mess_err="Error in Query.compute_attributes() :\nQuery first argument type is : %s\nQuery first argument type should be : list" % type(param_list[0]).__name__
+		sys.exit(mess_err)
 	if type(param_list[1]).__name__ !='list':
-		mess_err="Error in Query.compute_attributes() :\nQuery second argument type is : %s\nQuery second argument type should be : list\n\n\n" % type(param_list[1]).__name__
-		sys.stderr.write(mess_err)
-		raise Exception
+		mess_err="Error in Query.compute_attributes() :\nQuery second argument type is : %s\nQuery second argument type should be : list" % type(param_list[1]).__name__
+		sys.exit(mess_err)
 	for field in param_list[0]:
 		self.name_list.append(field.name)
 	self.fields_list=param_list[0]
@@ -160,9 +168,8 @@ class Dataset():
 	try :
 		simplejson.load(urllib.urlopen(url))
 	except:
-		err_mess="Error in Dataset.__init__() :\nDataset %s not available, please contact admin for more info\n" % url
-		sys.stderr.write(err_mess)		
-		raise Exception
+		err_mess="Error in Dataset.__init__() :\nDataset %s not available, please contact admin for more info" % url
+		sys.exit(err_mess)
         self.name = ""
         self.description = ""
 	self.uri="/"+url.split("/")[-1]
@@ -203,9 +210,7 @@ class Dataset():
 			if (column.has_key('columnRenderer')and column['columnRenderer']['behavior']=="noClientAccess"):
 				self.noClientAccess_list.append(column['columnAlias'])
 	except :
-		err_mess="Error in Dataset.compute_attributes(), please contact admin  for more info\n"
-		sys.stderr.write(err_mess)
-		raise Exception
+		sys.exit( "Error in Dataset.compute_attributes(), please contact admin  for more info")
 	for field in self.filter_list:
 		self.allowed_filter_list.append(field.name)
 	for field in self.sort_list:
@@ -220,8 +225,7 @@ class Dataset():
         	for i in range(len(resources)):
         	    self.resources_target.append(self.url+"/"+resources[i].getAttribute('path'))          
      	except:
-		out_mess="\t\t\tError in Dataset.ressources_list() not allowed, please contact admin for more info\n"
-		sys.stdout.write(out_mess)
+		print "\t\t\tError in Dataset.ressources_list() not allowed, please contact admin for more info"
 #Throw a research request on Sitools2 server, inside limit 350000 so > 1 month full cadence for SDO project 
     def search(self,query_list,output_list,sort_list,limit_request=350000, limit_to_nb_res_max=-1, **kwargs) :
 	"""This is the generic search() method of a Sitools2 instance.
@@ -256,9 +260,8 @@ class Dataset():
 		if operation in ['LT', 'EQ', 'GT', 'LTE', 'GTE'] :
 			for field in query.fields_list :
 				if field.name not in self.allowed_filter_list :
-					err_mess="Error in Dataset.search() :\nfilter on %s is not allowed\n" % field.name
-					sys.stderr.write(err_mess)
-					raise Exception
+					err_mess="Error in Dataset.search() :\nfilter on %s is not allowed" % field.name
+					sys.exit(err_mess)
 			kwargs.update({
 			'filter['+str(j)+'][columnAlias]' : "|".join(query.name_list),
 			'filter['+str(j)+'][data][type]' : 'numeric',
@@ -282,9 +285,7 @@ class Dataset():
 			i+=1#increment p counter
 		else :
 			allowed_operations="ge, le, gte, lte, lt, eq, gt, lte, like, in, numeric_between, date_between"
-			err_mess="Operation not available : %s \nAllowed operations are : %s\n" % (operation,allowed_operations)
-			sys.stderr.write(err_mess)
-			raise Exception
+			sys.exit("Operation not available : %s \nAllowed operations are : %s " % (operation,allowed_operations))#exit the program nicely with a clear error mess	
 	output_name_list=[]
 	output_name_dict={}
 	for i, field in enumerate(output_list):#build output object list and output object dict with name as a key  
@@ -299,9 +300,8 @@ class Dataset():
 	sort_dic_list=[]
 	for field in sort_list :#build sort output options 
 		if field[0].name not in self.allowed_sort_list :
-			err_mess="Error in Dataset.search():\nsort on %s is not allowed\n" % field.name
-			sys.stderr.write(err_mess)
-			raise Exception
+			err_mess="Error in Dataset.search():\nsort on %s is not allowed" % field.name
+			sys.exit(err_mess)
 		sort_dictionary={}
 		sort_dictionary.update({
 		"field" : field[0].name ,
@@ -359,8 +359,7 @@ class Dataset():
 			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#encode new kwargs and build new url for request
 		return result
 	else :
-		out_mess="Not allowed\nNbr results (%d) exceeds limit_request param: %d\n" % (result_count['total'],limit_request)
-		sys.stdout.write(out_mess)
+		print "Not allowed\nNbr results (%d) exceeds limit_request param: %d " % (result_count['total'],limit_request)
 		return result
 #Output attributes of Dataset
     def display(self) :
@@ -386,23 +385,15 @@ class Dataset():
     def execute_plugin(self, plugin_name=None, pkey_list=[], FILENAME=None, **kwargs) :
 	resources_list=[]
 	if plugin_name is None :
-		err_mess="Error execute_plugin():\nNo plugin_name provided\n"
-		sys.stderr.write(err_mess)
-		raise Exception
+		sys.exit("Error execute_plugin():\nNo plugin_name provided")
 	for resource in self.resources_target :
 		resources_list.append(resource.split("/")[-1])
 	if plugin_name not in resources_list : 
-			err_mess="Error execute_plugin():\nThis plugin_name %s does not exist in %s dataset\n" % (plugin_name,self.name)
-			sys.stderr.write(err_mess)
-			raise Exception
+			sys.exit("Error execute_plugin():\nThis plugin_name %s does not exist in %s dataset" % (plugin_name,self.name) )
 	if len(pkey_list)==0 :
-		err_mess="Error execute_plugin():\nNo identifiers pkey provided\n"
-		sys.stderr.write(err_mess)
-		raise Exception
+		sys.exit("Error execute_plugin():\nNo identifiers pkey provided")
 	if FILENAME is None :
-		err_mess="Error execute_plugin():\nNo FILENAME provided\n"
-		sys.stderr.write(err_mess)
-		raise Exception
+		sys.exit("Error execute_plugin():\nNo FILENAME provided")
 	operation='LISTBOXMULTIPLE'
 	kwargs.update({
 		'p[0]' : operation+"|"+self.primary_key.name+"|"+"|".join(str(pkey) for pkey in pkey_list)
@@ -441,8 +432,7 @@ class Project():
 		try :
         		domWadl = parseString(wadl)
 		except :
-			out_mess="Project : project.resources_list() not allowed, please contact admin for more info"
-			sys.stdout.write(out_mess)
+			print "Project : project.resources_list() not allowed, please contact admin for more info"
 		else : 
         		resources = domWadl.getElementsByTagName('resource')          
         		for i in range(len(resources)):
@@ -477,6 +467,5 @@ class Project():
 				ds_url=sitools_url+dataset['url']
 				data.append(Dataset(ds_url))
 	except :
-		out_mess="Error in Project.dataset_list() :\nCannot dataset %s is protected\nContact admin for more info\n" % url
-		sys.stdout.write(out_mess)
+		print "Error in Project.dataset_list() :\nCannot dataset %s is protected\nContact admin for more info" % url
 	return data

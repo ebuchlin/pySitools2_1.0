@@ -1,4 +1,21 @@
 #! /usr/bin/python
+
+#    SITools2 client for Python
+#    Copyright (C) 2013 - Institut d'astrophysique spatiale
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 This script has been designed to give python programmers an easy way to interrogate media sitools2 interface.
 You can make a search with the following entries : a date range , a wavelenghth or multiple wavelengths , a cadence.
@@ -8,7 +25,7 @@ For each result you will be able to call metadata_search() method in order to ha
 @author: Pablo ALINGERY for IAS  07-05-2013
 """
 __version__ = "1.0"
-__license__ = "GPLV3"
+__license__ = "GPL"
 __author__ ="Pablo ALINGERY"
 __credit__=["Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
@@ -16,7 +33,7 @@ __email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
 
 
 from sitools2.core.pySitools2 import *
-
+import os
 
 def get(MEDIA_DATA_LIST=[], TARGET_DIR=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
