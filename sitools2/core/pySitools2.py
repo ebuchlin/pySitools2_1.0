@@ -29,7 +29,7 @@ see http://sdo.ias.u-psud.fr/python/sdo_client_idoc.html
 @author: Pablo ALINGERY for IAS 28-08-2012
 """
 __version__ = "1.0"
-__license__ = "GPL"
+__license__ = "GPLV3"
 __author__ ="Pablo ALINGERY"
 __credit__=["Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
