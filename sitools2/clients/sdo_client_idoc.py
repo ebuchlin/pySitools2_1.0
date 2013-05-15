@@ -35,6 +35,8 @@ __email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
 from sitools2.core.pySitools2 import *
 import os
 
+sitools2_url='http://medoc-sdo.ias.u-psud.fr'
+
 def get(MEDIA_DATA_LIST=[], TARGET_DIR=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
 	for item in MEDIA_DATA_LIST:
@@ -43,8 +45,7 @@ def get(MEDIA_DATA_LIST=[], TARGET_DIR=None, **kwds) :
 
 def get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 	"""Use __getSelection__ method providing search result as an entry"""
-	sitools_url='http://medoc-sdo.ias.u-psud.fr'
-	sdo_dataset=Sdo_IAS_SDO_dataset(sitools_url+"/webs_IAS_SDO_dataset")
+	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
 	media_data_sunum_list=[]
 	for item in MEDIA_DATA_LIST:
 		media_data_sunum_list.append(item.sunum)
@@ -75,10 +76,8 @@ def search(DATES=None,WAVES=['94','131','171','193','211','304','335','1600','17
 		elif k=='nb_res_max':
 			NB_RES_MAX=v
 		
-	sitools_url='http://medoc-sdo.ias.u-psud.fr'
-#	sitools_url='http://localhost:8182'
-	print "Loading medoc-sdo Sitools2 client : ",sitools_url
-	sdo_dataset=Sdo_IAS_SDO_dataset(sitools_url+"/webs_IAS_SDO_dataset")
+	print "Loading medoc-sdo Sitools2 client : ",sitools2_url
+	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
 	DATES_OPTIM=[]
 	if DATES is None:
 		sys.exit("Error in search():\nDATES entry must be specified")
