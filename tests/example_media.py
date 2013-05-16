@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
 #    SITools2 client for Python
 #    Copyright (C) 2013 - Institut d'astrophysique spatiale
