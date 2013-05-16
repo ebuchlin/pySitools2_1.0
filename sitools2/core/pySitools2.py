@@ -37,78 +37,124 @@ __email__="pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
 
 
 import sys
+import logging
 from datetime import *
 
 try :
 	import urllib
 except:
-	sys.stderr.write("Import failed in module pySitools2_idoc :\n\turllib module is required\n")
-	raise ImportError
+        messageError = "Import failed in module pySitools2_idoc :\n\turllib module is required\n"
+	sys.stderr.write(messageError)
+	raise ImportError(messageError)
 try :
 	import simplejson
 except:
-	sys.stderr.write("Import failed in module pySitools2_idoc :\n\tsimplejson module is required\n")
-	raise ImportError
+        messageError = "Import failed in module pySitools2_idoc :\n\tsimplejson module is required\n"
+	sys.stderr.write(messageError)
+	raise ImportError(messageError)
 try :
 	from xml.dom.minidom import parseString
-
 except:
-	sys.stderr.write("Import failed in module pySitools2_idoc :\n\txml.dom.minidom module is required\n")
-	raise ImportError
+        messageError = "Import failed in module pySitools2_idoc :\n\txml.dom.minidom module is required\n"
+	sys.stderr.write(messageError)
+	raise ImportError(messageError)
 
-class Sitools2Instance() :
-    """"Define an install of Sitools2.
+class Sitools2Exception(Exception):
+    """SITools2 Exception"""
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class _Log(object):
+    """Module Logger.
+    Create a module logger with the following format '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    """    
+    @staticmethod
+    def getLogger(name, level = logging.INFO):
+        """Returns the logger
+        
+        Parameters
+        ----------
+            name : logger name
+            level : logging.level (par default logging.INFO)
+        
+        """
+        # create logger
+        logger = logging.getLogger(name) 
+        logger.setLevel(level)
+        # create console handler and set level to debug
+        ch = logging.StreamHandler()
+        ch.setLevel(level)
+        # create formatter
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # add formatter to ch
+        ch.setFormatter(formatter)
+        # add ch to logger
+        logger.addHandler(ch)
+        return logger        
+    
+    
+class Sitools2Instance:
+    """"Class to retrieve the list of project.
 	An instance of Sitools2Instance is defined using its url.
 	The method available : list_project(). 
 	It will return a list of the projects available for the instance.
-    """
-#Initialize class Sitools2Instance	
-    def __init__(self,url):
+    """        
+
+    def __init__(self, url):
+        """Constructs a SITools2Instance with an url and a log level."""
 	self.instanceUrl=url
+        self.__logger = _Log.getLogger(self.__class__.__name__) 
 	try :
+                self.__logger.debug(urllib.unquote((url+"/sitools/portal").encode('ascii')).decode('utf-8'))
 		simplejson.load(urllib.urlopen(url+"/sitools/portal"))
 	except:
-		err_mess="Error in Sitools2Instance.__init__() :\nSitools2 instance %s not available please contact admin for more info\n" % url
-		sys.stderr.write(err_mess)
-		raise Exception
-#List all projects available for that SitoolsInstance
+		err_mess="Sitools2 instance %s not available please contact admin for more info\n" % url
+                self.__logger.error(err_mess)		
+		raise Sitools2Exception(err_mess)        
+            
+
     def list_project(self, **kwargs):
+        """Returns the list of projects available for the SITools2 instance."""
 	sitools_url=self.instanceUrl
 	data=[]
 	kwargs.update({
 		'media' : 'json'
 	})
 	url=sitools_url+'/sitools/portal/projects'+'?'+urllib.urlencode(kwargs)
+        self.__logger.debug(urllib.unquote(url.encode('ascii')).decode('utf-8'))
 	result =simplejson.load(urllib.urlopen(url))
 	out_mess= "%s projects detected\n" % result['total']
-	sys.stdout.write(out_mess)
+        self.__logger.info(out_mess)
 	projects=result['data']
 	for i,project in enumerate(projects) :
-		p_url=sitools_url+project['sitoolsAttachementForUsers']
-		
+		p_url=sitools_url+project['sitoolsAttachementForUsers']		
 		try :
 			data.append(Project(p_url))
 		except :
-			out_mess="Error in Sitools2Instance.list_project() :\nCannot create object project %s, %s protected \nContact admin for more info\n" % (project['name'],p_url)
-			sys.stdout.write(out_mess)
-			raise Exception
+			out_mess="Cannot create object project %s, %s protected \nContact admin for more info\n" % (project['name'],p_url)
+                        self.__logger.error(out_mess)			
+			raise Sitools2Exception(out_mess)
 	return data
 
-class Field():
+class Field:
     """Definition of a Field class.
        A field is a item from a dataset. 
        It has several attributes : name, type, filter(boolean), sort(boolean), behavior.
     """
-#Initialize class Field     
+    
     def __init__(self,dictionary):
+        """Constructor with a dictionary"""
 	self.name=""
 	self.type=""
 	self.filter=False
 	self.sort=False
 	self.behavior=""
-	self.compute_attributes(dictionary)
-#Compute attribute from web service dataset description
-    def compute_attributes(self, dictionary):
+	self.__compute_attributes(dictionary)
+
+    def __compute_attributes(self, dictionary):
+        """Compute attributes from web service dataset description."""
 	if dictionary.has_key('columnAlias'):
 		self.name=dictionary['columnAlias']
 	if dictionary.has_key('sqlColumnType'):	
@@ -119,12 +165,40 @@ class Field():
 		self.sort=dictionary['sortable']
 	if dictionary.has_key('columnRenderer'):
 		self.behavior=dictionary['columnRenderer']['behavior']
-#Ouptut attributes of Field
+    
+    def get_name(self):
+        """Returns the name."""
+        return self.name
+    
+    def get_type(self):
+        """Returns the type."""
+        return self.type
+    
+    def get_filter(self):
+        """Returns the filter."""
+        return self.filter
+    
+    def get_sort(self):
+        """Returns the sort."""
+        return self.sort
+    
+    def get_behavior(self):
+        """Returns the behavior."""
+        return self.behavior
+    
+    def __display_variable(self, name):
+        """Returns name if the name != None otherwise \"\""""
+        if name == None:
+            return ""
+        else:
+            return name
+    
     def display(self):
+        """Ouptut attributes of Field."""
 	print self.__repr__()
 
     def __repr__(self):
-	return ("Field object display() :\n\t%s\n\t\ttype : %s\n\t\tfilter : %s\n\t\tsort : %s\n\t\tbehavior : %s" %(self.name,self.type,self.filter,self.sort, self.behavior))
+	return ("Field object display() :\n\t%s\n\t\ttype : %s\n\t\tfilter : %s\n\t\tsort : %s\n\t\tbehavior : %s" %(self.__display_variable(self.name),self.__display_variable(self.type),self.filter,self.sort, self.__display_variable(self.behavior)))
 
 
 class Query():
@@ -133,40 +207,62 @@ class Query():
        It can have the following attributes : fields_list, name_list, operation.
        The parameter operation can value : ge, le, gte, lte, lt, eq, gt, lte, like, in, numeric_between, date_between, cadence (dev for IAS) .
     """
-#Initialize class Query
-    def __init__(self,param_list):
+
+    def __init__(self, param_list):
+        """Constructor."""
 	self.fields_list=[]
 	self.name_list=[]
 	self.value_list=[]
 	self.operation=""
-	self.compute_attributes(param_list)
-#Compute attribute from client request
-    def compute_attributes(self,param_list) :
+        self.__logger = _Log.getLogger(self.__class__.__name__) 
+	self.__compute_attributes(param_list)
+
+    def __compute_attributes(self,param_list) :
+        """Compute attribute from client request."""
 	if type(param_list[0]).__name__ !='list':
-		mess_err="Error in Query.compute_attributes() :\nQuery first argument type is : %s\nQuery first argument type should be : list\n" % type(param_list[0]).__name__
-		sys.stderr.write(mess_err)
-		raise Exception
+		mess_err="Query first argument type is : %s\nQuery first argument type should be : list\n" % type(param_list[0]).__name__
+                self.__logger.error(mess_err)		
+		raise Sitools2Exception(mess_err)
 	if type(param_list[1]).__name__ !='list':
-		mess_err="Error in Query.compute_attributes() :\nQuery second argument type is : %s\nQuery second argument type should be : list\n\n\n" % type(param_list[1]).__name__
-		sys.stderr.write(mess_err)
-		raise Exception
+		mess_err="Query second argument type is : %s\nQuery second argument type should be : list\n\n\n" % type(param_list[1]).__name__
+                self.__logger.error(mess_err)		
+		raise Sitools2Exception(mess_err)
 	for field in param_list[0]:
 		self.name_list.append(field.name)
 	self.fields_list=param_list[0]
 	self.value_list=param_list[1]
 	self.operation=param_list[2]
 
+    def get_fields(self):
+        return self.fields_list
+    
+    def get_names(self):
+        return self.name_list
+    
+    def get_values(self):
+        return self.value_list
+    
+    def get_operation(self):
+        return self.operation
+
+    def __display_variable(self, name):
+        """Returns name if the name != None otherwise \"\""""
+        if name == None:
+            return ""
+        else:
+            return name
+        
 #Ouptut attributes of Query
     def display(self):
 	print self.__repr__()
 
 #Define a repr of this Class 
     def __repr__(self):
-	return ("name : % s\nvalue : %s\nOperation : %s" % (", ".join(self.name_list), ", ".join(self.value_list), self.operation))
+	return ("name : % s\nvalue : %s\nOperation : %s" % (", ".join(self.name_list), ", ".join(self.value_list), __display_variable(self.operation)))
 
 
 
-class Dataset():
+class Dataset:
     """Definition of a Dataset class.
        It is related to a Sitools2 dataset, which is a set of instances of the class Field with specific properties.
        It can have the following attibutes  : name, description, url, field_list,filter_list, resources_target, noClientAccess_list, primary_key,resources_list.  
@@ -174,12 +270,13 @@ class Dataset():
     """        
 #Initialize class Dataset
     def __init__(self, url):
+        self.__logger = _Log.getLogger(self.__class__.__name__)
 	try :
 		simplejson.load(urllib.urlopen(url))
 	except:
-		err_mess="Error in Dataset.__init__() :\nDataset %s not available, please contact admin for more info\n" % url
-		sys.stderr.write(err_mess)		
-		raise Exception
+		err_mess="Dataset %s not available, please contact admin for more info\n" % url	
+                self.__logger.error(err_mess)
+		raise Sitools2Exception(err_mess)
         self.name = ""
         self.description = ""
 	self.uri="/"+url.split("/")[-1]
@@ -193,14 +290,15 @@ class Dataset():
 	self.resources_target=[]
 	self.noClientAccess_list=[]
 	self.primary_key=""
-	self.compute_attributes()
+	self.__compute_attributes()
 	self.resources_list()
 #Compute attribute from web service answer dataset description
-    def compute_attributes(self, **kwargs) :
+    def __compute_attributes(self, **kwargs) :
 	kwargs.update({
 		'media' : 'json'
 	})
 	url=self.url+'?'+urllib.urlencode(kwargs)
+        self.__logger.debug(urllib.unquote(url.encode('ascii')).decode('utf-8'))
 	try:
 		result =simplejson.load(urllib.urlopen(url))
 		self.name=result['dataset']['name']
@@ -220,9 +318,9 @@ class Dataset():
 			if (column.has_key('columnRenderer')and column['columnRenderer']['behavior']=="noClientAccess"):
 				self.noClientAccess_list.append(column['columnAlias'])
 	except :
-		err_mess="Error in Dataset.compute_attributes(), please contact admin  for more info\n"
-		sys.stderr.write(err_mess)
-		raise Exception
+		err_mess="Error in Dataset.compute_attributes(), please contact admin  for more info"
+                self.__logger(err_mess)		
+		raise Sitools2Exception(err_mess)
 	for field in self.filter_list:
 		self.allowed_filter_list.append(field.name)
 	for field in self.sort_list:
@@ -237,8 +335,8 @@ class Dataset():
         	for i in range(len(resources)):
         	    self.resources_target.append(self.url+"/"+resources[i].getAttribute('path'))          
      	except:
-		out_mess="\t\t\tError in Dataset.ressources_list() not allowed, please contact admin for more info\n"
-		sys.stdout.write(out_mess)
+		out_mess="Error in Dataset.ressources_list() not allowed, please contact admin for more info"
+                self.__logger.error(out_mess)		
 #Throw a research request on Sitools2 server, inside limit 350000 so > 1 month full cadence for SDO project 
     def search(self,query_list,output_list,sort_list,limit_request=350000, limit_to_nb_res_max=-1, **kwargs) :
 	"""This is the generic search() method of a Sitools2 instance.
@@ -273,9 +371,9 @@ class Dataset():
 		if operation in ['LT', 'EQ', 'GT', 'LTE', 'GTE'] :
 			for field in query.fields_list :
 				if field.name not in self.allowed_filter_list :
-					err_mess="Error in Dataset.search() :\nfilter on %s is not allowed\n" % field.name
-					sys.stderr.write(err_mess)
-					raise Exception
+					err_mess="filter on %s is not allowed" % field.name
+                                        self.__logger.error(err_mess)					
+					raise Sitools2Exception(err_mess)
 			kwargs.update({
 			'filter['+str(j)+'][columnAlias]' : "|".join(query.name_list),
 			'filter['+str(j)+'][data][type]' : 'numeric',
@@ -299,9 +397,9 @@ class Dataset():
 			i+=1#increment p counter
 		else :
 			allowed_operations="ge, le, gte, lte, lt, eq, gt, lte, like, in, numeric_between, date_between"
-			err_mess="Operation not available : %s \nAllowed operations are : %s\n" % (operation,allowed_operations)
-			sys.stderr.write(err_mess)
-			raise Exception	
+			err_mess="Operation not available : %s Allowed operations are : %s" % (operation,allowed_operations)
+                        self.__logger.error(err_mess)			
+			raise Sitools2Exception	(err_mess)
 	output_name_list=[]
 	output_name_dict={}
 	for i, field in enumerate(output_list):#build output object list and output object dict with name as a key  
@@ -316,9 +414,9 @@ class Dataset():
 	sort_dic_list=[]
 	for field in sort_list :#build sort output options 
 		if field[0].name not in self.allowed_sort_list :
-			err_mess="Error in Dataset.search():\nsort on %s is not allowed\n" % field.name
-			sys.stderr.write(err_mess)
-			raise Exception
+			err_mess="Error in Dataset.search(): sort on %s is not allowed" % field.name		
+                        self.__logger.error(err_mess)
+			raise Sitools2Exception(err_mess)
 		sort_dictionary={}
 		sort_dictionary.update({
 		"field" : field[0].name ,
@@ -332,6 +430,7 @@ class Dataset():
 	temp_url=urllib.urlencode(temp_kwargs).replace('+','').replace('%27','%22')
 	url_count=self.url+"/count"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#Build url just for count
 	url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#Build url for the request
+        self.__logger.debug(urllib.unquote(url_count.encode('ascii')).decode('utf-8'))
 	result_count =simplejson.load(urllib.urlopen(url_count))
 	nbr_results=result_count['total']
 	result=[]
@@ -349,9 +448,12 @@ class Dataset():
 #Check that request is done each 300 items
 			result_temp =simplejson.load(urllib.urlopen(url))
 	 		for data in result_temp['data'] :
+                                self.__logger.debug(data)
 				result_dict={}
-				for k,v in data.items() :
+				for k,v in data.items() :                                       
 					if (k not in self.noClientAccess_list and k != 'uri' and k in output_name_list) or k in output_name_list :
+                                                self.__logger.debug(output_name_dict)
+                                                self.__logger.debug("key to search = "+ k)                                                
 						if output_name_dict[k].type.startswith('int'): 
 							result_dict.update({
 								k : int(v)
@@ -373,10 +475,11 @@ class Dataset():
 							})
 				result.append(result_dict)
 			kwargs['start'] += kwargs['limit']#increment the job by the kwargs limit given (by design)  
-			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#encode new kwargs and build new url for request
+			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#encode new kwargs and build new url for request                        
 		return result
 	else :
 		out_mess="Not allowed\nNbr results (%d) exceeds limit_request param: %d\n" % (result_count['total'],limit_request)
+                self.__logger.info(out_mess)
 		sys.stdout.write(out_mess)
 		return result
 #Output attributes of Dataset
@@ -403,51 +506,54 @@ class Dataset():
     def execute_plugin(self, plugin_name=None, pkey_list=[], FILENAME=None, **kwargs) :
 	resources_list=[]
 	if plugin_name is None :
-		err_mess="Error execute_plugin():\nNo plugin_name provided\n"
-		sys.stderr.write(err_mess)
-		raise Exception
+		err_mess="Error execute_plugin(): No plugin_name provided"
+                self.__logger.error(err_mess)		
+		raise Sitools2Exception(err_mess)
 	for resource in self.resources_target :
 		resources_list.append(resource.split("/")[-1])
 	if plugin_name not in resources_list : 
-			err_mess="Error execute_plugin():\nThis plugin_name %s does not exist in %s dataset\n" % (plugin_name,self.name)
-			sys.stderr.write(err_mess)
-			raise Exception
+			err_mess="Error execute_plugin(): This plugin_name %s does not exist in %s dataset" % (plugin_name,self.name)
+			self.__logger.error(err_mess)	
+			raise Sitools2Exception(err_mess)
 	if len(pkey_list)==0 :
-		err_mess="Error execute_plugin():\nNo identifiers pkey provided\n"
-		sys.stderr.write(err_mess)
-		raise Exception
+		err_mess="Error execute_plugin(): No identifiers pkey provided"
+                self.__logger.error(err_mess)			
+		raise Sitools2Exception(err_mess)
 	if FILENAME is None :
-		err_mess="Error execute_plugin():\nNo FILENAME provided\n"
-		sys.stderr.write(err_mess)
-		raise Exception
+		err_mess="Error execute_plugin(): No FILENAME provided"
+		self.__logger.error(err_mess)	
+		raise Sitools2Exception(err_mess)
 	operation='LISTBOXMULTIPLE'
 	kwargs.update({
 		'p[0]' : operation+"|"+self.primary_key.name+"|"+"|".join(str(pkey) for pkey in pkey_list)
 	})
 	url=self.url+"/"+plugin_name+"?"+urllib.urlencode(kwargs)
+        self.__logger.debug(urllib.unquote(url.encode('ascii')).decode('utf-8'))	
 	return urllib.urlretrieve('%s' % url, FILENAME)
 
-class Project():
+class Project:
     """Define a Project class.
        A Project instance gives details about a project of Sitools2. 
        It has the following attributes : name, description, uri, url, resources_target.
        The method dataset_list() will return information about the number of datasets available, their name and uri.
     """
 #Initialize Project
-    def __init__(self, url):        
+    def __init__(self, url):
+        self.__logger = _Log.getLogger(self.__class__.__name__)
         self.name = ""
 	self.description = ""
 	self.uri = "/"+url.split("/")[-1]
         self.url = url
 	self.resources_target = []
-	self.compute_attributes()
+	self.__compute_attributes()
         self.resources_list();
 #Compute_attributes builds value for instance Project
-    def compute_attributes(self,**kwargs) :
+    def __compute_attributes(self,**kwargs) :
 	kwargs.update({
 		'media' : 'json'
 	})
 	url=self.url+'?'+urllib.urlencode(kwargs)
+        self.__logger.debug(urllib.unquote(url.encode('ascii')).decode('utf-8'))
 	result =simplejson.load(urllib.urlopen(url))
 	self.name=result['project']['name']
 	self.description=result['project']['description']
@@ -459,7 +565,7 @@ class Project():
         		domWadl = parseString(wadl)
 		except :
 			out_mess="Project : project.resources_list() not allowed, please contact admin for more info"
-			sys.stdout.write(out_mess)
+                        self.__logger.info(out_mess)			
 		else : 
         		resources = domWadl.getElementsByTagName('resource')          
         		for i in range(len(resources)):
@@ -494,6 +600,6 @@ class Project():
 				ds_url=sitools_url+dataset['url']
 				data.append(Dataset(ds_url))
 	except :
-		out_mess="Error in Project.dataset_list() :\nCannot dataset %s is protected\nContact admin for more info\n" % url
-		sys.stdout.write(out_mess)
+		out_mess="Cannot dataset %s is protected\nContact admin for more info" % url
+                self.__logger.error(out_mess)
 	return data
