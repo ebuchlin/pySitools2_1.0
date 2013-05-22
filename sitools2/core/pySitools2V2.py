@@ -147,16 +147,20 @@ class _Log(object):
         return logger 
 
 class Sitools2(object):
+    """An abstract class providing the SITools2 base URL"""
     
-    VERSIONS = ['1.0']
+    VERSIONS = ['1.0'] # the compatible versions of this core with SITools2
     
     def __init__(self, baseUrl):
+        """Constructs a new instance with the SITools2 base URL."""
         self.__baseUrl = baseUrl
     
     def version(self):
+        """Returns the version number."""
         return VERSIONS
     
     def getBaseUrl(self):
+        """Returns the SITools2 base URL."""
         return self.__baseUrl
     
 class Projects(Sitools2):
@@ -314,7 +318,7 @@ class Project(Sitools2):
         Exception
         ---------
         Sitools2Exception when the server response is not a success"""
-        print "URL to parse: %s"%(Sitools2.getBaseUrl(self) + uri)
+        
         self.__logger.debug("URL to parse: %s"%(Sitools2.getBaseUrl(self) + uri))
         result = _Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + uri)        
         isSuccess = result['success']
@@ -394,23 +398,83 @@ class Project(Sitools2):
         
 
 class Datasets(Sitools2):
+    """Stores the list of datasets related to a project name.
+    This class provides information such as :
+    - the number of datasets
+    - the list of datasets
+    - search by dataset name
     
+    Let's start by querying a specific project:
+    >>> p = Project('http://medoc-dem.ias.u-psud.fr',projectNameUri='/ws_DEM_projet')
+    
+    >>> datasets = p.getDataSets()
+    
+    Now, we can get the number of datasets related to the project ws_DEM_project
+    >>> datasets.getCount()
+    2
+    
+    We can get a specific dataset in the list
+    >>> dataset = datasets.getDataset(0)
+    
+    If we try to get a dataset outer the array, we get a SITools2Exception
+    >>> dataset = datasets.getDataset(3)
+    Traceback (most recent call last):
+        ...
+    IndexError: list index out of range
+    """     
+   
     def __init__(self, baseUrl, data):
+        """Constructs the list of the datasets
+        Inputs
+        -----
+        baseUrl : SITools2 base URL
+        data : the response of the server when a specific project is called.        
+
+        Exception
+        ---------
+        Sitools2Exception when a dataset cannot be instanciated."""
+        
         super(Datasets, self).__init__(baseUrl)
         self.__datasets = []
         for dataset in data:
             self.__datasets.append(DataSet(Sitools2.getBaseUrl(self), dataset))
         
     def getCount(self):
+        """Returns the number of datasets."""
         return len(self.__datasets)
     
     def getDatasets(self):
+        """Returns the list of Dataset Objects."""
         return self.__datasets
     
     def getDataset(self, index):
+        """Returns a specific dataset Object in the list.
+        Input
+        -----
+        index : index number in the list
+        
+        Return
+        ------
+        A Dataset Object
+        
+        Exception
+        ---------
+        IndexError: list index out of range"""
         return self.__datasets[index]
     
-    def getDatasetByName(self, name):        
+    def getDatasetByName(self, name):
+        """Returns a Dataset Object by its name.
+        Input
+        -----
+        name : dataset name to search
+        
+        Return
+        ------
+        A Dataset Object
+        
+        Exception
+        ---------
+        Sitools2Exception: cannot find the dataset"""
         for dataset in self.__datasets:
             datasetName = dataset.getName()
             if datasetName == name:
@@ -419,17 +483,44 @@ class Datasets(Sitools2):
                         
         
 class DataSet(Sitools2):
+    """Stores a dataset.
+    This class provides information such as :
+    - the dataset name
+    - the dataset description
+    - the URI description
+    - if the web service is enabled
+    - if the dataset is protected for you
+    - if the dataset is visible in the web interface
+    - the number of records
+    - the list of dataset columns/attributes
+    - the search capability.
     
-    def __init__(self, baseUrl, dataItem):
+    Let's start by querying a specific dataset:
+    >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
+    
+    Now, we can retrieve the number of records in this dataset
+    >>> dataset.nbRecords()
+    8245
+    """
+    def __init__(self, baseUrl, dataItem = None, datasetName = None):
         super(DataSet, self).__init__(baseUrl)
         self.__logger = _Log.getLogger(self.__class__.__name__)
-        self.__dataItem = dataItem        
-        self.__updateDataItem()
+        if datasetName == None:
+            self.__dataItem = dataItem        
+            self.__updateDataItem()
+        else:
+            self.__dataItem = self.__parseResponseServer('/'+datasetName)        
+        self.__countNbRecords()
+        
         
     def __updateDataItem(self):
         """Updates dataItem."""
         uri = self.getUri()        
-        self.__dataItem = self.__parseResponseServer(uri)                
+        self.__dataItem = self.__parseResponseServer(uri)
+    
+    def __countNbRecords(self):
+        result = _Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + self.getUri() + '/count')
+        self.__dataItem['nbrecords'] = result['total']
     
     def __parseResponseServer(self, uri):
         """Parses the server response.
@@ -444,7 +535,7 @@ class DataSet(Sitools2):
         Exception
         ---------
         Sitools2Exception when the server response is not a success"""
-        print "URL to parse: %s"%(Sitools2.getBaseUrl(self) + uri)
+        
         self.__logger.debug("URL to parse: %s"%(Sitools2.getBaseUrl(self) + uri))
         result = _Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + uri)        
         isSuccess = result['success']
@@ -454,6 +545,8 @@ class DataSet(Sitools2):
         else:
             raise Sitools2Exception("Error when loading the server response")
         
+    def updateCountNbRecords(self):
+        self.__countNbRecords()
         
     def getName(self):
         return self.__dataItem['name']
@@ -486,31 +579,25 @@ class DataSet(Sitools2):
             return False
     
     def nbRecords(self):
-        nb = 0
-        properties = self.__dataItem['properties']
-        for key, value in enumerate(properties):
-            if value["name"] == "nbRecord":
-                nb = value["value"]
-                break
-        return nb
+        return self.__dataItem['nbrecords']
     
-    def getHtmlDescription(self):
-        desc = None
-        properties = self.__dataItem['properties']
-        for key, value in enumerate(properties):
-            if value["name"] == "descriptionHTML":
-                desc = value["value"]
-                break
-        return desc
+    #def getHtmlDescription(self):
+    #    desc = None
+    #    properties = self.__dataItem['properties']
+    #    for key, value in enumerate(properties):
+    #        if value["name"] == "descriptionHTML":
+    #            desc = value["value"]
+    #            break
+    #    return desc
     
-    def getImage(self):
-        image = None
-        properties = self.__dataItem['properties']
-        for key, value in enumerate(properties):
-            if value["name"] == "imageUrl":
-                image = value["value"]
-                break
-        return image
+    #def getImage(self):
+    #    image = None
+    #    properties = self.__dataItem['properties']
+    #    for key, value in enumerate(properties):
+    #        if value["name"] == "imageUrl":
+    #            image = value["value"]
+    #            break
+    #    return image
     
     def getColumns(self):
         return Columns(self.__dataItem['columnModel'])
