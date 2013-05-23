@@ -500,7 +500,7 @@ class DataSet(Sitools2):
     
     Now, we can retrieve the number of records in this dataset
     >>> dataset.nbRecords()
-    8245
+    8247
     """
     def __init__(self, baseUrl, dataItem = None, datasetName = None):
         super(DataSet, self).__init__(baseUrl)
@@ -545,82 +545,112 @@ class DataSet(Sitools2):
         else:
             raise Sitools2Exception("Error when loading the server response")
         
-    def updateCountNbRecords(self):
+    def updateDataset(self):
+        """Updates the dataset."""
+        self.__updateDataItem()
         self.__countNbRecords()
         
     def getName(self):
+        """Returns the dataset name."""
         return self.__dataItem['name']
     
     def getDescription(self):
+        """Returns the dataset description."""
         return self.__dataItem['description']
     
     def getUri(self):
+        """Returns the dataset URI."""
         if self.__dataItem.has_key('url'):
             return self.__dataItem['url']
         else:
             return self.__dataItem['sitoolsAttachementForUsers']
     
     def isEnabled(self):
+        """Indicates if the dataset is enabled."""
         if self.__dataItem['status'] == "ACTIVE":
             return True
         else:
             return False
         
     def isProtected(self):
+        """Indicates if the dataset is protected for you."""
         if self.__dataItem['authorized'] is True:
             return False
         else:
             return True        
     
     def isVisible(self):
+        """Indicates if the dataset is visible in the web interface."""
         if self.__dataItem['visible'] is True:
             return True
         else:
             return False
     
     def nbRecords(self):
+        """Returns the number of records in the dataset."""
         return self.__dataItem['nbrecords']
     
-    #def getHtmlDescription(self):
-    #    desc = None
-    #    properties = self.__dataItem['properties']
-    #    for key, value in enumerate(properties):
-    #        if value["name"] == "descriptionHTML":
-    #            desc = value["value"]
-    #            break
-    #    return desc
-    
-    #def getImage(self):
-    #    image = None
-    #    properties = self.__dataItem['properties']
-    #    for key, value in enumerate(properties):
-    #        if value["name"] == "imageUrl":
-    #            image = value["value"]
-    #            break
-    #    return image
-    
     def getColumns(self):
+        """Returns the columns of the dataset."""
         return Columns(self.__dataItem['columnModel'])
     
     def getSearch(self):
+        """Returns the search capability."""
         return Search(self.getColumns(), Sitools2.getBaseUrl(self) + self.getUri())
     
 class Columns:
+    """Stores the columns of the dataset...
+    Here is an example how to use this class. We start by retrieving a specific dataset
+    >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
+    
+    Gets the columns of the dataset
+    >>> columns = dataset.getColumns()
+    
+    Retrieves the number of columns
+    >>> columns.getCount()
+    23
+    
+    Retrieves a column from a list
+    >>> column = columns.getColumn(0)
+    
+    
+    """
     def __init__(self, data):
+        """ Constructor.
+        Input
+        -----
+        Data coming from the server response
+        """
         self.__columns = []
         for column in data:
             self.__columns.append(Column(column))
     
     def getCount(self):
+        """Returns the number of columns."""
         return len(self.__columns)
     
     def getColumns(self):
+        """Returns the column as an array of Column."""
         return self.__columns
     
     def getColumn(self, index):
+        """Returns a column from the list of columns."""
         return self.__columns[index]
     
-    def getColumnByColumnAlias(self, name):        
+    def getColumnByColumnAlias(self, name):
+        """Returns a column from its name.
+        Input
+        -----
+        name : columnAlias of the column to retrieve
+        
+        Return
+        ------
+        A Column object.
+        
+        Exception
+        ---------
+        Sitools2Exception : cannot find the column
+        """
         for column in self.__columns:
             columnAlias = column.getColumnAlias()
             if columnAlias == name:
@@ -629,53 +659,123 @@ class Columns:
 
 
 class Column:
+    """Stores a column.
+    Here is an example how to use this class. We start by retrieving a specific dataset
+    >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
     
+    Gets the columns of the dataset
+    >>> columns = dataset.getColumns()
+    
+    Retrieves a column from a list
+    >>> column = columns.getColumn(1)
+    
+    Returns the dataIndex
+    >>> column.getDataIndex()
+    'date_obs'
+    
+    Returns the Header
+    >>> column.getHeader()
+    'date_obs'
+    
+    Returns if the column is sortable
+    >>> column.isSortable()
+    True
+    
+    Returns if the column is visible
+    >>> column.isVisible()
+    True
+    
+    Returns if the column can be used as filter
+    >>> column.isFilter()
+    True
+    
+    Returns if the column is a primary key
+    >>> column.isPrimaryKey()
+    False
+    
+    Returns if the column has a rendered
+    >>> column.hasColumnRenderer()
+    False
+    
+    Returns the columnAlias
+    >>> column.getColumnAlias()
+    'date_obs'
+    
+    Returns the SQL columnType
+    >>> column.getSqlColumnType()
+    'timestamp'
+    
+    Returns the order by
+    >>> column.getOrderBy()
+    'ASC'
+    
+    Returns the format
+    >>> column.getFormat()
+    'Y-m-d H:i'
+    
+    """
     def __init__(self, data):
+        """Constructor."""
         self.__data = data
     
     def getDataIndex(self):
+        """Returns the data index."""
         return self.__data['dataIndex']
     
     def getHeader(self):
+        """Returns the header."""
         return self.__data['header']
     
     def isSortable(self):
+        """Returns if the column is sortable."""
         return self.__data['sortable']
     
     def isVisible(self):
+        """Returns if the column is visible."""
         return self.__data['visible']
     
     def isFilter(self):
+        """Returns if the column can be filtered."""
         if self.__data.has_key('filter'):
             return self.__data['filter']
         else:
             return False
     
     def isPrimaryKey(self):
+        """Returns if the column is a primary key."""
         return self.__data['primaryKey']
     
     def hasColumnRenderer(self):
+        """Returns if the column has a renderer."""
         return self.__data.has_key('columnRenderer')
     
-    def getColumnRenderer(self):        
-        return ColumnRender(self.__data['columnRenderer'])
+    def getColumnRenderer(self):
+        """Return the column renderer if available otherwise None"""
+        if hasColumnRenderer:
+            return ColumnRender(self.__data['columnRenderer'])
+        else:
+            return None
     
     def getColumnAlias(self):
+        """Returns the column alias."""
         return self.__data['columnAlias']
     
     def getSqlColumnType(self):
+        """Returns the SQL column type."""
         if self.__data.has_key('sqlColumnType'):
             return self.__data['sqlColumnType']
         else:
             return None       
     
     def getOrderBy(self):
+        """Returns the OrderBy property if available otherwise None"""
         if self.__data.has_key('orderBy'):
             return self.__data['orderBy']
         else:
             return None         
     
     def getFormat(self):
+        """Returns the date format if available otherwise false."""
         if self.__data.has_key('format'):
             return self.__data['format']
         else:
