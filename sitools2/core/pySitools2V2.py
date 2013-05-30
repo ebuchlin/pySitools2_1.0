@@ -39,81 +39,15 @@ import logging
 from datetime import *
 
 try :
-    import urllib
+    import os
 except:
-    messageError = "Import failed in module pySitools2_idoc :\n\turllib module is required\n"
-    sys.stderr.write(messageError)
-    raise ImportError(messageError)
-try :
-    import simplejson
-except:
-    messageError = "Import failed in module pySitools2_idoc :\n\tsimplejson module is required\n"
-    sys.stderr.write(messageError)
-    raise ImportError(messageError)
-try :
-	from xml.dom.minidom import parseString
-except:
-    messageError = "Import failed in module pySitools2_idoc :\n\txml.dom.minidom module is required\n"
+    messageError = "Import failed in module pySitools2_idoc :\n\tos module is required\n"
     sys.stderr.write(messageError)
     raise ImportError(messageError)
 
-class _Util(object):
-    """Utility class"""
-    @staticmethod
-    def format(name, dataItem, eltsToParse=None):
-        """Formats a list to display it.                
-        Input Parameters
-        ----------------
-        name : name of the object that contains a list of afftributes
-        dataItem : list of attributes
-        eltsToParse : elts to display
-        
-        Return
-        ------
-        Returns a string to display
-        
-        Note : When eltsToParse is no defined then all the list is displayed."""
-        display = []
-        if eltsToParse == None:
-            display = dataItem
-        else:
-            display = eltsToParse
-        
-        str = "%s object display:\n"%(name)       
-        for key, value in enumerate(display):
-            str += "\t%s : %s = %s\n"%(key, value, dataItem[value])
-        return str
-    
-    @staticmethod
-    def retrieveJsonResponseFromServer(url):
-        """Retrieves a JSON response from the server.
-        Input parameters
-        ----------------
-        url : url to call for retrieving the JSON response
-        
-        Return
-        ------
-        A dictionary
-        
-        Exception
-        ---------
-        SITools2Exception when a problem during the download or parsing happens"""
-        jsonData = None
-        try:
-            data = urllib.urlopen(url)
-            jsonData = simplejson.load(data)
-        except Exception as ex:
-            raise Sitools2Exception(ex)
-        return jsonData
-                  
+from query import *
 
-class Sitools2Exception(Exception):
-    """SITools2 Exception"""
-    def __init__(self, message):
-        self.message = message
-    def __str__(self):
-        return repr(self.message)
-
+from utility import Util, Sitools2Exception                  
 
 class _Log(object):
     """Module Logger.
@@ -208,7 +142,7 @@ class Projects(Sitools2):
         A Sitools2Exception is raised when the server does not send back a success."""
         
         self.__logger.debug(Sitools2.getBaseUrl(self) + Projects.PROJECTS_URI)        
-        result = _Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + Projects.PROJECTS_URI)
+        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + Projects.PROJECTS_URI)
         isSuccess = result['success']
         if isSuccess:            
             data = result['data']
@@ -235,6 +169,9 @@ class Project(Sitools2):
     - HTML Description of the project
     - maintenance status
     - maintenance text
+    - the number of datasets related to the project
+    - the list of datasets related to the project
+    - search by dataset name
     
     Let's start by querying a specific project:
     >>> p = Project('http://medoc-dem.ias.u-psud.fr',projectNameUri='/ws_DEM_projet')
@@ -266,6 +203,12 @@ class Project(Sitools2):
     
     >>> p.getMaintenanceText()
     'Sorry, our DEM database is not accessible at the moment, but it will come back soon!<br>'
+    
+    >>> datasets = p.getDataSets()
+    
+    Now, we can get the number of datasets related to the project ws_DEM_project
+    >>> p.getNumberOfDatasets()
+    2
     """
     ELEMENTS_TO_PARSE = ['name','description','image','status','sitoolsAttachementForUsers',
                          'authorized','htmlDescription','maintenance','maintenanceText']
@@ -299,6 +242,7 @@ class Project(Sitools2):
         else:
             self.__logger.debug("parses the project.")
             self.__dataItem = self.__parseResponseServer(projectNameUri)
+        self.__datasets = self.__parseDatasets()
         
     def __updateDataItem(self):
         """Updates dataItem."""
@@ -320,15 +264,22 @@ class Project(Sitools2):
         Sitools2Exception when the server response is not a success"""
         
         self.__logger.debug("URL to parse: %s"%(Sitools2.getBaseUrl(self) + uri))
-        result = _Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + uri)        
+        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + uri)        
         isSuccess = result['success']
         if isSuccess:
             data = result['project']            
             return data
         else:
             raise Sitools2Exception("Error when loading the server response")
-        
     
+    def __parseDatasets(self):
+        """Returns the list of Dataset related to the project."""
+        datasets = []
+        if self.__dataItem.has_key('dataSets'):
+            for dataset in self.__dataItem['dataSets']:
+                datasets.append(DataSet(Sitools2.getBaseUrl(self), dataset))
+        return datasets
+        
     def getName(self):
         """Returns the project name."""
         return self.__dataItem['name']
@@ -379,7 +330,31 @@ class Project(Sitools2):
         return self.__getNone(self.__dataItem['maintenanceText'])
     
     def getDataSets(self):
-        return Datasets(Sitools2.getBaseUrl(self), self.__dataItem['dataSets'])
+        """Returns the Dataset list related to this project."""
+        return self.__datasets
+    
+    def getNumberOfDatasets(self):
+        """Returns the number of dataset related to this project."""
+        return len(self.getDataSets())
+
+    def getDatasetByName(self, name):
+        """Returns a Dataset Object by its name.
+        Input
+        -----
+        name : dataset name to search
+        
+        Return
+        ------
+        A Dataset Object or None when the dataset is not found
+        """
+        
+        result = None
+        for dataset in self.__datasets:
+            datasetName = dataset.getName()
+            if datasetName == name:
+                result = dataset
+                break
+        return result
     
     def display(self):
         """Displays the object."""
@@ -393,93 +368,7 @@ class Project(Sitools2):
             return None
         
     def __repr__(self):        
-        return _Util.format(self.__class__.__name__, self.__dataItem, Project.ELEMENTS_TO_PARSE)
-            
-        
-
-class Datasets(Sitools2):
-    """Stores the list of datasets related to a project name.
-    This class provides information such as :
-    - the number of datasets
-    - the list of datasets
-    - search by dataset name
-    
-    Let's start by querying a specific project:
-    >>> p = Project('http://medoc-dem.ias.u-psud.fr',projectNameUri='/ws_DEM_projet')
-    
-    >>> datasets = p.getDataSets()
-    
-    Now, we can get the number of datasets related to the project ws_DEM_project
-    >>> datasets.getCount()
-    2
-    
-    We can get a specific dataset in the list
-    >>> dataset = datasets.getDataset(0)
-    
-    If we try to get a dataset outer the array, we get a SITools2Exception
-    >>> dataset = datasets.getDataset(3)
-    Traceback (most recent call last):
-        ...
-    IndexError: list index out of range
-    """     
-   
-    def __init__(self, baseUrl, data):
-        """Constructs the list of the datasets
-        Inputs
-        -----
-        baseUrl : SITools2 base URL
-        data : the response of the server when a specific project is called.        
-
-        Exception
-        ---------
-        Sitools2Exception when a dataset cannot be instanciated."""
-        
-        super(Datasets, self).__init__(baseUrl)
-        self.__datasets = []
-        for dataset in data:
-            self.__datasets.append(DataSet(Sitools2.getBaseUrl(self), dataset))
-        
-    def getCount(self):
-        """Returns the number of datasets."""
-        return len(self.__datasets)
-    
-    def getDatasets(self):
-        """Returns the list of Dataset Objects."""
-        return self.__datasets
-    
-    def getDataset(self, index):
-        """Returns a specific dataset Object in the list.
-        Input
-        -----
-        index : index number in the list
-        
-        Return
-        ------
-        A Dataset Object
-        
-        Exception
-        ---------
-        IndexError: list index out of range"""
-        return self.__datasets[index]
-    
-    def getDatasetByName(self, name):
-        """Returns a Dataset Object by its name.
-        Input
-        -----
-        name : dataset name to search
-        
-        Return
-        ------
-        A Dataset Object
-        
-        Exception
-        ---------
-        Sitools2Exception: cannot find the dataset"""
-        for dataset in self.__datasets:
-            datasetName = dataset.getName()
-            if datasetName == name:
-                return dataset
-        raise Sitools2Exception("cannot find the dataset %s"%(name))
+        return Util.format(self.__class__.__name__, self.__dataItem, Project.ELEMENTS_TO_PARSE)
                         
         
 class DataSet(Sitools2):
@@ -498,9 +387,16 @@ class DataSet(Sitools2):
     Let's start by querying a specific dataset:
     >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
     
-    Now, we can retrieve the number of records in this dataset
-    >>> dataset.nbRecords()
-    8247
+    #Now, we can retrieve the number of records in this dataset
+    #>>> dataset.nbRecords()
+    #8330
+    
+    Retrieves the number of columns
+    >>> dataset.getNbColumns()
+    23
+    
+    Gets the columns of the dataset
+    >>> columns = dataset.getColumns()       
     """
     def __init__(self, baseUrl, dataItem = None, datasetName = None):
         super(DataSet, self).__init__(baseUrl)
@@ -509,8 +405,20 @@ class DataSet(Sitools2):
             self.__dataItem = dataItem        
             self.__updateDataItem()
         else:
-            self.__dataItem = self.__parseResponseServer('/'+datasetName)        
-        self.__countNbRecords()
+            self.__dataItem = self.__parseResponseServer('/'+datasetName)
+        #TODO : countNbRecords pose un problème pour les larges dataset
+        #       il faudrait passer par les projects car le nombre de records
+        #       est caché dans le project
+        #self.__countNbRecords()
+        self.__columns = self.__parseColumns()
+        
+    def __parseColumns(self):
+        """Returns the list of columns related to the dataset."""
+        columns = []
+        if self.__dataItem.has_key('columnModel'):
+            for column in self.__dataItem['columnModel']:
+                columns.append(Column(column))
+        return columns        
         
         
     def __updateDataItem(self):
@@ -519,7 +427,8 @@ class DataSet(Sitools2):
         self.__dataItem = self.__parseResponseServer(uri)
     
     def __countNbRecords(self):
-        result = _Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + self.getUri() + '/count')
+        self.__logger.info("URL to parse: %s"%(Sitools2.getBaseUrl(self) + self.getUri() + '/count'))
+        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + self.getUri() + '/count')
         self.__dataItem['nbrecords'] = result['total']
     
     def __parseResponseServer(self, uri):
@@ -537,7 +446,7 @@ class DataSet(Sitools2):
         Sitools2Exception when the server response is not a success"""
         
         self.__logger.debug("URL to parse: %s"%(Sitools2.getBaseUrl(self) + uri))
-        result = _Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + uri)        
+        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + uri)        
         isSuccess = result['success']
         if isSuccess:
             data = result['dataset']            
@@ -549,6 +458,7 @@ class DataSet(Sitools2):
         """Updates the dataset."""
         self.__updateDataItem()
         self.__countNbRecords()
+        self.__columns = self.__parseColumns()
         
     def getName(self):
         """Returns the dataset name."""
@@ -586,56 +496,17 @@ class DataSet(Sitools2):
         else:
             return False
     
-    def nbRecords(self):
-        """Returns the number of records in the dataset."""
-        return self.__dataItem['nbrecords']
+    #def nbRecords(self):
+    #    """Returns the number of records in the dataset."""
+    #    return self.__dataItem['nbrecords']
     
-    def getColumns(self):
-        """Returns the columns of the dataset."""
-        return Columns(self.__dataItem['columnModel'])
-    
-    def getSearch(self):
-        """Returns the search capability."""
-        return Search(self.getColumns(), Sitools2.getBaseUrl(self) + self.getUri())
-    
-class Columns:
-    """Stores the columns of the dataset...
-    Here is an example how to use this class. We start by retrieving a specific dataset
-    >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
-    
-    Gets the columns of the dataset
-    >>> columns = dataset.getColumns()
-    
-    Retrieves the number of columns
-    >>> columns.getCount()
-    23
-    
-    Retrieves a column from a list
-    >>> column = columns.getColumn(0)
-    
-    
-    """
-    def __init__(self, data):
-        """ Constructor.
-        Input
-        -----
-        Data coming from the server response
-        """
-        self.__columns = []
-        for column in data:
-            self.__columns.append(Column(column))
-    
-    def getCount(self):
+    def getNbColumns(self):
         """Returns the number of columns."""
-        return len(self.__columns)
+        return len(self.getColumns())
     
     def getColumns(self):
         """Returns the column as an array of Column."""
         return self.__columns
-    
-    def getColumn(self, index):
-        """Returns a column from the list of columns."""
-        return self.__columns[index]
     
     def getColumnByColumnAlias(self, name):
         """Returns a column from its name.
@@ -645,18 +516,20 @@ class Columns:
         
         Return
         ------
-        A Column object.
-        
-        Exception
-        ---------
-        Sitools2Exception : cannot find the column
+        A Column object or None when the name cannot be found.        
         """
+        result = None
         for column in self.__columns:
             columnAlias = column.getColumnAlias()
             if columnAlias == name:
-                return column
-        raise Sitools2Exception("cannot find the column %s"%(name))
-
+                result = column
+                break
+        return result
+    
+    def getSearch(self):
+        """Returns the search capability."""
+        return Search(self.getColumns(), Sitools2.getBaseUrl(self) + self.getUri())
+    
 
 class Column:
     """Stores a column.
@@ -667,7 +540,7 @@ class Column:
     >>> columns = dataset.getColumns()
     
     Retrieves a column from a list
-    >>> column = columns.getColumn(1)
+    >>> column = columns[1]
     
     Returns the dataIndex
     >>> column.getDataIndex()
@@ -751,7 +624,7 @@ class Column:
     
     def getColumnRenderer(self):
         """Return the column renderer if available otherwise None"""
-        if hasColumnRenderer:
+        if self.hasColumnRenderer():
             return ColumnRender(self.__data['columnRenderer'])
         else:
             return None
@@ -782,53 +655,141 @@ class Column:
             return None        
    
 class ColumnRender:
+    """Columns can have a specific representation in the web interface.
+    Here is an example how to use this class. We start by retrieving a specific dataset
+    >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
     
+    Gets the columns of the dataset
+    >>> columns = dataset.getColumns()
+    
+    Retrieves a column from a list
+    >>> column = columns[0]
+    
+    >>> renderer = column.getColumnRenderer()
+    
+    >>> renderer.getBehavior()
+    'localUrl'
+    
+    >>> renderer.getDatasetLinkUrl()
+    
+    >>> renderer.getToolTip()
+    
+    """
     ENUM_BEHAVIOR = ['localUrl','extUrlNewTab','extUrlDesktop','ImgNoThumb','ImgAutoThumb',
     'ImgThumbSQL', 'datasetLink', 'datasetIconLink','noClientAccess']
 
     def __init__(self, data):
+        """Constructor."""
         self.__data = data
     
     def getBehavior(self):
-        return self.__data['behavior']
+        """Returns the behavior otherwise None."""
+        if self.__data.has_key('behavior'):
+            return self.__data['behavior']
+        else:
+            return None
     
     def getDatasetLinkUrl(self):
-        return self.__data['datasetLinkUrl']
+        """Returns the dataset link URL otherwise None."""
+        if self.__data.has_key('datasetLinkUrl'):
+            return self.__data['datasetLinkUrl']
+        else:
+            return None
     
     def getToolTip(self):
-        return self.__data['toolTip']
+        """Returns the tooltip otherwise None."""
+        if self.__data.has_key('toolTip'):
+            return self.__data['toolTip']
+        else:
+            return None   
 
-class Query():
-    """Definition of a Query class.
-       A Query defines the request passed to the server. 
-       It can have the following attributes : fields_list, name_list, operation.
-       The parameter operation can value : ge, le, gte, lte, lt, eq, gt, lte, like, in, numeric_between, date_between, cadence (dev for IAS) .
-    """
+class Plugins:
+    def __init__(self, datasetUrl):
+        self.__url = datasetUrl+'/services'
+        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + self.__url)
+        self.__dataItems = result['data']
+    
+        
+class Plugin:
+    def __init__(self, data):
+        self.__data = data        
+        self.__parseParameters()
+        
+    def __parseParameters(self):
+        self.__parameters = []
+        for parameter in self.__data['parameters']:
+            self.__parameters.append(Parameter(parameter))
 
-    def __init__(self, columns, value, operation):
-        """Constructor."""
-        self.__logger = _Log.getLogger(self.__class__.__name__)
-        self.__names = []
-        for column in columns:
-            self.__names.append(column.getColumnAlias())
-        self.__values = value
-        if operation =='GE' : 
-            operation='GTE'
-        elif operation == 'LE' : 
-            operation='LTE'
-        self.__operation = operation
+    def getName(self):
+        return self.__data['name']
     
-    def getNames(self):        
-        return self.__names
+    def getDescription(self):
+        if self.__data.has_key('description'):
+            return self.__data['description']
+        else:
+            return None
     
-    def getValues(self):
-        return self.__values
+    def getParameters(self):
+        return self.__parameters
     
-    def getOperation(self):
-        return self.__operation    
+    def getParameterByValue(self, value):
+        result = None
+        for parameter in self.getParameters():
+            valueParam = parameter.getValue()
+            if valueParam == value:
+                result = parameter
+                break
+        return result
+    
+    def getParameterByType(self, type):
+        result = None
+        for parameter in self.getParameters():
+            typeParam = parameter.getType()
+            if typeParam == type:
+                result = parameter
+                break
+        return result        
+    
+    def getParameterByName(self, name):
+        result = None
+        for parameter in self.getParameters():
+            nameParam = parameter.getName()
+            if nameParam == name:
+                result = parameter
+                break
+        return result      
+    
+    def getDataSetSelection(self):
+        return self.__data['dataSetSelection']
+
+    def getBehavior(self):
+        if self.__data.has_key('behavior'):
+            return self.__data['behavior']
+        else:
+            return None        
+    
+class Parameter:
+    def __init__(self, data):
+        self.__parameter = data
+    
+    def getName(self):
+        return self.__parameter['name']
+    
+    def getDescription(self):
+        return self.__parameter['description']
+    
+    def getValue(self):
+        return self.__parameter['value']
+    
+    def getValueType(self):
+        return self.__parameter['valueType']
+    
+    def getType(self):
+        return self.__parameter['type']
+    
 
 class Search:
-    
+    """The search capabilities."""
     LOGICAL_OPERATORS = ['LT', 'EQ', 'GT', 'LTE', 'GTE']
     
     def __init__(self, columns, url):
@@ -838,9 +799,9 @@ class Search:
         self.__availableSortableCols = []
         self.__queryParameters = []
         self.__sortParameters = []
-        self.__outputColumns = columns.getColumns()
+        self.__outputColumns = columns
         self.__url = url
-        for column in columns.getColumns():
+        for column in columns:
             if column.isFilter():
                 self.__availableFilterCols.append(column)
             if column.isSortable():
@@ -892,38 +853,9 @@ class Search:
                 break
         return result
     
-    def __buildFilter(self, kwargs):
+    def __buildFilter(self, kwargs):         
         for query in self.getQueries():
-            j=0#filter counter
-            i=0#p counter 
-            operation = query.getOperation()
-            if operation in ['LT', 'EQ', 'GT', 'LTE', 'GTE'] :
-                kwargs.update({
-                    'filter['+str(j)+'][columnAlias]' : ",".join(query.getNames()),
-                    'filter['+str(j)+'][data][type]' : 'numeric',
-                    'filter['+str(j)+'][data][value]' : "|".join(query.getValues()),
-                    'filter['+str(j)+'][data][comparison]' : query.getOperation()
-                })
-                j+=1 #increment filter counter    
-            elif operation in ['LIKE'] :
-                operation='TEXT'
-                i+=1#increment p counter
-            elif operation in ['IN'] :
-                operation='LISTBOXMULTIPLE'
-                kwargs.update({
-                    'p['+str(i)+']' : operation+"|"+"|".join(query.getNames())+"|"+"|".join(query.getValues())
-                })
-                i+=1#increment p counter
-            elif operation in ['DATE_BETWEEN','NUMERIC_BETWEEN', 'CADENCE'] :
-                kwargs.update({
-                    'p['+str(i)+']' : operation+"|"+"|".join(query.getNames())+"|"+"|".join(query.getValues())
-                })
-                i+=1#increment p counter
-            else :
-                allowed_operations="ge, le, gte, lte, lt, eq, gt, lte, like, in, numeric_between, date_between"
-                err_mess="Operation not available : %s Allowed operations are : %s" % (operation,allowed_operations)           
-                #self.__logger.error(err_mess)			
-                raise Sitools2Exception(err_mess)  
+            kwargs.update(query.getSyntax())
         return kwargs 
     
     def __columnToDisplay(self, kwargs):
@@ -945,7 +877,7 @@ class Search:
             sort_dictionary={"field" : column.getColumnAlias(), "direction" : "ASC"}
             sort_dic_list.append(sort_dictionary)
 	sort_kwargs={'sort' : {"ordersList" : sort_dic_list}}
-        return urllib.urlencode(sort_kwargs).replace('+','').replace('%27','%22')        
+        return Util.urlencode(sort_kwargs)        
 
     def __buildLimit(self, kwargs, limitResMax, nbResults):
         if limitResMax>0 and limitResMax < kwargs['limit']:
@@ -985,27 +917,56 @@ class Search:
                                 k : v
                         })                    
             response.append(result_dict)
-        return response
-                    
-        
+        return response    
+    
+    def download(self, FILENAME=None, **kwargs):
+        kwargs.update({'media' : 'json'})
+        url = self.__url+'/services'        
+        print (url)
+        result = Util.retrieveJsonResponseFromServer(url)
+        dataItems = result['data']
+        for item in dataItems:
+            plugin = Plugin(item)
+            print (plugin.getName())
+            result = plugin.getParameterByValue("fr.cnes.sitools.resources.order.DirectOrderResource")
+            print (result)
+            if result == None:
+                continue
+            else:
+                urlParameter = plugin.getParameterByType('PARAMETER_ATTACHMENT')
+                urlPlugin = urlParameter.getValue()
+                encodingParameter = plugin.getParameterByName('archiveType')
+                encodingPlugin = encodingParameter.getValue()                
+                kwargs = self.__buildFilter(kwargs)
+                kwargs = self.__columnToDisplay(kwargs)
+                sort_kwargs = self.__buildSort()
+                url = self.__url + urlPlugin + "?" + Util.urlencode(kwargs) + "&" + sort_kwargs                                    
+                (filename, header) = Util.urlretrieve('%s' % url, FILENAME)
+                if FILENAME == None:
+                    os.rename(filename, filename + "." + encodingPlugin)
+                break
+                
+    
     def execute(self, limitRequest=350000, limitResMax=-1, **kwargs):
 	kwargs.update({'media' : 'json','limit' : 300,'start' : 0})        
-        kwargs = self.__buildFilter(kwargs)
+        kwargs = self.__buildFilter(kwargs)        
         kwargs = self.__columnToDisplay(kwargs)
         sort_kwargs = self.__buildSort()
-        url_count=self.__url+"/count"+'?'+urllib.urlencode(kwargs)+"&"+sort_kwargs
-        url=self.__url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+sort_kwargs
-        result_count = _Util.retrieveJsonResponseFromServer(url_count)        
+        url_count=self.__url+"/count"+'?'+Util.urlencode(kwargs)+"&"+sort_kwargs
+        url=self.__url+"/records"+'?'+Util.urlencode(kwargs)+"&"+sort_kwargs
+        print (url_count)
+        print (url)
+        result_count = Util.retrieveJsonResponseFromServer(url_count)        
         nbr_results=result_count['total']
         resultSearch = []
         if nbr_results < limitRequest :
             [kwargs,nbr_results]  = self.__buildLimit(kwargs, limitResMax, nbr_results)
-            url=self.__url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+sort_kwargs            
+            url=self.__url+"/records"+'?'+Util.urlencode(kwargs)+"&"+sort_kwargs            
             while (nbr_results-kwargs['start'])>0 :#Do the job per 300 items till nbr_result is reached
-                resultTemp = _Util.retrieveJsonResponseFromServer(url)
+                resultTemp = Util.retrieveJsonResponseFromServer(url)
                 resultSearch.extend(self.__parseResponse(resultTemp))
                 kwargs['start'] += kwargs['limit']#increment the job by the kwargs limit given (by design)  
-		url=self.__url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+sort_kwargs#encode new kwargs and build new url for request
+		url=self.__url+"/records"+'?'+Util.urlencode(kwargs)+"&"+sort_kwargs#encode new kwargs and build new url for request            
         else:
             out_mess="Not allowed\nNbr results (%d) exceeds limit_request param: %d\n" % (nbr_results, limitRequest)
             self.__logger.info(out_mess)        
@@ -1031,10 +992,13 @@ if __name__ == "__main__":
 #>>> dss = p.getDataSets()
 #URL to parse: http://medoc-dem.ias.u-psud.fr/ws_SDO_DEM
 #URL to parse: http://medoc-dem.ias.u-psud.fr/ws_DEM_HV
-#>>> ds = dss.getDatasets()[0]
+#>>> ds = dss[0]
 #>>> search = ds.getSearch()
 #>>> c = search.getAvailableFilterCols()[1]
-#>>> query = Query([c],['2'],'GTE')
-#>>> search.addQuery(query)
+#>>> query1 = Filter(c,'numeric', 410098249,'LT')
+#>>> query2 = Filter(c,'numeric', 410098247,'GT')
+#>>> search.addQuery(query1)
+#>>> search.addQuery(query2)
 #>>> search.execute()
+#http://medoc-dem.ias.u-psud.fr/ws_SDO_DEM/services
     
