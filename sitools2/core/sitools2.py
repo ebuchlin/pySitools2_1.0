@@ -32,55 +32,13 @@ __author__=["Jean-Christophe MALAPERT", "Pablo ALINGERY"]
 __date__ ="$16 mai 2013 03:46:43$"
 __credit__=["Jean-Christophe MALAPERT","Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
-__email__="pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
-
-import sys
-import logging
-from datetime import *
-
-try :
-    import os
-except:
-    messageError = "Import failed in module pySitools2_idoc :\n\tos module is required\n"
-    sys.stderr.write(messageError)
-    raise ImportError(messageError)
+__email__="jean-christophe.malapert@cnes.fr, pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
 
 from query import *
 
-from utility import Util, Sitools2Exception                  
+from utility import Util, Sitools2Exception, Log
 
-class _Log(object):
-    """Module Logger.
-    Create a module logger with the following format '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    """    
-    @staticmethod
-    def getLogger(name, level = logging.INFO):
-        """Returns the logger
-        Parameters
-        ----------
-        name : logger name
-        level : logging.level (par default logging.INFO)
-            
-        Return
-        ------
-        Returns the logger
-
-        """
-        # create logger
-        logger = logging.getLogger(name) 
-        logger.setLevel(level)
-        # create console handler and set level to debug
-        ch = logging.StreamHandler()
-        ch.setLevel(level)
-        # create formatter
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        # add formatter to ch
-        ch.setFormatter(formatter)
-        # add ch to logger
-        logger.addHandler(ch)
-        return logger 
-
-class Sitools2(object):
+class Sitools2Abstract(object):
     """An abstract class providing the SITools2 base URL"""
     
     VERSIONS = ['1.0'] # the compatible versions of this core with SITools2
@@ -90,48 +48,48 @@ class Sitools2(object):
         self.__baseUrl = baseUrl
     
     def version(self):
-        """Returns the version number."""
+        """Returns the compatibles SITools2 version numbers."""
         return VERSIONS
     
     def getBaseUrl(self):
         """Returns the SITools2 base URL."""
         return self.__baseUrl
     
-class Projects(Sitools2):
+class SITools2Instance(Sitools2Abstract):
     """Stores the server response when calling the list of projects
     from a SITools2 instance that is installed on a host
     
-    Projects provides the list of projects that are hosted by SITools2.
+    SITools2Instance provides the list of projects that are hosted by SITools2.
     A project can be public or not and contains some information
     
     This is an example on how to use this class
     
     Exception when a problem is detected:
-    >>> projects = Projects('http://foo.com')
+    >>> sitools2 = SITools2Instance('http://foo.com')
     Traceback (most recent call last):
         ...
     Sitools2Exception: JSONDecodeError('No JSON object could be decoded: line 1 column 0 (char 0)',)
     
     Now, we use a existing instance:
-    >>> projects = Projects('http://medoc-sdo.ias.u-psud.fr')
+    >>> sitools2 = SITools2Instance('http://medoc-sdo.ias.u-psud.fr')
     
     We can retrieve the list of the projects that the instance hosts:
-    >>> projectsList = projects.getProjects()
+    >>> projects = sitools2.getProjects()
     
     Computes the number of projects that are hosted
-    >>> len(projectsList)
+    >>> len(projects)
     2
     
-    Retrieves the parameter of the constructor
-    >>> projects.getBaseUrl()
+    Retrieves the base Url
+    >>> sitools2.getBaseUrl()
     'http://medoc-sdo.ias.u-psud.fr'
     """
     PROJECTS_URI = '/sitools/portal/projects'
     
     def __init__(self, baseUrl):
-        """Constructs a project by calling a URL."""
-        super(Projects, self).__init__(baseUrl)
-        self.__logger = _Log.getLogger(self.__class__.__name__)
+        """Constructs a Sitools2 instance by calling the host where SITools2 is installed."""
+        super(SITools2Instance, self).__init__(baseUrl)
+        self.__logger = Log.getLogger(self.__class__.__name__)
         self.__projects = []
         self.__parseResponseServer()        
         
@@ -141,14 +99,14 @@ class Projects(Sitools2):
         ---------
         A Sitools2Exception is raised when the server does not send back a success."""
         
-        self.__logger.debug(Sitools2.getBaseUrl(self) + Projects.PROJECTS_URI)        
-        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + Projects.PROJECTS_URI)
+        self.__logger.debug(Sitools2Abstract.getBaseUrl(self) + SITools2Instance.PROJECTS_URI)        
+        result = Util.retrieveJsonResponseFromServer(Sitools2Abstract.getBaseUrl(self) + SITools2Instance.PROJECTS_URI)
         isSuccess = result['success']
         if isSuccess:            
             data = result['data']
             self.__logger.debug(data)
             for i, dataItem in enumerate(data):
-                project = Project(Sitools2.getBaseUrl(self), dataItem)
+                project = Project(Sitools2Abstract.getBaseUrl(self), dataItem)
                 self.__projects.append(project)
         else:
             raise Sitools2Exception("Error when loading the server response")                
@@ -158,7 +116,7 @@ class Projects(Sitools2):
         return self.__projects
     
     
-class Project(Sitools2):
+class Project(Sitools2Abstract):
     """Stores the server response when calling a specific project.
     A project provides usefull information about a project such as :
     - project name
@@ -231,7 +189,7 @@ class Project(Sitools2):
         - projectNameUri is the URI of the project != URI of the project in the portal
         """
         super(Project, self).__init__(baseUrl)
-        self.__logger = _Log.getLogger(self.__class__.__name__)
+        self.__logger = Log.getLogger(self.__class__.__name__)
         self.__dataItem = dataItem        
         self.__projectNameUri = projectNameUri
         if dataItem != None and projectNameUri != None:
@@ -263,8 +221,8 @@ class Project(Sitools2):
         ---------
         Sitools2Exception when the server response is not a success"""
         
-        self.__logger.debug("URL to parse: %s"%(Sitools2.getBaseUrl(self) + uri))
-        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + uri)        
+        self.__logger.debug("URL to parse: %s"%(Sitools2Abstract.getBaseUrl(self) + uri))
+        result = Util.retrieveJsonResponseFromServer(Sitools2Abstract.getBaseUrl(self) + uri)            
         isSuccess = result['success']
         if isSuccess:
             data = result['project']            
@@ -277,7 +235,7 @@ class Project(Sitools2):
         datasets = []
         if self.__dataItem.has_key('dataSets'):
             for dataset in self.__dataItem['dataSets']:
-                datasets.append(DataSet(Sitools2.getBaseUrl(self), dataset))
+                datasets.append(DataSet(Sitools2Abstract.getBaseUrl(self), dataset))
         return datasets
         
     def getName(self):
@@ -294,7 +252,7 @@ class Project(Sitools2):
         if value == None:
             return None
         else:
-            return Sitools2.getBaseUrl(self) + self.__dataItem['image']['url']
+            return Sitools2Abstract.getBaseUrl(self) + self.__dataItem['image']['url']
     
     def isEnabled(self):
         """Returns True when the project is enabled otherwise False."""
@@ -371,7 +329,7 @@ class Project(Sitools2):
         return Util.format(self.__class__.__name__, self.__dataItem, Project.ELEMENTS_TO_PARSE)
                         
         
-class DataSet(Sitools2):
+class DataSet(Sitools2Abstract):
     """Stores a dataset.
     This class provides information such as :
     - the dataset name
@@ -400,7 +358,7 @@ class DataSet(Sitools2):
     """
     def __init__(self, baseUrl, dataItem = None, datasetName = None):
         super(DataSet, self).__init__(baseUrl)
-        self.__logger = _Log.getLogger(self.__class__.__name__)
+        self.__logger = Log.getLogger(self.__class__.__name__)
         if datasetName == None:
             self.__dataItem = dataItem        
             self.__updateDataItem()
@@ -427,8 +385,8 @@ class DataSet(Sitools2):
         self.__dataItem = self.__parseResponseServer(uri)
     
     def __countNbRecords(self):
-        self.__logger.info("URL to parse: %s"%(Sitools2.getBaseUrl(self) + self.getUri() + '/count'))
-        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + self.getUri() + '/count')
+        self.__logger.info("URL to parse: %s"%(Sitools2Abstract.getBaseUrl(self) + self.getUri() + '/count'))
+        result = Util.retrieveJsonResponseFromServer(Sitools2Abstract.getBaseUrl(self) + self.getUri() + '/count')
         self.__dataItem['nbrecords'] = result['total']
     
     def __parseResponseServer(self, uri):
@@ -445,8 +403,8 @@ class DataSet(Sitools2):
         ---------
         Sitools2Exception when the server response is not a success"""
         
-        self.__logger.debug("URL to parse: %s"%(Sitools2.getBaseUrl(self) + uri))
-        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + uri)        
+        self.__logger.debug("URL to parse: %s"%(Sitools2Abstract.getBaseUrl(self) + uri))
+        result = Util.retrieveJsonResponseFromServer(Sitools2Abstract.getBaseUrl(self) + uri)        
         isSuccess = result['success']
         if isSuccess:
             data = result['dataset']            
@@ -528,7 +486,7 @@ class DataSet(Sitools2):
     
     def getSearch(self):
         """Returns the search capability."""
-        return Search(self.getColumns(), Sitools2.getBaseUrl(self) + self.getUri())
+        return Search(self.getColumns(), Sitools2Abstract.getBaseUrl(self) + self.getUri())
     
 
 class Column:
@@ -655,7 +613,7 @@ class Column:
             return None        
    
 class ColumnRender:
-    """Columns can have a specific representation in the web interface.
+    """Columns may have a specific representation in the web interface.
     Here is an example how to use this class. We start by retrieving a specific dataset
     >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
     
@@ -701,304 +659,24 @@ class ColumnRender:
         if self.__data.has_key('toolTip'):
             return self.__data['toolTip']
         else:
-            return None   
-
-class Plugins:
-    def __init__(self, datasetUrl):
-        self.__url = datasetUrl+'/services'
-        result = Util.retrieveJsonResponseFromServer(Sitools2.getBaseUrl(self) + self.__url)
-        self.__dataItems = result['data']
-    
-        
-class Plugin:
-    def __init__(self, data):
-        self.__data = data        
-        self.__parseParameters()
-        
-    def __parseParameters(self):
-        self.__parameters = []
-        for parameter in self.__data['parameters']:
-            self.__parameters.append(Parameter(parameter))
-
-    def getName(self):
-        return self.__data['name']
-    
-    def getDescription(self):
-        if self.__data.has_key('description'):
-            return self.__data['description']
-        else:
-            return None
-    
-    def getParameters(self):
-        return self.__parameters
-    
-    def getParameterByValue(self, value):
-        result = None
-        for parameter in self.getParameters():
-            valueParam = parameter.getValue()
-            if valueParam == value:
-                result = parameter
-                break
-        return result
-    
-    def getParameterByType(self, type):
-        result = None
-        for parameter in self.getParameters():
-            typeParam = parameter.getType()
-            if typeParam == type:
-                result = parameter
-                break
-        return result        
-    
-    def getParameterByName(self, name):
-        result = None
-        for parameter in self.getParameters():
-            nameParam = parameter.getName()
-            if nameParam == name:
-                result = parameter
-                break
-        return result      
-    
-    def getDataSetSelection(self):
-        return self.__data['dataSetSelection']
-
-    def getBehavior(self):
-        if self.__data.has_key('behavior'):
-            return self.__data['behavior']
-        else:
-            return None        
-    
-class Parameter:
-    def __init__(self, data):
-        self.__parameter = data
-    
-    def getName(self):
-        return self.__parameter['name']
-    
-    def getDescription(self):
-        return self.__parameter['description']
-    
-    def getValue(self):
-        return self.__parameter['value']
-    
-    def getValueType(self):
-        return self.__parameter['valueType']
-    
-    def getType(self):
-        return self.__parameter['type']
-    
-
-class Search:
-    """The search capabilities."""
-    LOGICAL_OPERATORS = ['LT', 'EQ', 'GT', 'LTE', 'GTE']
-    
-    def __init__(self, columns, url):
-        self.__logger = _Log.getLogger(self.__class__.__name__)
-        self.__columns = []
-        self.__availableFilterCols = []
-        self.__availableSortableCols = []
-        self.__queryParameters = []
-        self.__sortParameters = []
-        self.__outputColumns = columns
-        self.__url = url
-        for column in columns:
-            if column.isFilter():
-                self.__availableFilterCols.append(column)
-            if column.isSortable():
-                self.__availableSortableCols.append(column)
-            if column.hasColumnRenderer():
-                columnRender = column.getColumnRenderer()
-                behavior = columnRender.getBehavior()
-                if behavior != "noClientAccess":
-                    self.__columns.append(column)
-    
-    def getAvailableFilterCols(self):
-        return self.__availableFilterCols
-    
-    def getAvailableSortCols(self):
-        return self.__availableSortableCols    
-    
-    def getColumns(self):
-        return self.__columns
-    
-    def addQuery(self, queryParameter):
-        self.__queryParameters.append(queryParameter)
-        
-    def setQueries(self, queryParameters):
-        self.__queryParameters = queryParameters
-    
-    def getQueries(self):
-        return self.__queryParameters
-    
-    def addSort(self, sortParameter):
-        self.__sortParameters.append(sortParameter)
-        
-    def setSorts(self, sortParameters):
-        self.__sortParameters = sortParameters
-    
-    def getSorts(self):
-        return self.__sortParameters    
-    
-    def setOutputColumns(self, columns):
-        self.__outputColumns = columns
-    
-    def getOutputColumns(self):
-        return self.__outputColumns
-    
-    def getOutputColumn(self, columnAlias):
-        result = None
-        for column in self.__outputColumns:
-            if column.getColumnAlias() == columnAlias:
-                result = column
-                break
-        return result
-    
-    def __buildFilter(self, kwargs):         
-        for query in self.getQueries():
-            kwargs.update(query.getSyntax())
-        return kwargs 
-    
-    def __columnToDisplay(self, kwargs):
-	output_name_list=[]
-	output_name_dict={}                
-        for outputCol in self.getOutputColumns():
-            output_name_list.append(outputCol.getColumnAlias())
-            output_name_dict.update({
-                    outputCol.getColumnAlias() : outputCol
-            })
-	kwargs.update({#build colModel url options
-		'colModel' : '"'+", ".join(output_name_list)+'"'
-	})
-        return kwargs
-    
-    def __buildSort(self):
-        sort_dic_list=[]
-        for column in self.getSorts():
-            sort_dictionary={"field" : column.getColumnAlias(), "direction" : "ASC"}
-            sort_dic_list.append(sort_dictionary)
-	sort_kwargs={'sort' : {"ordersList" : sort_dic_list}}
-        return Util.urlencode(sort_kwargs)        
-
-    def __buildLimit(self, kwargs, limitResMax, nbResults):
-        if limitResMax>0 and limitResMax < kwargs['limit']:
-            kwargs['limit']=limitResMax
-            kwargs['nocount']='true'
-            nbResults = limitResMax
-        elif  limitResMax>0 and  limitResMax >= kwargs['limit']:
-            kwargs['nocount']='true'
-            nbResults = limitResMax
-        return [kwargs,nbResults]
-        
-    def __parseResponse(self, result):
-        response = []
-        for data in result['data'] :
-            result_dict={}
-            for k,v in data.items() :
-                column = self.getOutputColumn(k)
-                if column != None:
-                    type = column.getSqlColumnType()
-                    if type != None and type.startswith('int'): 
-                        result_dict.update({
-                                k : int(v)
-                        })
-                    elif type != None and type.startswith('float'):
-                        result_dict.update({
-                                k : float(v)
-                        })
-                    elif type != None  and type.startswith('timestamp'):
-                        (dt, mSecs)= v.split(".")
-                        dt = datetime.strptime(dt,"%Y-%m-%dT%H:%M:%S")
-                        mSeconds = timedelta(microseconds = int(mSecs))
-                        result_dict.update({
-                                k : dt+mSeconds
-                        })
-                    else :
-                        result_dict.update({
-                                k : v
-                        })                    
-            response.append(result_dict)
-        return response    
-    
-    def download(self, FILENAME=None, **kwargs):
-        kwargs.update({'media' : 'json'})
-        url = self.__url+'/services'        
-        print (url)
-        result = Util.retrieveJsonResponseFromServer(url)
-        dataItems = result['data']
-        for item in dataItems:
-            plugin = Plugin(item)
-            print (plugin.getName())
-            result = plugin.getParameterByValue("fr.cnes.sitools.resources.order.DirectOrderResource")
-            print (result)
-            if result == None:
-                continue
-            else:
-                urlParameter = plugin.getParameterByType('PARAMETER_ATTACHMENT')
-                urlPlugin = urlParameter.getValue()
-                encodingParameter = plugin.getParameterByName('archiveType')
-                encodingPlugin = encodingParameter.getValue()                
-                kwargs = self.__buildFilter(kwargs)
-                kwargs = self.__columnToDisplay(kwargs)
-                sort_kwargs = self.__buildSort()
-                url = self.__url + urlPlugin + "?" + Util.urlencode(kwargs) + "&" + sort_kwargs                                    
-                (filename, header) = Util.urlretrieve('%s' % url, FILENAME)
-                if FILENAME == None:
-                    os.rename(filename, filename + "." + encodingPlugin)
-                break
-                
-    
-    def execute(self, limitRequest=350000, limitResMax=-1, **kwargs):
-	kwargs.update({'media' : 'json','limit' : 300,'start' : 0})        
-        kwargs = self.__buildFilter(kwargs)        
-        kwargs = self.__columnToDisplay(kwargs)
-        sort_kwargs = self.__buildSort()
-        url_count=self.__url+"/count"+'?'+Util.urlencode(kwargs)+"&"+sort_kwargs
-        url=self.__url+"/records"+'?'+Util.urlencode(kwargs)+"&"+sort_kwargs
-        print (url_count)
-        print (url)
-        result_count = Util.retrieveJsonResponseFromServer(url_count)        
-        nbr_results=result_count['total']
-        resultSearch = []
-        if nbr_results < limitRequest :
-            [kwargs,nbr_results]  = self.__buildLimit(kwargs, limitResMax, nbr_results)
-            url=self.__url+"/records"+'?'+Util.urlencode(kwargs)+"&"+sort_kwargs            
-            while (nbr_results-kwargs['start'])>0 :#Do the job per 300 items till nbr_result is reached
-                resultTemp = Util.retrieveJsonResponseFromServer(url)
-                resultSearch.extend(self.__parseResponse(resultTemp))
-                kwargs['start'] += kwargs['limit']#increment the job by the kwargs limit given (by design)  
-		url=self.__url+"/records"+'?'+Util.urlencode(kwargs)+"&"+sort_kwargs#encode new kwargs and build new url for request            
-        else:
-            out_mess="Not allowed\nNbr results (%d) exceeds limit_request param: %d\n" % (nbr_results, limitRequest)
-            self.__logger.info(out_mess)        
-        return resultSearch
-    
+            return None                 
     
 if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-#    try:
-#        projects = Projects('http://medoc-dem.ias.u-psud.fr')
-#        ps = projects.getProjects()
-#        ps[0].display()
-#    except Sitools2Exception as ex:
-#        print ex.message
-
-
-#>>> from pySitools2V2 import *
-#>>> projects = Projects('http://medoc-dem.ias.u-psud.fr')
-#URL to parse: http://medoc-dem.ias.u-psud.fr/ws_DEM_projet
-#>>> ps = projects.getProjects()
-#>>> p = ps[0]
-#>>> dss = p.getDataSets()
-#URL to parse: http://medoc-dem.ias.u-psud.fr/ws_SDO_DEM
-#URL to parse: http://medoc-dem.ias.u-psud.fr/ws_DEM_HV
-#>>> ds = dss[0]
-#>>> search = ds.getSearch()
-#>>> c = search.getAvailableFilterCols()[1]
-#>>> query1 = Filter(c,'numeric', 410098249,'LT')
-#>>> query2 = Filter(c,'numeric', 410098247,'GT')
-#>>> search.addQuery(query1)
-#>>> search.addQuery(query2)
-#>>> search.execute()
-#http://medoc-dem.ias.u-psud.fr/ws_SDO_DEM/services
+    #import doctest
+    #doctest.testmod()
+    sitools2 = SITools2Instance('http://medoc-dem.ias.u-psud.fr')
+    ps = sitools2.getProjects()
+    p = ps[0]
+    dss = p.getDataSets()
+    ds = dss[0]
+    search = ds.getSearch()
+    c = search.getAvailableFilterCols()[1]
+    request = RelativeRequest()
+    request = Filter(request, c.getColumnAlias(), 'numeric', 410098249,'LT')
+    request = Filter(request, c.getColumnAlias(), 'numeric', 410098247,'GT')
+    search.setQueries(request)
+    toto = search.execute()
+    #toto = search.download()
+    print (toto)
+    
     
