@@ -16,295 +16,170 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-This script has been designed to give python programmers an easy way to interrogate medoc gaia-dem sitools2 interface.
-You can make a search providing a date range and get your selection very easilly.
-@author: Pablo ALINGERY for IAS 07-05-2013
-"""
-__version__ = "1.0"
-__license__ = "GPLV3"
-__author__ ="Pablo ALINGERY"
-__credit__=["Pablo ALINGERY"]
+__author__=["Jean-Christophe MALAPERT", "Pablo ALINGERY"]
+__date__ ="$30 mai 2013 21:02:05$"
+__credit__=["Jean-Christophe MALAPERT","Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
-__email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
-
+__email__="jean-christophe.malapert@cnes.fr, pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
 
 from sitools2.core.pySitools2 import *
-import os
 
-sitools2_url='http://medoc-dem.ias.u-psud.fr'
-
-def get(GAIA_LIST=[], TARGET_DIR=None, **kwds) :
-	"""Use search result as an entry to call get_file method"""
-	kwds=kwds
-	for item in GAIA_LIST:
-		item.get_file(TARGET_DIR=TARGET_DIR, **kwds)	
+try:
+    from datetime import *
+except:
+    messageError = "Import failed in module pySitools2_idoc :\n\tdatetime module is required\n"
+    sys.stderr.write(messageError)
+    raise ImportError(messageError)
 
 
-def get_selection(GAIA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
-	"""Uses the  __getSelection__() method of Sdo_IAS_gaia_dataset classe for Sitools2 GAIA instance located at IAS
-	Parameters available are GAIA_LIST and DOWNLOAD_TYPE
-	GAIA_LIST is the result list of the following search function 
-	DOWNLOAD_TYPE specify the kind of download type of the file expected (tar,zip, tar.gz) 
-	PS : Only tar for the moment 
-	"""
+SITOOLS_URL='http://medoc-dem.ias.u-psud.fr'
+DATASET_NAME = 'ws_SDO_DEM'
 
-	gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/ws_SDO_DEM")
-	gaia_data_sunum_list=[]
-	for item in GAIA_LIST:
-		gaia_data_sunum_list.append(item.sunum_193)
-	
-	gaia_dataset.__getSelection__(SUNUM_LIST=gaia_data_sunum_list, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
-
-def search(DATES=None,NB_RES_MAX=-1,**kwds):
-	"""Uses the generic search() from pySitools2 library for Sitools2 GAIA instance located at IAS
-	Parameters available are DATES and NB_RES_MAX
-	DATES is the interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1
-	NB_RES_MAX is the nbr of results you wish to display from the results 
-	it must be an integer and if specified must be >0
-	"""
-#Allow lower case entries
-	for k,v  in kwds.iteritems():
-		if k not in ['dates','nb_res_max']:
-			sys.exit("Error in search():\n'%s' entry for the search function is not allowed" % k) 
-		elif k=='dates':
-			DATES=v
-		elif k=='nb_res_max':
-			NB_RES_MAX=v
-
-	sitools_url='http://medoc-dem.ias.u-psud.fr'
-	print "Loading medoc-dem Sitools2 client : ",sitools_url
-	gaia_dataset=Sdo_IAS_gaia_dataset(sitools_url+"/ws_SDO_DEM")
-	DATES_OPTIM=[]
-	if DATES is None:
-		sys.exit("Error in search():\nDATES entry must be specified")
-	if type(DATES).__name__!='list' :
-			mess_err="Error in search():\nentry type for DATES is : %s\nDATES must be a list type" % type(DATES).__name__
-			sys.exit(mess_err)
-	if len(DATES)!=2:
-		mess_err="Error in search() : %d elements specified for DATES\nDATES param must be specified and a list of 2 elements" %len(DATES)
-		sys.exit(mess_err)
-	for date in DATES :
-		if type(date).__name__!='datetime' :
-			mess_err="Error in search() : type for DATES element is %s \nDATES list element must be a datetime type" % type(date).__name__
-			sys.exit(mess_err)
-		else :
-			DATES_OPTIM.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
-	if DATES[1]<= DATES[0]:
-		mess_err="Error in search():\nd1=%s\nd2=%s\nfor DATES =[d1,d2] d2 should be > d1" %(DATES[1].strftime("%Y-%m-%dT%H:%M:%S"),DATES[2].strftime("%Y-%m-%dT%H:%M:%S"))
-		sys.exit(mess_err)
-	dates_param=[[gaia_dataset.fields_list[1]],DATES_OPTIM,'DATE_BETWEEN']
-	if type(NB_RES_MAX).__name__!='int' :
-			mess_err="Error in search():\nentry type for NB_RES_MAX is : %s\nNB_RES_MAX must be a int type" % type(NB_RES_MAX).__name__
-			sys.exit(mess_err)
-	if NB_RES_MAX!=-1 and  NB_RES_MAX<0 :
-		mess_err="Error in search():\nNB_RES_MAX= %s not allowed\nNB_RES_MAX must be >0" % NB_RES_MAX
-		sys.exit(mess_err)
-#Ask for download,date_obs,sunum_193,filename,temp_fits_rice,em_fits_rice,width_fits_rice,chi2_fits_rice
-	output_options=[gaia_dataset.fields_list[0],gaia_dataset.fields_list[1],gaia_dataset.fields_list[5],gaia_dataset.fields_list[8],gaia_dataset.fields_list[18],gaia_dataset.fields_list[19],gaia_dataset.fields_list[20],gaia_dataset.fields_list[21]]
-#Sort date_obs ASC
-	sort_options=[[gaia_dataset.fields_list[1],'ASC']]
-	Q1=Query(dates_param)
-	query_list=[Q1]
-	result=gaia_dataset.search(query_list,output_options,sort_options,limit_to_nb_res_max=NB_RES_MAX)
-	gaia_data_list=[]
-	if len(result) !=0 :
-		for data in result :
-			gaia_data_list.append(Gaia_data(data))
-	print "%s results returned" % len(gaia_data_list)
-	return gaia_data_list
-
-#Define decorator
-def singleton(class_def):
-    """Define decorator that will modify the class so decorated and only return the same instance of a class """
-
-    instances = {}
-
-    def get_instance(Class_heritage):
-        """Define a function that only return an existing instance of a Class from the dictionary instances define above or add a new element to instances"""
-
-        if class_def not in instances:
-            instances[class_def] = class_def(Class_heritage)
-        return instances[class_def]
-
-    return get_instance
-
-#This following classes will only have one instance 
-@singleton
-class Sdo_IAS_gaia_dataset(Dataset):
-	"""Define  class Sdo_IAS_gaia_dataset that heritates of Dataset"""
-
-	def __init__(self,url):
-		Dataset.__init__(self,url)
-
-	def __getSelection__(self, SUNUM_LIST=[], FILENAME=None, TARGET_DIR=None, DOWNLOAD_TYPE="TAR",QUIET=False, **kwds) :
-		"""Use getSelection to retrieve a tar ball or a zip collection providing a list of sunum  
-		"""
-		if DOWNLOAD_TYPE.upper() not in ['TAR']:
-				sys.exit("Error get_selection(): %s type not allowed\nOnly TAR is allowed for parameter DOWNLOAD_TYPE" % DOWNLOAD_TYPE  )
-		for k,v  in kwds.iteritems():
-			if k not in ['filename','target_dir','quiet','download_type']:
-				sys.exit("Error __getSelection__():\n'%s' entry for the search function is not allowed" % k) 
-			elif k=='filename':
-				FILENAME=v
-			elif k=='target_dir':
-				TARGET_DIR=v
-			elif k=='download_type':
-				DOWNLOAD_TYPE=v
-			elif k=='quiet':
-				QUIET=v
-		if FILENAME is None :
-			FILENAME="IAS_GAIA_export_"+datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")+"."+DOWNLOAD_TYPE.lower() #if not specified this is the default name
-		if TARGET_DIR is not None:
-			if not os.path.isdir(TARGET_DIR) :
-				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
-			if TARGET_DIR[-1].isalnum():
-				FILENAME=TARGET_DIR+'/'+FILENAME
-			elif TARGET_DIR[-1]=='/':
-				FILENAME=TARGET_DIR+FILENAME
-			else :
-				sys.exit("Error get_file():\nCheck the param TARGET_DIR, special char %s at the end of TARGET_DIR is not allowed." % TARGET_DIR[-1])
-
-		if DOWNLOAD_TYPE.upper()== "TAR":
-			plugin_id="download_tar_DEM"
-		else :
-			plugin_id=""
-		if not QUIET :
-			print "Download %s file in progress ..." % DOWNLOAD_TYPE.lower()		
-	#	Dataset.execute_plugin(self,plugin_name=plugin_id, pkey_list=SUNUM_LIST, FILENAME=FILENAME)
-		try :
-			Dataset.execute_plugin(self,plugin_name=plugin_id, pkey_list=SUNUM_LIST, FILENAME=FILENAME)
-		except :
-			print "Error downloading selection %s " % FILENAME
-		else :
-			if not QUIET :
-				print "Download selection %s completed" % FILENAME
-
-
-		
 class Gaia_data():
-	"""Definition de la classe Gaia_data """
+    def __init__(self, data):
+        self.__data = data
+        
+    def getData(self):
+        return self.__data
+    
+    def getKeys(self):
+        return self.__data.keys()
+    
+    def getItemByName(self, name):
+        return self.getData()[name]
+    
+    def get_file(self, TARGET_DIR='/tmp/', TYPE=['all'], QUIET=True):
+        if not TARGET_DIR[-1] == '/':
+            TARGET_DIR = TARGET_DIR + '/'
+            
+        filesAllToDownload = {
+        'temp':SITOOLS_URL+self.getData()['temp_fits_rice'],
+        'em':SITOOLS_URL+self.getData()['em_fits_rice'],
+        'width':SITOOLS_URL+self.getData()['width_fits_rice'],
+        'chi2':SITOOLS_URL+self.getData()['chi2_fits_rice']
+        }
+        filesToDownload = dict()
+            
+        if TYPE[0] == 'all':
+            filesToDownload = filesAllToDownload
+        else:
+            for typeFile in TYPE:
+                filesToDownload[typeFile] = filesAllToDownload[typeFile]            
 
-	def __init__(self,data):
-#		self.url=''
-		self.download=''
-		self.sunum_193=0
-		self.date_obs=''
-		self.filename=''
-		self.temp_fits_rice_uri=''
-		self.em_fits_rice_uri=''
-		self.width_fits_rice_uri=''
-		self.chi2_fits_rice_uri=''
-		self.compute_attributes(data)
+        colorred = "\033[01;31m{0}\033[00m"
+        colorgrn = "\033[1;36m{0}\033[00m"
+	for (item,url) in filesToDownload.iteritems():
+            filename = url.split('/')[-1]
+            if not QUIET :
+                print colorgrn.format("Downloading file %s%s .... " % (TARGET_DIR,filename)),
+            try :
+                Util.urlretrieve(url, TARGET_DIR+filename)
+            except :
+                if not QUIET :
+                    print colorred.format("error")
+                else:
+                    print "Error downloading %s%s " % (TARGET_DIR,filename)
+            else :
+		if not QUIET :
+                    print colorred.format("completed")
+        
+    def display(self):
+        print self.__str__()
+        
+    def __str__(self):
+        display = ""
+        colorred = "\033[01;31m{0}\033[00m"
+        colorgrn = "\033[1;36m{0}\033[00m"        
+        display += colorred.format("Record\n---------")+'\n'
+        for i,item in enumerate(self.__data):
+            if str(self.__data[item]).startswith('/'):
+                display += colorgrn.format('\t' + item + ' = ') + SITOOLS_URL + str(self.__data[item])+'\n'
+            else:
+                display += colorgrn.format('\t' + item + ' = ') + str(self.__data[item])+'\n'
+        display += '\n\n'
+        return display
+        
+        
+def search(DATES,NB_RES_MAX=-1):
+    gaia_data_list = []
+    dataset = DataSet(SITOOLS_URL, datasetName=DATASET_NAME)    
+    columnsToDisplay = []
+    cs = dataset.getColumns()
+    for c in cs:    
+        if c.hasColumnRenderer():
+            render = c.getColumnRenderer()
+            if not render.getBehavior() in ['datasetIconLink','noClientAccess','ImgThumbSQL']:
+                columnsToDisplay.append(c.getColumnAlias())
+        else:            
+            columnsToDisplay.append(c.getColumnAlias())
 
-	def compute_attributes(self, data) :
-#		self.url=data['uri']
-		self.download=data['download']
-		self.sunum_193=data['sunum_193']
-		self.date_obs=data['date_obs']
-		self.filename=data['filename']
-		self.temp_fits_rice_uri=data['temp_fits_rice']
-		self.em_fits_rice_uri=data['em_fits_rice']
-		self.width_fits_rice_uri=data['width_fits_rice']
-		self.chi2_fits_rice_uri=data['chi2_fits_rice']
+    c = dataset.getColumnByColumnAlias('date_obs')   
+    search = dataset.getSearch()    
+    request = RelativeRequest()    
+    request = DateBetween(request, c.getColumnAlias(), str(DATES[0].strftime("%Y-%m-%dT%H:%M:%S")), str(DATES[1].strftime("%Y-%m-%dT%H:%M:%S")))
+    request = ColumnToDisplay(request, columnsToDisplay)
+    request = Sorting(request, ['date_obs'])
+    search.setQueries(request) 
+    result = search.execute(limitResMax=NB_RES_MAX)
+    for record in result:
+        gaia_data_list.append(Gaia_data(record))
+    return gaia_data_list
 
-	def display(self):
-		print self.__repr__()
+def get(GAIA_LIST, TARGET_DIR="/tmp", TYPE=['all'], QUIET=True):
+    if not TARGET_DIR[-1] == '/':
+        TARGET_DIR = TARGET_DIR + '/'    
+    for gaia_data in GAIA_LIST:
+        gaia_data.get_file(TARGET_DIR, TYPE, QUIET)
 
-        def __repr__(self):
-            return ("sunum_193 : %d, date_obs : %s, download : %s, filename : %s,\ntemp_fits_rice : %s,\nem_fits_rice : %s,\nwidth_fits_rice : %s,\nchi2_fits_rice : %s\n" %(self.sunum_193,self.date_obs,self.download,self.filename,self.temp_fits_rice_uri,self.em_fits_rice_uri,self.width_fits_rice_uri,self.chi2_fits_rice_uri))
+def download(DATES, TARGET_DIR="/tmp/", FILENAME='toto'):
+    if not TARGET_DIR[-1] == '/':
+        TARGET_DIR = TARGET_DIR + '/'    
+    dataset = DataSet(SITOOLS_URL, datasetName=DATASET_NAME)    
+    columnsToDisplay = []
+    cs = dataset.getColumns()
+    for c in cs:    
+        if c.hasColumnRenderer():
+            render = c.getColumnRenderer()
+            if not render.getBehavior() in ['datasetIconLink','noClientAccess','ImgThumbSQL']:
+                columnsToDisplay.append(c.getColumnAlias())
+        else:            
+            columnsToDisplay.append(c.getColumnAlias())
 
-	def get_file(self, FILENAME=None, TARGET_DIR=None, QUIET=False, TYPE=None, **kwds ):
-		"""This method is used to retrieve the data on the client side 
-		   DECOMPRESS is set by default to False so compressed file are downloaded, to get uncompressed files set DECOMPRESS=True
-		   FILENAME is by design aia.lev1.waveA_date_obs.image_lev1.fits you can change it providing a FILENAME  
-		   TARGET_DIR the path of the targetted directory, by design the files are downloaded in the current dir
-		   QUIET output active or not, by design the output is active , for a quiet get_file process set QUIET=True 
-		"""
-		url_dict={\
-		'temp': self.temp_fits_rice_uri,\
-		'em' : self.em_fits_rice_uri,\
-		'width' : self.width_fits_rice_uri,\
-		'chi2' : self.chi2_fits_rice_uri\
-		}
-		filename_dict={}
-#Allow lower case entries
-		for k,v  in kwds.iteritems():
-			if k not in ['filename','target_dir','quiet','type']:
-				sys.exit("Error get_file():\n'%s' entry for the search function is not allowed\n" % k) 
-			elif k=='filename':
-				FILENAME=v
-			elif k=='target_dir':
-				TARGET_DIR=v
-			elif k=='quiet':
-				QUIET=v
-			elif k=='type':
-				TYPE=v
-		if TYPE is not None and type(TYPE).__name__!='list' :
-			sys.exit("Error get_file():\nTYPE should be a list\n") 
-		if FILENAME is None and TYPE is None:
-#			if not specified this is the default name
-				for value in url_dict.values() :
-					key=value.split("/")[-1]
-					value=sitools2_url+value
-					filename_dict[key]=value		
-		elif FILENAME is None and TYPE is not None:
-			for type_spec in TYPE :
-				if type_spec not in url_dict.keys() and type_spec!='all':
-					sys.exit("Error get_file():\nTYPE = %s entry for the search function is not allowed\nTYPE value should be in list 'temp','em','width','chi2', 'all'\n" % TYPE) 
-				elif type_spec=='all':
-					for value in url_dict.values() :
-						key=value.split("/")[-1]
-						value=sitools2_url+value
-						filename_dict[key]=value
-				else :
-					for type_spec in TYPE :
-						key=url_dict[type_spec].split("/")[-1]
-						print "key : %s" %key
-						value=sitools2_url+url_dict[type_spec]
-						print "value : %s" %value
-						filename_dict[key]=value
+    c = dataset.getColumnByColumnAlias('date_obs')   
+    search = dataset.getSearch()    
+    request = RelativeRequest()    
+    request = DateBetween(request, c.getColumnAlias(), str(DATES[0].strftime("%Y-%m-%dT%H:%M:%S")), str(DATES[1].strftime("%Y-%m-%dT%H:%M:%S")))
+    request = ColumnToDisplay(request, columnsToDisplay)
+    request = Sorting(request, ['date_obs'])
+    search.setQueries(request) 
+    result = search.download(TARGET_DIR+FILENAME)
+    print result + " is downloaded"
 
-		elif FILENAME is not None and TYPE is not None:
-				 sys.exit("Warning get_file():\nFILENAME :%s\nTYPE : %s \nFILENAME and TYPE are both specified at the same time\nNot allowed please remove one\n" % (FILENAME,TYPE))
-
-		elif FILENAME is not None and type(FILENAME).__name__!='dict' :
-			sys.exit("Error get_file():\nFILENAME should be a dictionary\n") 
-		else :
-			for k,v in FILENAME.iteritems() :
-				if k not in url_dict.keys(): 
-					sys.exit("Error get_file():\nTYPE = %s entry for the search function is not allowed\n \
-					TYPE value should be in list 'temp','em','width','chi2'\n" % k)
- 				else : 
-					key=FILENAME[k]
-					print "key : %s" %key
-					value=sitools2_url+url_dict[k]
-					print "value : %s" %value
-					filename_dict[key]=value
-				
-		if TARGET_DIR is not None:
-			if not os.path.isdir(TARGET_DIR) :
-				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
-			if TARGET_DIR[-1].isalnum():
-				TARGET_DIR=TARGET_DIR+'/'
-			else :
-				sys.exit("Error get_file():\nCheck the param TARGET_DIR, special char %s at the end of TARGET_DIR is not allowed." % TARGET_DIR[-1])
-
-		for (item,url) in filename_dict.iteritems():
-			try :	
-				urllib.urlretrieve(url, "%s%s" % (TARGET_DIR,item))
-			except :
-				print "Error downloading %s%s " % (TARGET_DIR,item)
-			else :
-				if not QUIET :
-					print "Download file %s%s completed" % (TARGET_DIR,item)
-
+def get_selection(GAIA_LIST, TARGET_DIR="/tmp/", FILENAME='myresult'):
+    if not TARGET_DIR[-1] == '/':
+        TARGET_DIR = TARGET_DIR + '/'    
+    filenames = []
+    for gaia in GAIA_LIST:
+        filenames.append(gaia.getItemByName('filename'))
+    dataset = DataSet(SITOOLS_URL, datasetName=DATASET_NAME)
+    search = dataset.getSearch()
+    request = RelativeRequest()    
+    request = EnumerateValues(request,'filename', filenames)
+    search.setQueries(request)
+    result = search.download(TARGET_DIR+FILENAME)
+    print result + " is downloaded"    
+    
+    
 def main():
-	d1=datetime(2012,8,10,0,0,0)
-	d2=d1+timedelta(days=1)
-	gaia_data_list=search(DATES=[d1,d2],nb_res_max=10) 
-	for data in gaia_data_list :
-		data.get_file(target_dir='results')
+    d1=datetime(2012,8,10,0,0,0)
+    d2=d1+timedelta(days=1) 
+    gaia_data_list=search(DATES=[d1,d2],NB_RES_MAX=10)
+    for gaia_data in gaia_data_list:
+        gaia_data.display()
+
+    #get(gaia_data_list)
+    get(gaia_data_list, TYPE=['em','temp'], QUIET=False)    
+    download(DATES=[d1,d2])
 
 if __name__ == "__main__":
-	main()
+    main()

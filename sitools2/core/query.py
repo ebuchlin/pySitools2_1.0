@@ -15,14 +15,16 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+Decorator pattern to build a query to SITools2.
 
+@author: Jean-Christophe MALAPERT
+"""
 __author__=["Jean-Christophe MALAPERT", "Pablo ALINGERY"]
 __date__ ="$16 mai 2013 03:46:43$"
 __credit__=["Jean-Christophe MALAPERT","Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
 __email__="jean-christophe.malapert@cnes.fr, pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
-
-
 
 try:
     from datetime import *
@@ -41,9 +43,31 @@ except:
     raise ImportError(messageError)
 
 class Query(object):
-    """Abstract component to build a query."""
+    """Abstract component to build a query. Thanks to the decorator pattern, it
+    is possible to decorate the query by a set of constraints.
+    
+    Here is an example of the use of the decorator pattern.
+    
+    We start to create a Relative request :    
+    >>> query = RelativeRequest();
+    
+    Now we decorate the relative request by a date constraint:    
+    >>> query = DateBetween(query, "colDate", "25/05/20013", "26/05/2013")
+    
+    We go on to add a new date constraint:    
+    >>> query = DateBetween(query, "colDate", "25/06/20013", "26/06/2013")
+    
+    Then we add a enumerate value constraint.
+    >>> query = EnumerateValues(query, "col", ["val1", "val"])
+
+    Finally, we get URL:
+    >>> query.getUrl()
+    '?p%5B2%5D=LISTBOXMULTIPLE%7Ccol%7Cval1%7Cval&start=0&limit=300&p%5B1%5D=DATE_BETWEEN%7CcolDate%7C25%2F06%2F20013%7C26%2F06%2F2013&media=json&p%5B0%5D=DATE_BETWEEN%7CcolDate%7C25%2F05%2F20013%7C26%2F05%2F2013'
+    
+    """
     
     def __init__(self):
+        """Constructor."""
         self.__parameters = {'media' : 'json','limit' : 300,'start' : 0}
         self.__updateParams = {}
         self.__index = -1
@@ -104,6 +128,7 @@ class NumericBetween(DecoratorQuery):
         self.__validInputs()
         
     def __validInputs(self):
+        """Validates the inputs of the constructor."""
         #if not isinstance(self.__column, Column):
         #    raise Sitools2Exception("column must be an instance of Column")
         try:
@@ -119,6 +144,7 @@ class NumericBetween(DecoratorQuery):
             raise Sitools2Exception("maxVal must be superior to minVal")        
     
     def _getParameters(self):
+        """Returns the result of this decorator."""
         param = self.query._getParameters()
         key = self.__PATTERN_KEY % (str(self._getIndex()))
         val = self.__PATTERN_VALUE % (self.__column, self.__minVal, self.__maxVal)
@@ -126,7 +152,7 @@ class NumericBetween(DecoratorQuery):
         param.update({key:val})
         return param
     
-    def _getIndex(self):
+    def _getIndex(self):        
         index = self.query._getIndex()
         return index+1
          
@@ -136,17 +162,19 @@ class DateBetween(DecoratorQuery):
     __PATTERN_KEY = "p[%s]"
 
     def __init__(self, query, column, minDate, maxDate):
+        """Constructor."""
         super(DateBetween, self).__init__(query)
         self.__column = column
         self.__minDate = minDate
         self.__maxDate = maxDate    
 
     def _getParameters(self):
+        """Returns the result of this decorator."""
         param = self.query._getParameters()
         key = self.__PATTERN_KEY % (str(self._getIndex()))
         val = self.__PATTERN_VALUE % (self.__column, self.__minDate, self.__maxDate)
         #self.__column.getColumnAlias()
-        param.update({key:val})
+        param.update({key:val})        
         return param
     
     def _getIndex(self):
@@ -160,18 +188,21 @@ class EnumerateValues(DecoratorQuery):
     __PATTERN_KEY = "p[%s]"
 
     def __init__(self, query, column, enumerateValues):
+        """Constructor."""
         super(EnumerateValues, self).__init__(query)
         self.__column = column
         self.__enumerateValues = enumerateValues
         self.__validInputs()
         
     def __validInputs(self):
+        """Validates the inputs of the constructor."""
         #if not isinstance(self.__column, Column):
         #    raise Sitools2Exception("column must be an instance of Column")         
         if not isinstance(self.__enumerateValues, list):
             raise Sitools2Exception("enumerateValues must be a list")        
 
     def _getParameters(self):
+        """Returns the result of this decorator."""
         param = self.query._getParameters()
         key = self.__PATTERN_KEY % (str(self._getIndex()))
         val = self.__PATTERN_VALUE % (self.__column, '|'.join(self.__enumerateValues))
@@ -189,11 +220,13 @@ class StringEqual(DecoratorQuery):
     __PATTERN_KEY = "p[%s]"
 
     def __init__(self, query, column, value):
+        """Constructor."""
         super(StringEqual, self).__init__(query)
         self.__column = column
         self.__value = value
 
     def _getParameters(self):
+        """Returns the result of this decorator."""
         param = self.query._getParameters()
         key = self.__PATTERN_KEY % (str(self._getIndex()))
         val = self.__PATTERN_VALUE % (self.__column, self.__value)
@@ -211,6 +244,7 @@ class Filter(DecoratorQuery):
     __COMPARISON = ['LT', 'GT', 'EQ', 'LIKE' ,'IN', 'NOTIN']
     
     def __init__(self, query, column, type, value, comparison):
+        """Cosntrcutor."""
         super(Filter, self).__init__(query)
         self.__column = column
         self.__type = type
@@ -219,6 +253,7 @@ class Filter(DecoratorQuery):
         self.__validInputs()
         
     def __validInputs(self):
+        """Validates the inputs of the constructor."""
         #if not isinstance(self.__column, Column):
         #    raise Sitools2Exception("column must be an instance of Column") 
         if self.__type not in self.__TYPE:
@@ -227,6 +262,7 @@ class Filter(DecoratorQuery):
             raise Sitools2Exception("Comparison must be one of these values : LT, GT, EQ, LIKE, IN, NOTIN")                
 
     def _getParameters(self):
+        """Returns the result of this decorator."""
         param = self.query._getParameters() 
         index = self._getFilterIndex()
         param.update({
@@ -244,10 +280,12 @@ class Filter(DecoratorQuery):
 class ColumnToDisplay(DecoratorQuery):
     """Decorates the query by setting the columns to display."""
     def __init__(self, query, columns):
+        """Constructor."""
         super(ColumnToDisplay, self).__init__(query)
         self.__columns = columns       
         
     def _getParameters(self):
+        """Returns the result of this decorator."""
         param = self.query._getParameters() 
         outputNames = []
         for outputCol in self.__columns:
@@ -258,10 +296,12 @@ class ColumnToDisplay(DecoratorQuery):
 class Sorting(DecoratorQuery):
     """Decorates the query by setting the columns to sort."""
     def __init__(self, query, columns):
+        """Constructor."""
         super(Sorting, self).__init__(query)
         self.__columns = columns     
         
     def _getParameters(self):
+        """Returns the result of this decorator."""
         param = self.query._getParameters()        
         sortingNames = []
         for outputCol in self.__columns:
@@ -274,11 +314,13 @@ class Sorting(DecoratorQuery):
 class UpdateParameter(DecoratorQuery):
     """Decorates the query by updating a parameter."""
     def __init__(self, query, key, value):
+        """Constructor."""
         super(UpdateParameter, self).__init__(query)
         self.__key = key
         self.__value = value
         
     def _getParameters(self):
+        """Returns the result of this decorator."""
         param = self.query._getParameters()                   
         param[self.__key] =  self.__value
         return param        
@@ -341,19 +383,18 @@ class Search:
                 break
         return result         
 
-    def __buildLimit(self, query ,limitResMax, nbResults):
+    def __buildLimit(self, query ,limitResMax):
         """Builds limit parameter."""
         limit = query._getParameters()['limit']
         if limitResMax>0 and limitResMax < limit:
             query = UpdateParameter(query, 'limit', limitResMax)
-            query = UpdateParameter(query, 'nocount', 'true')
-            nbResults = limitResMax
+            query = UpdateParameter(query, 'nocount', 'true')        
         elif  limitResMax>0 and  limitResMax >= limit:
             query = UpdateParameter(query, 'nocount', 'true')
-            nbResults = limitResMax
-        return [query,nbResults]
+        return query
         
     def __parseResponse(self, result):
+        """Parses the server response."""
         response = []
         for data in result['data'] :
             result_dict={}
@@ -384,6 +425,7 @@ class Search:
         return response    
     
     def download(self, FILENAME=None):
+        """Downloads the files related to the query."""
         resultFilename = None
         url = self.__url+'/services'                
         result = Util.retrieveJsonResponseFromServer(url)
@@ -412,14 +454,19 @@ class Search:
         return resultFilename
     
     def execute(self, limitRequest=350000, limitResMax=-1):
+        """Executes the query."""
         query = self.getQueries()
-        query.setBaseUrl(self.__url+'/count')
-        countUrl = query.getUrl()
-        result_count = Util.retrieveJsonResponseFromServer(countUrl)        
-        nbr_results=result_count['total']
+        query  = self.__buildLimit(query, limitResMax)
+        nbr_results = limitResMax
+        if (limitResMax == -1):
+            query.setBaseUrl(self.__url+'/count')
+            countUrl = query.getUrl()            
+            result_count = Util.retrieveJsonResponseFromServer(countUrl)    
+            nbr_results=result_count['total']
+        else:
+            nbr_results = limitResMax
         resultSearch = []
-        if nbr_results < limitRequest :
-            [query,nbr_results]  = self.__buildLimit(query, limitResMax, nbr_results)
+        if nbr_results < limitRequest :            
             query.setBaseUrl(self.__url+'/records')
             url = query.getUrl()
             startVal = query._getParameters()['start']
@@ -437,28 +484,35 @@ class Search:
         return resultSearch        
         
 class Plugin:
+    """SITools2 plugin on the dataset."""
     def __init__(self, data):
+        """Constrcutor."""
         self.__data = data        
         self.__parseParameters()
         
     def __parseParameters(self):
+        """Parses the parameters of data."""
         self.__parameters = []
         for parameter in self.__data['parameters']:
             self.__parameters.append(Parameter(parameter))
 
     def getName(self):
+        """Returns the plugin name."""
         return self.__data['name']
     
     def getDescription(self):
+        """Returns the plugin description."""
         if self.__data.has_key('description'):
             return self.__data['description']
         else:
             return None
     
     def getParameters(self):
+        """Returns the plugin parameters."""
         return self.__parameters
     
     def getParameterByValue(self, value):
+        """Searchs a parameter by value and returns it."""
         result = None
         for parameter in self.getParameters():
             valueParam = parameter.getValue()
@@ -468,6 +522,7 @@ class Plugin:
         return result
     
     def getParameterByType(self, type):
+        """Searchs a parameter by type and returns it."""
         result = None
         for parameter in self.getParameters():
             typeParam = parameter.getType()
@@ -477,6 +532,7 @@ class Plugin:
         return result        
     
     def getParameterByName(self, name):
+        """Searchs a parameter by name and returns it."""
         result = None
         for parameter in self.getParameters():
             nameParam = parameter.getName()
@@ -486,45 +542,45 @@ class Plugin:
         return result      
     
     def getDataSetSelection(self):
+        """Returns the dataset selection."""
         return self.__data['dataSetSelection']
 
     def getBehavior(self):
+        """Returns the behavior."""
         if self.__data.has_key('behavior'):
             return self.__data['behavior']
         else:
             return None        
     
 class Parameter:
+    """Hanles plugin parameter."""
     def __init__(self, data):
+        """Constructor."""
         self.__parameter = data
     
     def getName(self):
+        """Returns the parameter name."""
         return self.__parameter['name']
     
     def getDescription(self):
+        """Returns the description name."""
         return self.__parameter['description']
     
     def getValue(self):
+        """Returns the value name."""
         return self.__parameter['value']
     
     def getValueType(self):
+        """Returns the value type."""
         return self.__parameter['valueType']
     
     def getType(self):
+        """Returns the type."""
         return self.__parameter['type']  
     
+def test(): 
+    import doctest
+    doctest.testmod()
     
 if __name__ == "__main__":
-    request = RelativeRequest()
-    request = NumericBetween(request, 'colA', 4, 10)
-    request = NumericBetween(request, 'colB', 5, 10)
-    request = EnumerateValues(request, 'colC', ['aa','bb'])
-    request = StringEqual(request, 'colD','FFF')
-    request = Filter(request, 'colE', 'numeric', '4', 'LT')
-    print (request.getUrl())
-    #query = NumericBetween("a",24, 35)
-    #syntax = query.getSyntax()
-    #print (syntax)
-    #query = NumericBetween("a",24, 35)
-    #syntax = query.getSyntax()
-    #print (syntax)
+    test()

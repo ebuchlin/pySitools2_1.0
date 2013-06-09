@@ -24,15 +24,20 @@ The code defines several classes of Sitools2: Field, Query, Dataset and Project.
                     gaia_client_idoc.py // idoc client using pySitools2.py
                     sdo_client_idoc.py // sdo client using pySitools2.py
                 -- core
-                    pySitools2.py // library calling SITools2
-            
-            -- tests
+                    pySitools2.py // SITools2 library core
+                    query.py
+                    utility.py
+            -- examples
                 example_gaia.py
                 example_media.py
+            -- tests
+                testGaia.py
+                testMedia.py
+                testSitools2Core.py
 
 ### Testing the module
 
-	$ cd pySitools2_1.0
+	$ cd pySitools2_1.0/src
         python setup.py test -q
 
 ## Installing the module
@@ -101,6 +106,3 @@ This python module will allow you to :
 
         $ get( GAIA_LIST=gaia_data_list, TARGET_DIR="results", TYPE=['temp','em'] )
 
-    - Specify the FILENAME you want to retrieve , it should be a dictionary with key within 'temp','em','width','chi2'
-
-        $ get( GAIA_LIST=gaia_data_list, TARGET_DIR="results", FILENAME={'temp' :'temp.fits','em':'em.fits'} )
