@@ -33,10 +33,10 @@ sdo_data_list = search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['1 min'] )
 
 #The fastest way to retrieve data
 #PS : The directory 'results' has to be created !
-get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='/tmp', DECOMPRESS=True)
+#get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='/tmp', DECOMPRESS=True)
 
 #Need to get a tar ball or zip file do sthg like :
-#get_selection(MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_download_file.tar")
+get_selection(MEDIA_DATA_LIST=sdo_data_list, TARGET_DIR="/tmp" ,FILENAME="my_download_file")
 
 #And if you want to specifies files name do sthg like 
 #for item in sdo_data_list :

@@ -31,7 +31,7 @@ setup (
   author = 'Pablo ALINGERY',
   author_email = 'pablo.alingery@ias.u-psud.fr',
 
-  summary = 'A generic python Sitools2 client with some specific clients (GAIA, SDO)',
+  description = 'A generic python Sitools2 client with some specific clients (GAIA, SDO)',
   url = 'http://sitools2.github.com/pySitools2_1.0/',
   license = 'GPLv3',
   long_description = open("README.md").read(),
@@ -47,5 +47,5 @@ setup (
   'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
   ],
   download_url = 'https://github.com/SITools2/pySitools2_1.0/archive/master.zip',
-  test_suite="tests",
+  test_suite="tests"
 )

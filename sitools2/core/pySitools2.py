@@ -71,7 +71,7 @@ class _Log(object):
     Create a module logger with the following format '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     """    
     @staticmethod
-    def getLogger(name, level = logging.INFO):
+    def getLogger(name, level = logging.DEBUG):
         """Returns the logger
         
         Parameters
@@ -475,7 +475,7 @@ class Dataset:
 							})
 				result.append(result_dict)
 			kwargs['start'] += kwargs['limit']#increment the job by the kwargs limit given (by design)  
-			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#encode new kwargs and build new url for request                        
+			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#encode new kwargs and build new url for request                                            
 		return result
 	else :
 		out_mess="Not allowed\nNbr results (%d) exceeds limit_request param: %d\n" % (result_count['total'],limit_request)
@@ -542,7 +542,7 @@ class Project:
         self.__logger = _Log.getLogger(self.__class__.__name__)
         self.name = ""
 	self.description = ""
-	self.uri = "/"+url.split("/")[-1]
+	self.uri = None    
         self.url = url
 	self.resources_target = []
 	self.__compute_attributes()
@@ -557,6 +557,8 @@ class Project:
 	result =simplejson.load(urllib.urlopen(url))
 	self.name=result['project']['name']
 	self.description=result['project']['description']
+        self.uri = result['project']['sitoolsAttachementForUsers']
+        
 #Explore Project resources (method=options should be allowed)
     def resources_list(self):
 	        url = urllib.urlopen(self.url+'?method=OPTIONS')      
@@ -587,18 +589,26 @@ class Project:
     def dataset_list(self, **kwargs):
 	"""Return relevant information concerning the datasets of your project
 	"""
-	sitools_url=self.url.split("/")[0]+"//"+self.url.split("//")[1].split("/")[0]
+	sitools_url=self.url.split("/sitools")[0]
 	kwargs.update({
 		'media' : 'json'
 	})
-	url=self.url+'/datasets'+'?'+urllib.urlencode(kwargs)
+	url=sitools_url+self.uri+'/datasets'+'?'+urllib.urlencode(kwargs)
+        self.__logger.debug(url)
 	data=[]
 	try:
 		result =simplejson.load(urllib.urlopen(url))
 		if len (result['data'])!=0 :
 			for i,dataset in enumerate(result['data']) :
 				ds_url=sitools_url+dataset['url']
-				data.append(Dataset(ds_url))
+                                status = dataset['status']
+                                if status == 'ACTIVE':
+                                    try:
+                                        data.append(Dataset(ds_url))
+                                    except Sitools2Exception as e:
+                                        self.__logger.error(e.value)
+                                else:
+                                    self.__logger.warn("The access to dataset %s is currently disabled" % (dataset['name']))
 	except :
 		out_mess="Cannot dataset %s is protected\nContact admin for more info" % url
                 self.__logger.error(out_mess)
