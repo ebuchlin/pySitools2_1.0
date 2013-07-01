@@ -26,590 +26,657 @@ see http://sdo.ias.u-psud.fr/python/sdo_client_idoc.html
 
 
 
-@author: Pablo ALINGERY for IAS 28-08-2012
+@author: Pablo ALINGERY for IAS 28-08-2012 and Jean-Christophe MALAPERT
 """
-__version__ = "1.0"
-__license__ = "GPLV3"
-__author__ ="Pablo ALINGERY"
-__credit__=["Pablo ALINGERY", "Elie SOUBRIE"]
+__author__=["Jean-Christophe MALAPERT", "Pablo ALINGERY"]
+__date__ ="$16 mai 2013 03:46:43$"
+__credit__=["Jean-Christophe MALAPERT","Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
-__email__="pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
+__email__="jean-christophe.malapert@cnes.fr, pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
 
+from query import *
 
-import sys
-import logging
-from datetime import *
+from utility import Util, Sitools2Exception, Log
 
-try :
-	import urllib
-except:
-        messageError = "Import failed in module pySitools2_idoc :\n\turllib module is required\n"
-	sys.stderr.write(messageError)
-	raise ImportError(messageError)
-try :
-	import simplejson
-except:
-        messageError = "Import failed in module pySitools2_idoc :\n\tsimplejson module is required\n"
-	sys.stderr.write(messageError)
-	raise ImportError(messageError)
-try :
-	from xml.dom.minidom import parseString
-except:
-        messageError = "Import failed in module pySitools2_idoc :\n\txml.dom.minidom module is required\n"
-	sys.stderr.write(messageError)
-	raise ImportError(messageError)
-
-class Sitools2Exception(Exception):
-    """SITools2 Exception"""
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class _Log(object):
-    """Module Logger.
-    Create a module logger with the following format '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    """    
-    @staticmethod
-    def getLogger(name, level = logging.DEBUG):
-        """Returns the logger
+class Sitools2Abstract(object):
+    """An abstract class providing the SITools2 base URL"""
+    
+    VERSIONS = ['1.0'] # the compatible versions of this core with SITools2
+    
+    def __init__(self, baseUrl):
+        """Constructs a new instance with the SITools2 base URL."""
+        self.__baseUrl = baseUrl
+    
+    def version(self):
+        """Returns the compatibles SITools2 version numbers."""
+        return VERSIONS
+    
+    def getBaseUrl(self):
+        """Returns the SITools2 base URL."""
+        return self.__baseUrl
+    
+class SITools2Instance(Sitools2Abstract):
+    """Stores the server response when calling the list of projects
+    from a SITools2 instance that is installed on a host
+    
+    SITools2Instance provides the list of projects that are hosted by SITools2.
+    A project can be public or not and contains some information
+    
+    This is an example on how to use this class
+    
+    Exception when a problem is detected:
+    >>> sitools2 = SITools2Instance('http://foo.com')
+    Traceback (most recent call last):
+        ...
+    Sitools2Exception: JSONDecodeError('No JSON object could be decoded: line 1 column 0 (char 0)',)
+    
+    Now, we use a existing instance:
+    >>> sitools2 = SITools2Instance('http://medoc-sdo.ias.u-psud.fr')
+    
+    We can retrieve the list of the projects that the instance hosts:
+    >>> projects = sitools2.getProjects()
+    
+    Computes the number of projects that are hosted
+    >>> len(projects)
+    2
+    
+    Retrieves the base Url
+    >>> sitools2.getBaseUrl()
+    'http://medoc-sdo.ias.u-psud.fr'
+    """
+    PROJECTS_URI = '/sitools/portal/projects'
+    
+    def __init__(self, baseUrl):
+        """Constructs a Sitools2 instance by calling the host where SITools2 is installed."""
+        super(SITools2Instance, self).__init__(baseUrl)
+        self.__logger = Log.getLogger(self.__class__.__name__)
+        self.__projects = []
+        self.__parseResponseServer()        
         
-        Parameters
-        ----------
-            name : logger name
-            level : logging.level (par default logging.INFO)
+    def __parseResponseServer(self):
+        """Parses the response of the server.
+        Exception
+        ---------
+        A Sitools2Exception is raised when the server does not send back a success."""
         
+        self.__logger.debug(Sitools2Abstract.getBaseUrl(self) + SITools2Instance.PROJECTS_URI)        
+        result = Util.retrieveJsonResponseFromServer(Sitools2Abstract.getBaseUrl(self) + SITools2Instance.PROJECTS_URI)
+        isSuccess = result['success']
+        if isSuccess:            
+            data = result['data']
+            self.__logger.debug(data)
+            for i, dataItem in enumerate(data):
+                project = Project(Sitools2Abstract.getBaseUrl(self), dataItem)
+                self.__projects.append(project)
+        else:
+            raise Sitools2Exception("Error when loading the server response")                
+    
+    def getProjects(self):
+        """Returns the list of projects that are hosted by baseUrl."""
+        return self.__projects
+    
+    
+class Project(Sitools2Abstract):
+    """Stores the server response when calling a specific project.
+    A project provides usefull information about a project such as :
+    - project name
+    - project description
+    - project status providing the availability of the service
+    - sitoolsAttachementForUser providing the uri to query to get more information
+    - project authorization providing if the current user is authorized to access to the project
+    - HTML Description of the project
+    - maintenance status
+    - maintenance text
+    - the number of datasets related to the project
+    - the list of datasets related to the project
+    - search by dataset name
+    
+    Let's start by querying a specific project:
+    >>> p = Project('http://medoc-dem.ias.u-psud.fr',projectNameUri='/ws_DEM_projet')
+    
+    Now we can get its name and other information:
+    >>> p.getName()
+    'DEM'
+    
+    >>> p.getDescription()
+    'DEM inversion from Chloe Guennou et al.'
+    
+    >>> p.getImage()
+    'http://medoc-dem.ias.u-psud.fr/sitools/common/res/images/DEM_picture_120X120.png'
+    
+    >>> p.isEnabled()
+    True
+    
+    >>> p.getUri()
+    '/ws_DEM_projet'
+    
+    >>> p.isProtected()
+    True
+    
+    >>> p.getHtmlDescription()
+    '<br>'
+    
+    >>> p.isInMaintenance()
+    False
+    
+    >>> p.getMaintenanceText()
+    'Sorry, our DEM database is not accessible at the moment, but it will come back soon!<br>'
+    
+    >>> datasets = p.getDataSets()
+    
+    Now, we can get the number of datasets related to the project ws_DEM_project
+    >>> p.getNumberOfDatasets()
+    2
+    """
+    ELEMENTS_TO_PARSE = ['name','description','image','status','sitoolsAttachementForUsers',
+                         'authorized','htmlDescription','maintenance','maintenanceText']
+    
+    def __init__(self, baseUrl, dataItem = None, projectNameUri = None):
+        """Constructor.
+        Inputs
+        ------
+        baseUrl : SIToole2 baseURL
+        dataItem : response from the server (optional)
+        projectNameUri : URI of the project (optional)
+        
+        Exception
+        ---------
+        Sitools2Exception is raised when both dataItem and projectNameUri are not None.
+        
+        Note
+        ----
+        - dataItem is used in the Projects class. When it is used, an update of dataItem is done
+        - projectNameUri is the URI of the project != URI of the project in the portal
         """
-        # create logger
-        logger = logging.getLogger(name) 
-        logger.setLevel(level)
-        # create console handler and set level to debug
-        ch = logging.StreamHandler()
-        ch.setLevel(level)
-        # create formatter
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        # add formatter to ch
-        ch.setFormatter(formatter)
-        # add ch to logger
-        logger.addHandler(ch)
-        return logger        
-    
-    
-class Sitools2Instance:
-    """"Class to retrieve the list of project.
-	An instance of Sitools2Instance is defined using its url.
-	The method available : list_project(). 
-	It will return a list of the projects available for the instance.
-    """        
-
-    def __init__(self, url):
-        """Constructs a SITools2Instance with an url and a log level."""
-	self.instanceUrl=url
-        self.__logger = _Log.getLogger(self.__class__.__name__) 
-	try :
-                self.__logger.debug(urllib.unquote((url+"/sitools/portal").encode('ascii')).decode('utf-8'))
-		simplejson.load(urllib.urlopen(url+"/sitools/portal"))
-	except:
-		err_mess="Sitools2 instance %s not available please contact admin for more info\n" % url
-                self.__logger.error(err_mess)		
-		raise Sitools2Exception(err_mess)        
-            
-
-    def list_project(self, **kwargs):
-        """Returns the list of projects available for the SITools2 instance."""
-	sitools_url=self.instanceUrl
-	data=[]
-	kwargs.update({
-		'media' : 'json'
-	})
-	url=sitools_url+'/sitools/portal/projects'+'?'+urllib.urlencode(kwargs)
-        self.__logger.debug(urllib.unquote(url.encode('ascii')).decode('utf-8'))
-	result =simplejson.load(urllib.urlopen(url))
-	out_mess= "%s projects detected\n" % result['total']
-        self.__logger.info(out_mess)
-	projects=result['data']
-	for i,project in enumerate(projects) :
-		p_url=sitools_url+project['sitoolsAttachementForUsers']		
-		try :
-			data.append(Project(p_url))
-		except :
-			out_mess="Cannot create object project %s, %s protected \nContact admin for more info\n" % (project['name'],p_url)
-                        self.__logger.error(out_mess)			
-			raise Sitools2Exception(out_mess)
-	return data
-
-class Field:
-    """Definition of a Field class.
-       A field is a item from a dataset. 
-       It has several attributes : name, type, filter(boolean), sort(boolean), behavior.
-    """
-    
-    def __init__(self,dictionary):
-        """Constructor with a dictionary"""
-	self.name=""
-	self.type=""
-	self.filter=False
-	self.sort=False
-	self.behavior=""
-	self.__compute_attributes(dictionary)
-
-    def __compute_attributes(self, dictionary):
-        """Compute attributes from web service dataset description."""
-	if dictionary.has_key('columnAlias'):
-		self.name=dictionary['columnAlias']
-	if dictionary.has_key('sqlColumnType'):	
-		self.type=dictionary['sqlColumnType']
-	if dictionary.has_key('filter'):	
-		self.filter=dictionary['filter']
-	if dictionary.has_key('sortable'):	
-		self.sort=dictionary['sortable']
-	if dictionary.has_key('columnRenderer'):
-		self.behavior=dictionary['columnRenderer']['behavior']
-    
-    def get_name(self):
-        """Returns the name."""
-        return self.name
-    
-    def get_type(self):
-        """Returns the type."""
-        return self.type
-    
-    def get_filter(self):
-        """Returns the filter."""
-        return self.filter
-    
-    def get_sort(self):
-        """Returns the sort."""
-        return self.sort
-    
-    def get_behavior(self):
-        """Returns the behavior."""
-        return self.behavior
-    
-    def __display_variable(self, name):
-        """Returns name if the name != None otherwise \"\""""
-        if name == None:
-            return ""
+        super(Project, self).__init__(baseUrl)
+        self.__logger = Log.getLogger(self.__class__.__name__)
+        self.__dataItem = dataItem        
+        self.__projectNameUri = projectNameUri
+        if dataItem != None and projectNameUri != None:
+            raise Sitools2Exception("You cannot set both dataItem and projectNameUri.")
+        elif projectNameUri == None:
+            self.__logger.debug("updates the project.")
+            self.__updateDataItem()
         else:
-            return name
+            self.__logger.debug("parses the project.")
+            self.__dataItem = self.__parseResponseServer(projectNameUri)
+        self.__datasets = self.__parseDatasets()
+        
+    def __updateDataItem(self):
+        """Updates dataItem."""
+        uri = self.getUri()        
+        self.__dataItem = self.__parseResponseServer(uri)                
+    
+    def __parseResponseServer(self, uri):
+        """Parses the server response.
+        Input
+        -----
+        uri : URI of the project to call
+        
+        Return
+        ------
+        Returns the dataItem
+        
+        Exception
+        ---------
+        Sitools2Exception when the server response is not a success"""
+        
+        self.__logger.debug("URL to parse: %s"%(Sitools2Abstract.getBaseUrl(self) + uri))
+        result = Util.retrieveJsonResponseFromServer(Sitools2Abstract.getBaseUrl(self) + uri)            
+        isSuccess = result['success']
+        if isSuccess:
+            data = result['project']            
+            return data
+        else:
+            raise Sitools2Exception("Error when loading the server response")
+    
+    def __parseDatasets(self):
+        """Returns the list of Dataset related to the project."""
+        datasets = []
+        if self.__dataItem.has_key('dataSets'):
+            for dataset in self.__dataItem['dataSets']:
+                datasets.append(DataSet(Sitools2Abstract.getBaseUrl(self), dataset))
+        return datasets
+        
+    def getName(self):
+        """Returns the project name."""
+        return self.__dataItem['name']
+    
+    def getDescription(self):
+        """Returns the project description when available."""
+        return self.__getNone(self.__dataItem['description'])
+    
+    def getImage(self):
+        """Returns the project image when available."""
+        value = self.__getNone(self.__dataItem['image']['url'])
+        if value == None:
+            return None
+        else:
+            return Sitools2Abstract.getBaseUrl(self) + self.__dataItem['image']['url']
+    
+    def isEnabled(self):
+        """Returns True when the project is enabled otherwise False."""
+        if self.__dataItem['status'] == 'ACTIVE':
+            return True
+        else:
+            return False
+   
+    def getUri(self):
+        """Returns the project URI."""
+        return self.__dataItem['sitoolsAttachementForUsers']    
+    
+    def isProtected(self):
+        """Returns True when the web project is protected otherwise False."""
+        if self.__dataItem['authorized'] is True:
+            return False
+        else:
+            return True
+
+    def getHtmlDescription(self):
+        """Returns the HTML description of the project when available."""
+        return self.__getNone(self.__dataItem['htmlDescription'])
+    
+    def isInMaintenance(self):
+        """Returns True when the project is in maintenance otherwise False."""
+        if self.__dataItem['maintenance'] is True:
+            return True
+        else:
+            return False
+    
+    def getMaintenanceText(self):
+        """Returns the maintenance text."""
+        return self.__getNone(self.__dataItem['maintenanceText'])
+    
+    def getDataSets(self):
+        """Returns the Dataset list related to this project."""
+        return self.__datasets
+    
+    def getNumberOfDatasets(self):
+        """Returns the number of dataset related to this project."""
+        return len(self.getDataSets())
+
+    def getDatasetByName(self, name):
+        """Returns a Dataset Object by its name.
+        Input
+        -----
+        name : dataset name to search
+        
+        Return
+        ------
+        A Dataset Object or None when the dataset is not found
+        """
+        
+        result = None
+        for dataset in self.__datasets:
+            datasetName = dataset.getName()
+            if datasetName == name:
+                result = dataset
+                break
+        return result
     
     def display(self):
-        """Ouptut attributes of Field."""
-	print self.__repr__()
-
-    def __repr__(self):
-	return ("Field object display() :\n\t%s\n\t\ttype : %s\n\t\tfilter : %s\n\t\tsort : %s\n\t\tbehavior : %s" %(self.__display_variable(self.name),self.__display_variable(self.type),self.filter,self.sort, self.__display_variable(self.behavior)))
-
-
-class Query():
-    """Definition of a Query class.
-       A Query defines the request passed to the server. 
-       It can have the following attributes : fields_list, name_list, operation.
-       The parameter operation can value : ge, le, gte, lte, lt, eq, gt, lte, like, in, numeric_between, date_between, cadence (dev for IAS) .
+        """Displays the object."""
+        print self.__repr__
+    
+    def __getNone(self, val):
+        """Returns None when val is empty otherwise val."""
+        if val != None and len(val)!=0:
+            return val
+        else:
+            return None
+        
+    def __repr__(self):        
+        return Util.format(self.__class__.__name__, self.__dataItem, Project.ELEMENTS_TO_PARSE)
+                        
+        
+class DataSet(Sitools2Abstract):
+    """Stores a dataset.
+    This class provides information such as :
+    - the dataset name
+    - the dataset description
+    - the URI description
+    - if the web service is enabled
+    - if the dataset is protected for you
+    - if the dataset is visible in the web interface
+    - the number of records
+    - the list of dataset columns/attributes
+    - the search capability.
+    
+    Let's start by querying a specific dataset:
+    >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
+    
+    #Now, we can retrieve the number of records in this dataset
+    #>>> dataset.nbRecords()
+    #8330
+    
+    Retrieves the number of columns
+    >>> dataset.getNbColumns()
+    23
+    
+    Gets the columns of the dataset
+    >>> columns = dataset.getColumns()       
     """
+    def __init__(self, baseUrl, dataItem = None, datasetName = None):
+        super(DataSet, self).__init__(baseUrl)
+        self.__logger = Log.getLogger(self.__class__.__name__)
+        if datasetName == None:
+            self.__dataItem = dataItem        
+            self.__updateDataItem()
+        else:
+            self.__dataItem = self.__parseResponseServer('/'+datasetName)
+        #TODO : countNbRecords pose un problème pour les larges dataset
+        #       il faudrait passer par les projects car le nombre de records
+        #       est caché dans le project
+        #self.__countNbRecords()
+        self.__columns = self.__parseColumns()
+        
+    def __parseColumns(self):
+        """Returns the list of columns related to the dataset."""
+        columns = []
+        if self.__dataItem.has_key('columnModel'):
+            for column in self.__dataItem['columnModel']:
+                columns.append(Column(column))
+        return columns        
+        
+        
+    def __updateDataItem(self):
+        """Updates dataItem."""
+        uri = self.getUri()        
+        self.__dataItem = self.__parseResponseServer(uri)
+    
+    def __countNbRecords(self):
+        self.__logger.info("URL to parse: %s"%(Sitools2Abstract.getBaseUrl(self) + self.getUri() + '/count'))
+        result = Util.retrieveJsonResponseFromServer(Sitools2Abstract.getBaseUrl(self) + self.getUri() + '/count')
+        self.__dataItem['nbrecords'] = result['total']
+    
+    def __parseResponseServer(self, uri):
+        """Parses the server response.
+        Input
+        -----
+        uri : URI of the project to call
+        
+        Return
+        ------
+        Returns the dataItem
+        
+        Exception
+        ---------
+        Sitools2Exception when the server response is not a success"""
+        
+        self.__logger.debug("URL to parse: %s"%(Sitools2Abstract.getBaseUrl(self) + uri))
+        result = Util.retrieveJsonResponseFromServer(Sitools2Abstract.getBaseUrl(self) + uri)        
+        isSuccess = result['success']
+        if isSuccess:
+            data = result['dataset']            
+            return data
+        else:
+            raise Sitools2Exception("Error when loading the server response")
+        
+    def updateDataset(self):
+        """Updates the dataset."""
+        self.__updateDataItem()
+        self.__countNbRecords()
+        self.__columns = self.__parseColumns()
+        
+    def getName(self):
+        """Returns the dataset name."""
+        return self.__dataItem['name']
+    
+    def getDescription(self):
+        """Returns the dataset description."""
+        return self.__dataItem['description']
+    
+    def getUri(self):
+        """Returns the dataset URI."""
+        if self.__dataItem.has_key('url'):
+            return self.__dataItem['url']
+        else:
+            return self.__dataItem['sitoolsAttachementForUsers']
+    
+    def isEnabled(self):
+        """Indicates if the dataset is enabled."""
+        if self.__dataItem['status'] == "ACTIVE":
+            return True
+        else:
+            return False
+        
+    def isProtected(self):
+        """Indicates if the dataset is protected for you."""
+        if self.__dataItem['authorized'] is True:
+            return False
+        else:
+            return True        
+    
+    def isVisible(self):
+        """Indicates if the dataset is visible in the web interface."""
+        if self.__dataItem['visible'] is True:
+            return True
+        else:
+            return False
+    
+    #def nbRecords(self):
+    #    """Returns the number of records in the dataset."""
+    #    return self.__dataItem['nbrecords']
+    
+    def getNbColumns(self):
+        """Returns the number of columns."""
+        return len(self.getColumns())
+    
+    def getColumns(self):
+        """Returns the column as an array of Column."""
+        return self.__columns
+    
+    def getColumnByColumnAlias(self, name):
+        """Returns a column from its name.
+        Input
+        -----
+        name : columnAlias of the column to retrieve
+        
+        Return
+        ------
+        A Column object or None when the name cannot be found.        
+        """
+        result = None
+        for column in self.__columns:
+            columnAlias = column.getColumnAlias()
+            if columnAlias == name:
+                result = column
+                break
+        return result
+    
+    def getSearch(self):
+        """Returns the search capability."""
+        return Search(self.getColumns(), Sitools2Abstract.getBaseUrl(self) + self.getUri())
+    
 
-    def __init__(self, param_list):
+class Column:
+    """Stores a column.
+    Here is an example how to use this class. We start by retrieving a specific dataset
+    >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
+    
+    Gets the columns of the dataset
+    >>> columns = dataset.getColumns()
+    
+    Retrieves a column from a list
+    >>> column = columns[1]
+    
+    Returns the dataIndex
+    >>> column.getDataIndex()
+    'date_obs'
+    
+    Returns the Header
+    >>> column.getHeader()
+    'date_obs'
+    
+    Returns if the column is sortable
+    >>> column.isSortable()
+    True
+    
+    Returns if the column is visible
+    >>> column.isVisible()
+    True
+    
+    Returns if the column can be used as filter
+    >>> column.isFilter()
+    True
+    
+    Returns if the column is a primary key
+    >>> column.isPrimaryKey()
+    False
+    
+    Returns if the column has a rendered
+    >>> column.hasColumnRenderer()
+    False
+    
+    Returns the columnAlias
+    >>> column.getColumnAlias()
+    'date_obs'
+    
+    Returns the SQL columnType
+    >>> column.getSqlColumnType()
+    'timestamp'
+    
+    Returns the order by
+    >>> column.getOrderBy()
+    'ASC'
+    
+    Returns the format
+    >>> column.getFormat()
+    'Y-m-d H:i'
+    
+    """
+    def __init__(self, data):
         """Constructor."""
-	self.fields_list=[]
-	self.name_list=[]
-	self.value_list=[]
-	self.operation=""
-        self.__logger = _Log.getLogger(self.__class__.__name__) 
-	self.__compute_attributes(param_list)
-
-    def __compute_attributes(self,param_list) :
-        """Compute attribute from client request."""
-	if type(param_list[0]).__name__ !='list':
-		mess_err="Query first argument type is : %s\nQuery first argument type should be : list\n" % type(param_list[0]).__name__
-                self.__logger.error(mess_err)		
-		raise Sitools2Exception(mess_err)
-	if type(param_list[1]).__name__ !='list':
-		mess_err="Query second argument type is : %s\nQuery second argument type should be : list\n\n\n" % type(param_list[1]).__name__
-                self.__logger.error(mess_err)		
-		raise Sitools2Exception(mess_err)
-	for field in param_list[0]:
-		self.name_list.append(field.name)
-	self.fields_list=param_list[0]
-	self.value_list=param_list[1]
-	self.operation=param_list[2]
-
-    def get_fields(self):
-        return self.fields_list
+        self.__data = data
     
-    def get_names(self):
-        return self.name_list
+    def getDataIndex(self):
+        """Returns the data index."""
+        return self.__data['dataIndex']
     
-    def get_values(self):
-        return self.value_list
+    def getHeader(self):
+        """Returns the header."""
+        return self.__data['header']
     
-    def get_operation(self):
-        return self.operation
-
-    def __display_variable(self, name):
-        """Returns name if the name != None otherwise \"\""""
-        if name == None:
-            return ""
+    def isSortable(self):
+        """Returns if the column is sortable."""
+        return self.__data['sortable']
+    
+    def isVisible(self):
+        """Returns if the column is visible."""
+        return self.__data['visible']
+    
+    def isFilter(self):
+        """Returns if the column can be filtered."""
+        if self.__data.has_key('filter'):
+            return self.__data['filter']
         else:
-            return name
-        
-#Ouptut attributes of Query
-    def display(self):
-	print self.__repr__()
-
-#Define a repr of this Class 
-    def __repr__(self):
-	return ("name : % s\nvalue : %s\nOperation : %s" % (", ".join(self.name_list), ", ".join(self.value_list), __display_variable(self.operation)))
-
-
-
-class Dataset:
-    """Definition of a Dataset class.
-       It is related to a Sitools2 dataset, which is a set of instances of the class Field with specific properties.
-       It can have the following attibutes  : name, description, url, field_list,filter_list, resources_target, noClientAccess_list, primary_key,resources_list.  
-       Dataset provides the generic powerfull search method that allows a python client to make a request on a Sitools2 installation.
-    """        
-#Initialize class Dataset
-    def __init__(self, url):
-        self.__logger = _Log.getLogger(self.__class__.__name__)
-	try :
-		simplejson.load(urllib.urlopen(url))
-	except:
-		err_mess="Dataset %s not available, please contact admin for more info\n" % url	
-                self.__logger.error(err_mess)
-		raise Sitools2Exception(err_mess)
-        self.name = ""
-        self.description = ""
-	self.uri="/"+url.split("/")[-1]
-        self.url = url
-	self.fields_list=[]
-	self.fields_dict={}
-	self.filter_list=[]
-	self.allowed_filter_list=[]
-	self.sort_list=[]
-	self.allowed_sort_list=[]
-	self.resources_target=[]
-	self.noClientAccess_list=[]
-	self.primary_key=""
-	self.__compute_attributes()
-	self.resources_list()
-#Compute attribute from web service answer dataset description
-    def __compute_attributes(self, **kwargs) :
-	kwargs.update({
-		'media' : 'json'
-	})
-	url=self.url+'?'+urllib.urlencode(kwargs)
-        self.__logger.debug(urllib.unquote(url.encode('ascii')).decode('utf-8'))
-	try:
-		result =simplejson.load(urllib.urlopen(url))
-		self.name=result['dataset']['name']
-		self.description=result['dataset']['description']
-		columns=result['dataset']['columnModel']
-		for column in columns :
-			self.fields_list.append(Field(column))
-			self.fields_dict.update({
-				column['columnAlias'] : Field(column)
-			})
-			if (column.has_key('filter') and column['filter']):
-				self.filter_list.append(Field(column))
-			if (column.has_key('sortable') and column['sortable']):
-				self.sort_list.append(Field(column))
-			if (column.has_key('primaryKey') and column['primaryKey']):
-				self.primary_key=(Field(column))
-			if (column.has_key('columnRenderer')and column['columnRenderer']['behavior']=="noClientAccess"):
-				self.noClientAccess_list.append(column['columnAlias'])
-	except :
-		err_mess="Error in Dataset.compute_attributes(), please contact admin  for more info"
-                self.__logger(err_mess)		
-		raise Sitools2Exception(err_mess)
-	for field in self.filter_list:
-		self.allowed_filter_list.append(field.name)
-	for field in self.sort_list:
-		self.allowed_sort_list.append(field.name)
-#Explore and list dataset resources (method=options has to be allowed )
-    def resources_list(self):
-	try :
-		url = urllib.urlopen(self.url+'?method=OPTIONS') 
-        	wadl = url.read()
-        	domWadl = parseString(wadl)
-        	resources = domWadl.getElementsByTagName('resource')          
-        	for i in range(len(resources)):
-        	    self.resources_target.append(self.url+"/"+resources[i].getAttribute('path'))          
-     	except:
-		out_mess="Error in Dataset.ressources_list() not allowed, please contact admin for more info"
-                self.__logger.error(out_mess)		
-#Throw a research request on Sitools2 server, inside limit 350000 so > 1 month full cadence for SDO project 
-    def search(self,query_list,output_list,sort_list,limit_request=350000, limit_to_nb_res_max=-1, **kwargs) :
-	"""This is the generic search() method of a Sitools2 instance.
-	The parameters available are : query_list, output_list, sort_list, limit_request & limit_to_nb_res_max.
-	Example of use : 
-	result=ds1.search([Q1,Q2,Q3,Q4],O1,S1,limit_to_nb_res_max=10) 
-	Where Q1, Q2, Q3 & Q4 can be :
-	Q1=Query(param_query1)
-	Q2=Query(param_query2)
-	Q3=Query(param_query3)
-	Q4=Query(param_query4)
-	Where param _query1, param_query2, param_query3, param_query4 can value :
-	param_query1=[[ds1.fields_list[4]],['2012-08-10T00:00','2012-08-10T01:00'],'DATE_BETWEEN']
-	param_query2=[[ds1.fields_list[5]],['335'],'IN']
-	param_query3=[[ds1.fields_list[10]],['1 min'],'CADENCE']
-	param_query4=[[ds1.fields_list[8]],['2.900849'],'LTE']
-	"""
-	kwargs.update({
-		'media' : 'json',
-		'limit' : 300,
-		'start' : 0
-	})
-#Initialize counter
-	j=0#filter counter
-	i=0#p counter
-	for num_query,query in enumerate(query_list) :#create url options p[$i] and filter[$j]
-		operation=query.operation.upper()#transform entries as upper letter
-		if operation =='GE' : 
-			operation='GTE'
-		elif operation == 'LE' : 
-			operation='LTE'
-		if operation in ['LT', 'EQ', 'GT', 'LTE', 'GTE'] :
-			for field in query.fields_list :
-				if field.name not in self.allowed_filter_list :
-					err_mess="filter on %s is not allowed" % field.name
-                                        self.__logger.error(err_mess)					
-					raise Sitools2Exception(err_mess)
-			kwargs.update({
-			'filter['+str(j)+'][columnAlias]' : "|".join(query.name_list),
-			'filter['+str(j)+'][data][type]' : 'numeric',
-			'filter['+str(j)+'][data][value]' : "|".join(query.value_list),
-			'filter['+str(j)+'][data][comparison]' : operation
-			})
-			j+=1 #increment filter counter
-		elif operation in ['LIKE'] :
-			operation='TEXT'
-			i+=1#increment p counter
-		elif operation in ['IN'] :
-			operation='LISTBOXMULTIPLE'
-			kwargs.update({
-				'p['+str(i)+']' : operation+"|"+"|".join(query.name_list)+"|"+"|".join(query.value_list)
-			})
-			i+=1#increment p counter
-		elif operation in ['DATE_BETWEEN','NUMERIC_BETWEEN', 'CADENCE'] :
-			kwargs.update({
-				'p['+str(i)+']' : operation+"|"+"|".join(query.name_list)+"|"+"|".join(query.value_list)
-			})
-			i+=1#increment p counter
-		else :
-			allowed_operations="ge, le, gte, lte, lt, eq, gt, lte, like, in, numeric_between, date_between"
-			err_mess="Operation not available : %s Allowed operations are : %s" % (operation,allowed_operations)
-                        self.__logger.error(err_mess)			
-			raise Sitools2Exception	(err_mess)
-	output_name_list=[]
-	output_name_dict={}
-	for i, field in enumerate(output_list):#build output object list and output object dict with name as a key  
-		output_name_list.append(field.name)
-		output_name_dict.update({
-			field.name : field
-		}
-		)
-	kwargs.update({#build colModel url options
-		'colModel' : '"'+", ".join(output_name_list)+'"'
-	})
-	sort_dic_list=[]
-	for field in sort_list :#build sort output options 
-		if field[0].name not in self.allowed_sort_list :
-			err_mess="Error in Dataset.search(): sort on %s is not allowed" % field.name		
-                        self.__logger.error(err_mess)
-			raise Sitools2Exception(err_mess)
-		sort_dictionary={}
-		sort_dictionary.update({
-		"field" : field[0].name ,
-		"direction" : field[1]
-		})
-		sort_dic_list.append(sort_dictionary)
-	temp_kwargs={}
-	temp_kwargs.update({
-				'sort' : {"ordersList" : sort_dic_list}
-			})
-	temp_url=urllib.urlencode(temp_kwargs).replace('+','').replace('%27','%22')
-	url_count=self.url+"/count"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#Build url just for count
-	url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#Build url for the request
-        self.__logger.debug(urllib.unquote(url_count.encode('ascii')).decode('utf-8'))
-	result_count =simplejson.load(urllib.urlopen(url_count))
-	nbr_results=result_count['total']
-	result=[]
-	if nbr_results < limit_request :#Check if the request does not exceed 350 000 items 
-		if limit_to_nb_res_max>0 and limit_to_nb_res_max < kwargs['limit']: #if nbr to display is specified and < 300
-			kwargs['limit']=limit_to_nb_res_max
-			kwargs['nocount']='true'
-			nbr_results=limit_to_nb_res_max
-			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url
-		elif  limit_to_nb_res_max>0 and  limit_to_nb_res_max >= kwargs['limit']:#if nbr to display is specified and >= 300
-			nbr_results=limit_to_nb_res_max
-			kwargs['nocount']='true'
-			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url
-		while (nbr_results-kwargs['start'])>0 :#Do the job per 300 items till nbr_result is reached
-#Check that request is done each 300 items
-			result_temp =simplejson.load(urllib.urlopen(url))
-	 		for data in result_temp['data'] :
-                                self.__logger.debug(data)
-				result_dict={}
-				for k,v in data.items() :                                       
-					if (k not in self.noClientAccess_list and k != 'uri' and k in output_name_list) or k in output_name_list :
-                                                self.__logger.debug(output_name_dict)
-                                                self.__logger.debug("key to search = "+ k)                                                
-						if output_name_dict[k].type.startswith('int'): 
-							result_dict.update({
-								k : int(v)
-							})
-						elif output_name_dict[k].type.startswith('float'):
-							result_dict.update({
-								k : float(v)
-							})
-						elif output_name_dict[k].type.startswith('timestamp'):
-							(dt, mSecs)= v.split(".")
-							dt = datetime.strptime(dt,"%Y-%m-%dT%H:%M:%S")
-							mSeconds = timedelta(microseconds = int(mSecs))
-							result_dict.update({
-								k : dt+mSeconds
-							})
-						else :
-							result_dict.update({
-								k : v
-							})
-				result.append(result_dict)
-			kwargs['start'] += kwargs['limit']#increment the job by the kwargs limit given (by design)  
-			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#encode new kwargs and build new url for request                                            
-		return result
-	else :
-		out_mess="Not allowed\nNbr results (%d) exceeds limit_request param: %d\n" % (result_count['total'],limit_request)
-                self.__logger.info(out_mess)
-		sys.stdout.write(out_mess)
-		return result
-#Output attributes of Dataset
-    def display(self) :
-	print self.__repr__()
-#Representation of an instance of Dataset
-    def __repr__(self):
-	phrase=""
-	phrase+="\n\nDataset object display() :\n\t%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s\n\t\tprimary_key : %s" % (self.name,self.description,self.uri,self.url,self.primary_key.name)
-	phrase+="\n\t\tresources_list :"
-	for i, res in enumerate(self.resources_target) :
-		phrase+="\n\t\t\t%d) %s" % (i,res)	
-	phrase+="\n\t\tfields list :"
-	for i, field in enumerate(self.fields_list) :
-		phrase+="\n\t\t\t%d) %s" % (i,field.name)	
-	phrase+="\n\t\tfilter list :"
-	for i, field in enumerate(self.filter_list) :
-		phrase+="\n\t\t\t%d) %s" % (i,field.name)	
-	phrase+="\n\t\tsort list :"
-	for i, field in enumerate(self.sort_list) :
-		phrase+="\n\t\t\t%d) %s" % (i,field.name)
-	return phrase
-
-    def execute_plugin(self, plugin_name=None, pkey_list=[], FILENAME=None, **kwargs) :
-	resources_list=[]
-	if plugin_name is None :
-		err_mess="Error execute_plugin(): No plugin_name provided"
-                self.__logger.error(err_mess)		
-		raise Sitools2Exception(err_mess)
-	for resource in self.resources_target :
-		resources_list.append(resource.split("/")[-1])
-	if plugin_name not in resources_list : 
-			err_mess="Error execute_plugin(): This plugin_name %s does not exist in %s dataset" % (plugin_name,self.name)
-			self.__logger.error(err_mess)	
-			raise Sitools2Exception(err_mess)
-	if len(pkey_list)==0 :
-		err_mess="Error execute_plugin(): No identifiers pkey provided"
-                self.__logger.error(err_mess)			
-		raise Sitools2Exception(err_mess)
-	if FILENAME is None :
-		err_mess="Error execute_plugin(): No FILENAME provided"
-		self.__logger.error(err_mess)	
-		raise Sitools2Exception(err_mess)
-	operation='LISTBOXMULTIPLE'
-	kwargs.update({
-		'p[0]' : operation+"|"+self.primary_key.name+"|"+"|".join(str(pkey) for pkey in pkey_list)
-	})
-	url=self.url+"/"+plugin_name+"?"+urllib.urlencode(kwargs)
-        self.__logger.debug(urllib.unquote(url.encode('ascii')).decode('utf-8'))	
-	return urllib.urlretrieve('%s' % url, FILENAME)
-
-class Project:
-    """Define a Project class.
-       A Project instance gives details about a project of Sitools2. 
-       It has the following attributes : name, description, uri, url, resources_target.
-       The method dataset_list() will return information about the number of datasets available, their name and uri.
+            return False
+    
+    def isPrimaryKey(self):
+        """Returns if the column is a primary key."""
+        return self.__data['primaryKey']
+    
+    def hasColumnRenderer(self):
+        """Returns if the column has a renderer."""
+        return self.__data.has_key('columnRenderer')
+    
+    def getColumnRenderer(self):
+        """Return the column renderer if available otherwise None"""
+        if self.hasColumnRenderer():
+            return ColumnRender(self.__data['columnRenderer'])
+        else:
+            return None
+    
+    def getColumnAlias(self):
+        """Returns the column alias."""
+        return self.__data['columnAlias']
+    
+    def getSqlColumnType(self):
+        """Returns the SQL column type."""
+        if self.__data.has_key('sqlColumnType'):
+            return self.__data['sqlColumnType']
+        else:
+            return None       
+    
+    def getOrderBy(self):
+        """Returns the OrderBy property if available otherwise None"""
+        if self.__data.has_key('orderBy'):
+            return self.__data['orderBy']
+        else:
+            return None         
+    
+    def getFormat(self):
+        """Returns the date format if available otherwise false."""
+        if self.__data.has_key('format'):
+            return self.__data['format']
+        else:
+            return None        
+   
+class ColumnRender:
+    """Columns may have a specific representation in the web interface.
+    Here is an example how to use this class. We start by retrieving a specific dataset
+    >>> dataset = DataSet( 'http://medoc-dem.ias.u-psud.fr', datasetName='ws_SDO_DEM')
+    
+    Gets the columns of the dataset
+    >>> columns = dataset.getColumns()
+    
+    Retrieves a column from a list
+    >>> column = columns[0]
+    
+    >>> renderer = column.getColumnRenderer()
+    
+    >>> renderer.getBehavior()
+    'localUrl'
+    
+    >>> renderer.getDatasetLinkUrl()
+    
+    >>> renderer.getToolTip()
+    
     """
-#Initialize Project
-    def __init__(self, url):
-        self.__logger = _Log.getLogger(self.__class__.__name__)
-        self.name = ""
-	self.description = ""
-	self.uri = None    
-        self.url = url
-	self.resources_target = []
-	self.__compute_attributes()
-        self.resources_list();
-#Compute_attributes builds value for instance Project
-    def __compute_attributes(self,**kwargs) :
-	kwargs.update({
-		'media' : 'json'
-	})
-	url=self.url+'?'+urllib.urlencode(kwargs)
-        self.__logger.debug(urllib.unquote(url.encode('ascii')).decode('utf-8'))
-	result =simplejson.load(urllib.urlopen(url))
-	self.name=result['project']['name']
-	self.description=result['project']['description']
-        self.uri = result['project']['sitoolsAttachementForUsers']
-        
-#Explore Project resources (method=options should be allowed)
-    def resources_list(self):
-	        url = urllib.urlopen(self.url+'?method=OPTIONS')      
-        	wadl = url.read()
-		try :
-        		domWadl = parseString(wadl)
-		except :
-			out_mess="Project : project.resources_list() not allowed, please contact admin for more info"
-                        self.__logger.info(out_mess)			
-		else : 
-        		resources = domWadl.getElementsByTagName('resource')          
-        		for i in range(len(resources)):
-        		    self.resources_target.append(self.url+"/"+resources[i].getAttribute('path'))          
-#Ouptut Project attributes       
-    def display(self):
-	print self.__repr__()
-#Represention of Project instance 
-    def __repr__(self):
-	phrase=""
-	phrase+="\n\nProject object display() :\n\t%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s" % (self.name,self.description,self.uri,self.url) 
-	phrase+="\n\t\tresources list :"
-	if len(self.resources_target)!=0 :
-		for i, res in enumerate(self.resources_target) :
-			phrase+="\n\t\t\t%d) %s" % (i,res)
-	return phrase
+    ENUM_BEHAVIOR = ['localUrl','extUrlNewTab','extUrlDesktop','ImgNoThumb','ImgAutoThumb',
+    'ImgThumbSQL', 'datasetLink', 'datasetIconLink','noClientAccess']
 
-#List all datasets in the Project and create the dataset objects
-    def dataset_list(self, **kwargs):
-	"""Return relevant information concerning the datasets of your project
-	"""
-	sitools_url=self.url.split("/sitools")[0]
-	kwargs.update({
-		'media' : 'json'
-	})
-	url=sitools_url+self.uri+'/datasets'+'?'+urllib.urlencode(kwargs)
-        self.__logger.debug(url)
-	data=[]
-	try:
-		result =simplejson.load(urllib.urlopen(url))
-		if len (result['data'])!=0 :
-			for i,dataset in enumerate(result['data']) :
-				ds_url=sitools_url+dataset['url']
-                                status = dataset['status']
-                                if status == 'ACTIVE':
-                                    try:
-                                        data.append(Dataset(ds_url))
-                                    except Sitools2Exception as e:
-                                        self.__logger.error(e.value)
-                                else:
-                                    self.__logger.warn("The access to dataset %s is currently disabled" % (dataset['name']))
-	except :
-		out_mess="Cannot dataset %s is protected\nContact admin for more info" % url
-                self.__logger.error(out_mess)
-	return data
+    def __init__(self, data):
+        """Constructor."""
+        self.__data = data
+    
+    def getBehavior(self):
+        """Returns the behavior otherwise None."""
+        if self.__data.has_key('behavior'):
+            return self.__data['behavior']
+        else:
+            return None
+    
+    def getDatasetLinkUrl(self):
+        """Returns the dataset link URL otherwise None."""
+        if self.__data.has_key('datasetLinkUrl'):
+            return self.__data['datasetLinkUrl']
+        else:
+            return None
+    
+    def getToolTip(self):
+        """Returns the tooltip otherwise None."""
+        if self.__data.has_key('toolTip'):
+            return self.__data['toolTip']
+        else:
+            return None                 
+    
+if __name__ == "__main__":
+    #import doctest
+    #doctest.testmod()
+    sitools2 = SITools2Instance('http://medoc-dem.ias.u-psud.fr')
+    ps = sitools2.getProjects()
+    p = ps[0]
+    dss = p.getDataSets()
+    ds = dss[0]
+    search = ds.getSearch()
+    c = search.getAvailableFilterCols()[1]
+    request = RelativeRequest()
+    request = Filter(request, c.getColumnAlias(), 'numeric', 410098249,'LT')
+    request = Filter(request, c.getColumnAlias(), 'numeric', 410098247,'GT')
+    search.setQueries(request)
+    toto = search.execute()
+    #toto = search.download()
+    print (toto)
+    
+    
