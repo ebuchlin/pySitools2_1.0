@@ -18,7 +18,7 @@
 
 """
 This is a generic python Sitools2 tool
-pySitools2 tool has been designed to perform all operations available within Sitools2.
+pySitools2 tool has been designed to perform all available operations within Sitools2.
 The code defines several classes SitoolsInstance, Field, Query, Dataset and Project. 
 Example of application : 
 A Solar tool to request and retrieve SDO data from IAS (Institut d'Astrophysique Spatiale)
@@ -661,22 +661,10 @@ class ColumnRender:
         else:
             return None                 
     
-if __name__ == "__main__":
-    #import doctest
-    #doctest.testmod()
-    sitools2 = SITools2Instance('http://medoc-dem.ias.u-psud.fr')
-    ps = sitools2.getProjects()
-    p = ps[0]
-    dss = p.getDataSets()
-    ds = dss[0]
-    search = ds.getSearch()
-    c = search.getAvailableFilterCols()[1]
-    request = RelativeRequest()
-    request = Filter(request, c.getColumnAlias(), 'numeric', 410098249,'LT')
-    request = Filter(request, c.getColumnAlias(), 'numeric', 410098247,'GT')
-    search.setQueries(request)
-    toto = search.execute()
-    #toto = search.download()
-    print (toto)
+def test(): 
+    import doctest
+    doctest.testmod()
     
+if __name__ == "__main__":
+    test()
     
