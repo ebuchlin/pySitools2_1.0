@@ -2,7 +2,7 @@
 """
 This script has been designed to give python programmers an easy way to interrogate medoc gaia-dem sitools2 interface.
 You can make a search providing a date range and get your selection very easilly.
-@author: Pablo ALINGERY for IAS 07-05-2013
+@author: Pablo ALINGERY for IAS 07-03-2013
 """
 __version__ = "1.0"
 __license__ = "GPL"
@@ -16,11 +16,15 @@ from pySitools2_idoc import *
 
 sitools2_url='http://medoc-dem.ias.u-psud.fr'
 
-def get(GAIA_LIST=[], TARGET_DIR=None, **kwds) :
+def get(GAIA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, TYPE=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
 	kwds=kwds
-	for item in GAIA_LIST:
-		item.get_file(TARGET_DIR=TARGET_DIR, **kwds)	
+	if DOWNLOAD_TYPE is not None :
+#TYPE is ignored
+		get_selection(GAIA_LIST=GAIA_LIST, TARGET_DIR=TARGET_DIR, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
+	else: 
+		for item in GAIA_LIST:
+			item.get_file(TARGET_DIR=TARGET_DIR, **kwds)	
 
 
 def get_selection(GAIA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
@@ -242,9 +246,7 @@ class Gaia_data():
 				else :
 					for type_spec in TYPE :
 						key=url_dict[type_spec].split("/")[-1]
-						print "key : %s" %key
 						value=sitools2_url+url_dict[type_spec]
-						print "value : %s" %value
 						filename_dict[key]=value
 
 		elif FILENAME is not None and TYPE is not None:
@@ -259,9 +261,7 @@ class Gaia_data():
 					TYPE value should be in list 'temp','em','width','chi2'\n" % k)
  				else : 
 					key=FILENAME[k]
-					print "key : %s" %key
 					value=sitools2_url+url_dict[k]
-					print "value : %s" %value
 					filename_dict[key]=value
 				
 		if TARGET_DIR is not None:

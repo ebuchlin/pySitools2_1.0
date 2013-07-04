@@ -5,29 +5,32 @@ You can make a search with the following entries : a date range , a wavelenghth 
 You will have as a result a list of Sdo_data objets on which you can apply the method display() that will give you for each 
 the recnum, the sunum, the date_obs, the wavelength, the ias_location, the exptime and t_rec_index 
 For each result you will be able to call metadata_search() method in order to have the metadata information.
-@author: Pablo ALINGERY for IAS  07-05-2013
+@author: Pablo ALINGERY for IAS 28-08-2012
 """
 __version__ = "1.0"
-__license__ = "GPL"
+__license__ = "GPLV3"
 __author__ ="Pablo ALINGERY"
 __credit__=["Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
 __email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
 
 
-from pySitools2_idoc import *
+from pySitools2 import *
 
+sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 
-def get(MEDIA_DATA_LIST=[], TARGET_DIR=None, **kwds) :
+def get(MEDIA_DATA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
-	for item in MEDIA_DATA_LIST:
-		item.get_file(TARGET_DIR=TARGET_DIR, **kwds)	
+	if DOWNLOAD_TYPE is not None :
+		get_selection(MEDIA_DATA_LIST=MEDIA_DATA_LIST, TARGET_DIR=TARGET_DIR, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
+	else :
+		for item in MEDIA_DATA_LIST:
+			item.get_file(TARGET_DIR=TARGET_DIR, **kwds)
 
 
 def get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 	"""Use __getSelection__ method providing search result as an entry"""
-	sitools_url='http://medoc-sdo.ias.u-psud.fr'
-	sdo_dataset=Sdo_IAS_SDO_dataset(sitools_url+"/webs_IAS_SDO_dataset")
+	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
 	media_data_sunum_list=[]
 	for item in MEDIA_DATA_LIST:
 		media_data_sunum_list.append(item.sunum)
@@ -58,10 +61,9 @@ def search(DATES=None,WAVES=['94','131','171','193','211','304','335','1600','17
 		elif k=='nb_res_max':
 			NB_RES_MAX=v
 		
-	sitools_url='http://medoc-sdo.ias.u-psud.fr'
-#	sitools_url='http://localhost:8182'
-	print "Loading medoc-sdo Sitools2 client : ",sitools_url
-	sdo_dataset=Sdo_IAS_SDO_dataset(sitools_url+"/webs_IAS_SDO_dataset")
+
+	print "Loading MEDIA Sitools2 client : ",sitools2_url
+	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
 	DATES_OPTIM=[]
 	if DATES is None:
 		sys.exit("Error in search():\nDATES entry must be specified")
