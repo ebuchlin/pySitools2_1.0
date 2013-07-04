@@ -1,6 +1,5 @@
 #############################################  How to use python gaia_client_idoc.py  ######################################################
-#version  1.0 ##############################################################################################################################
-#Author Pablo ALINGERY######################################################################################################################
+#version  1.0 #############################################################################################################################
 
 This module has been designed to give python programmers an easy way to interrogate medoc-dem.ias.u-psud.fr interface & to get data from it.
 
@@ -68,6 +67,19 @@ for example :
 gaia_data_list = search( DATES=[d1,d2] ) 
 get (GAIA_LIST=sdo_data_list,TARGET_DIR='results')
 
+4bis-To download data within a tar file from medoc-dem.ias.u-psud.fr
+Add the parameter DOWNLOAD_TYPE as followed :
+	 
+get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE=download_type_value,TARGET_DIR=directory_name,FILENAME=filename_value,QUIET=quiet_value)
+
+   * download _type is the format of the file returned, it can only value 'tar' for the moment no zip file file available so far.
+   * filename_value is None by default, the filename recorded will be 'IAS_SDO_export_{currentTimestamp}.{download_type_value}'.
+
+For example : 
+
+gaia_data_list = search( DATES=[d1,d2] )
+get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
+
 
 5- You can choose also to download a certain TYPE of data from medoc-dem.ias.u-psud.fr
 You just have to specify the TYPE you want to  retrieve , it should be a list among : 'temp','em','width','chi2' (TYPE=['all'] will do as well), the filess retrieved will have the default name 
@@ -113,26 +125,6 @@ get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", FILENAME={'temp' :'temp.fits
 ###########################################################
 
 
-7-To download data within a tar file from medoc-dem.ias.u-psud.fr
-Use get_selection() function as followed :
-	 
-get_selection(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE=download_type_value,TARGET_DIR=directory_name,FILENAME=filename_value,QUIET=quiet_value)
-
-   * gaia_data_list is a var in which the result of your previous search is stored (see previous 3-Use the function search() )
-   * download _type is the format of the file returned, it can only value 'tar' for the moment no zip file file available so far.
-   * target_dir is the targeted directory. By design, files are retrieved in the current directory.
-     It needs to be specified (to an existing directory) to get the fits files elsewhere.
-   * quiet_value switches off the verbose mode. By default, quiet_value is False.
-     To retrieve data in a quiet mode set QUIET=True  
-   * Lower case as arguments are allowed too so
-     item.get_selection( gaia_list=sdo_data_list,download_type=download_type_value,target_dir=directory_name,filename=filename_value,quiet=quiet_value ) will do the same
-   
-For example : 
-
-gaia_data_list = search( DATES=[d1,d2] )
-get_selection(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
-
-
 ################################ Complete example ###########################
 
 # This example queries GAIA-DEM between d1 and d2
@@ -161,11 +153,17 @@ get(GAIA_LIST=gaia_data_list, TARGET_DIR="results")
 #Need to do it quietly 
 #get(GAIA_LIST=gaia_data_list, TARGET_DIR="results",QUIET=True)
 
+#Need to get a tar ball do sthg like :
+#get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
+
+#To specify FILENAME you want to retrieve, use get_file() method and do something like the following
+#FILENAME should be a dictionary with key within 'temp','em','width','chi2' and value can be whatever you want
+#for item in gaia_data_list :
+#	file_date_obs=(item.date_obs).strftime("%Y-%m-%dT%H:%M:%S")
+#	item.get_file(TARGET_DIR="results", FILENAME={'temp' :"temp_%s.fits" % file_date_obs, 'em':"em_%s.fits" % file_date_obs})
 #########################Warning###########################
 #specify both FILENAME and TYPE is not allowed 
 #get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", FILENAME={'temp' :'temp.fits','em':'em.fits'}, TYPE=['temp','em'])
 ###########################################################
 
-#Need to get a tar ball do sthg like :
-#get_selection(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
 

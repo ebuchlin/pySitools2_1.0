@@ -1,36 +1,43 @@
 #! /usr/bin/python
 """
 
-@author: Pablo ALINGERY for IAS 07-05-2013
+@author: Pablo ALINGERY for IAS 28-08-2012
 """
-from gaia_client_idoc import *
+from gaia_client_medoc import *
 
 d1 = datetime(2012,8,10,0,0,0)
 d2 = d1 + timedelta(days=1)
 
-gaia_data_list = search( DATES=[d1,d2], nb_res_max=1 )  
+gaia_data_list = search( DATES=[d1,d2], nb_res_max=10)  
 
 #for item in gaia_data_list :
-#	print item
+#	print item.date_obs
 
 #the fastest way to retrieve data
 #PS : The directory 'results' has to be created !
-get(GAIA_LIST=gaia_data_list, TARGET_DIR="results")
+#get(GAIA_LIST=gaia_data_list, TARGET_DIR="results")
 
-#specify TYPE you want to  retrieve , it should be in list 'temp','em','width','chi2' (TYPE=['all'] will do as well ), FILENAME would be the default one 
-#get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", TYPE=['temp','em'])
-
-#specify FILENAME you want to retrieve , it should be a dictionary with key within 'temp','em','width','chi2' and value can be whatever you want
-#get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", FILENAME={'temp' :'temp.fits','em':'em.fits'})
+#Need to get a tar ball do sthg like :
+get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
 
 #Need to do it quietly 
 #get(GAIA_LIST=gaia_data_list, TARGET_DIR="results",QUIET=True)
+
+#specify TYPE you want to  retrieve , it should be in list 'temp','em','width','chi2' (TYPE=['all'] will do as well ), FILENAME would be the default one 
+#get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", TYPE=['temp','em'])
+#Warning TYPE will be ignored if you specify DOWNLOAD_TYPE
+
+#To specify FILENAME you want to retrieve, Use get_file() method 
+#FILENAME should be a dictionary with key within 'temp','em','width','chi2' and value can be whatever you want
+#for item in gaia_data_list :
+#	file_date_obs=(item.date_obs).strftime("%Y-%m-%dT%H:%M:%S")
+#	item.get_file(TARGET_DIR="results", FILENAME={'temp' :"temp_%s.fits" % file_date_obs, 'em':"em_%s.fits" % file_date_obs})
+
 
 #########################Warning###########################
 #specify both FILENAME and TYPE is not allowed 
 #get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", FILENAME={'temp' :'temp.fits','em':'em.fits'}, TYPE=['temp','em'])
 ###########################################################
 
-#Need to get a tar ball do sthg like :
-#get_selection(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
+
 

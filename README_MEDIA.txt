@@ -1,6 +1,5 @@
 #############################################  How to use python sdo_client_idoc.py  ######################################################
 #version  1.0 #############################################################################################################################
-#Author PAblo ALINGERY#####################################################################################################################
 
 This module has been designed to give python programmers an easy way to interrogate medoc-sdo.ias.u-psud.fr interface & to get data from it.
 
@@ -112,6 +111,12 @@ for example :
 sdo_data_list = search( DATES=[d1,d2], WAVES=['335','304'], nb_res_max= 50 ,CADENCE=['1 min'] ) 
 get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
 
+5bis-To download data within a tar or a zip file from medoc-sdo.ias.u-psud.fr
+Add the parameter DOWNLOAD_TYPE  as followed :
+get(MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE=download_type_value,TARGET_DIR=directory_name,FILENAME=filename_value,QUIET=quiet_value)
+
+  * download _type is the format of the file returned, it can value 'tar' or 'zip' (tar is faster than zip)
+  * filename_value is None by default, the filename recorded will be 'IAS_SDO_export_{currentTimestamp}.{download_type_value}'.
 
 6- Other way to download data from medoc-sdo.ias.u-psud.fr (FILENAME specification is better here)
 Since you have a result sdo_data_list from a previous search() request, you simply have to call the method get_file:
@@ -138,25 +143,6 @@ for data in sdo_data_list :
 		data.get_file(TARGET_DIR='results/')
 
 
-6-To download data within a tar or a zip file from medoc-sdo.ias.u-psud.fr
-Use get_selection() function as followed :
-	 
-get_selection(MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE=download_type_value,TARGET_DIR=directory_name,FILENAME=filename_value,QUIET=quiet_value)
-
-   * sdo_data_list is a var in which the result of your previous search is stored (see previous 3-Use the function search() )
-   * download _type is the format of the file returned, it can value 'tar' or 'zip' (tar is faster than zip)
-   * target_dir is the targeted directory. By design, files are retrieved in the current directory.
-     It needs to be specified (to an existing directory) to get the fits files elsewhere.
-   * quiet_value switches off the verbose mode. By default, quiet_value is False.
-     To retrieve data in a quiet mode set QUIET=True  
-   * Lower case as arguments are allowed too so
-     item.get_selection( media_data_list=sdo_data_list,download_type=download_type_value,target_dir=directory_name,filename=filename_value,quiet=quiet_value ) will do the same
-   
-For example : 
-
-sdo_data_list = search( DATES=[d1,d2], WAVES=['335','304'], nb_res_max= 50 ,CADENCE=['1 min'] ) 
-get_selection(MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_download_file.tar")
-
 ################################ Complete example ###########################
 
 # This example queries for all AIA files at 335 Angstrom between d1 and d2
@@ -176,9 +162,9 @@ sdo_data_list = search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['1 min'] )
 get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
 
 #Need to get a tar ball or zip file do sthg like :
-#get_selection(MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_download_file.tar")
+#get(MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_download_file.tar")
 
-#And if you want to specifies files name do sthg like 
+#And if you want to specifies files name use get_file() method and do something like the following
 #for item in sdo_data_list :
 #	file_date_obs=item.date_obs
 #	file_wave=item.wave
