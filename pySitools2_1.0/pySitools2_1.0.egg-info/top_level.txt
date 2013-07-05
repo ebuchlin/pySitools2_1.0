@@ -1,3 +1,0 @@
-sitools2
-tests
-examples
