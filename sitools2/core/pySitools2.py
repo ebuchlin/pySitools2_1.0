@@ -35,7 +35,7 @@ __maintainer__="Pablo ALINGERY"
 __email__="jean-christophe.malapert@cnes.fr, pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
 
 from query import *
-
+import sys
 from utility import Util, Sitools2Exception, Log
 
 class Sitools2Abstract(object):
@@ -667,4 +667,4 @@ def test():
     
 if __name__ == "__main__":
     test()
-    
+
