@@ -142,7 +142,7 @@ def media_search(DATES = None, WAVES=['94','131','171','193','211','304','335','
 	sys.stdout.write( "%s results returned\n" % len(sdo_data_list))
     return sdo_data_list
 
-def media_get(MEDIA_DATA_LIST, TARGET_DIR="/tmp", TYPE=['all'], QUIET=False, DECOMPRESS=False, FILENAME='myresult', DOWNLOAD_TYPE=None):
+def media_get(MEDIA_DATA_LIST, TARGET_DIR="/tmp", QUIET=False, DECOMPRESS=False, FILENAME='myresult', DOWNLOAD_TYPE=None):
     if not QUIET :
         print "Download in progress ..."
     if not TARGET_DIR[-1] == '/':
