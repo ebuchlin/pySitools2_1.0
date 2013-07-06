@@ -1,3 +1,6 @@
 /NewPythonProject/nbproject/private/
 /src/NewPythonProject/nbproject/private/
+/dist/
+/build/
 *.pyc
+*.py~
