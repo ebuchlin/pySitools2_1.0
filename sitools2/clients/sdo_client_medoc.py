@@ -66,13 +66,14 @@ class Sdo_data():
     def getItemByName(self, name):
         return self.getData()[name]
     
-    def get_file(self, TARGET_DIR='/tmp/', TYPE=['all'], QUIET=True, FILENAME = None, DECOMPRESS=False):
+    def get_file(self, TARGET_DIR='/tmp/', TYPE=['all'], QUIET=False, FILENAME = None, DECOMPRESS=False):
         if not TARGET_DIR[-1] == '/':
             TARGET_DIR = TARGET_DIR + '/'
                       
         colorred = "\033[01;31m{0}\033[00m"
         colorgrn = "\033[1;36m{0}\033[00m"
-        
+        colorgrnok="\033[0;32m{0}\033[00m"
+
         url = self.getData()['get']
         if FILENAME == None:
             FILENAME = "aia.lev1."+str(self.getData()['wavelnth'])+"A_"+self.getData()['date__obs'].strftime('%Y-%m-%dT%H:%M:%S.')+"image_lev1.fits"
@@ -91,7 +92,7 @@ class Sdo_data():
                 print "Error downloading %s%s " % (TARGET_DIR,FILENAME)
         else :
             if not QUIET :
-                print colorred.format("completed")
+                print colorgrnok.format("completed")
         
     def display(self):
         print self.__str__()
@@ -110,7 +111,9 @@ class Sdo_data():
         return display
         
         
-def search(DATES = None, WAVES=['94','131','171','193','211','304','335','1600','1700'], CADENCE=['1 min'], NB_RES_MAX=-1):
+def media_search(DATES = None, WAVES=['94','131','171','193','211','304','335','1600','1700'], CADENCE=['1 min'], NB_RES_MAX=-1, QUIET=False):
+    if not QUIET :
+	sys.stdout.write( "Loading MEDIA Sitools2 client : %s\n" % SITOOLS_URL)
     sdo_data_list = []
     dataset = DataSet(SITOOLS_URL, datasetName=DATASET_NAME)    
     columnsToDisplay = []
@@ -135,28 +138,39 @@ def search(DATES = None, WAVES=['94','131','171','193','211','304','335','1600',
     result = search.execute(limitResMax=NB_RES_MAX)
     for record in result:
         sdo_data_list.append(Sdo_data(record))
+    if not QUIET :
+	sys.stdout.write( "%s results returned\n" % len(sdo_data_list))
     return sdo_data_list
 
-def get(MEDIA_DATA_LIST, TARGET_DIR="/tmp", TYPE=['all'], QUIET=True, DECOMPRESS=False):
+def media_get(MEDIA_DATA_LIST, TARGET_DIR="/tmp", TYPE=['all'], QUIET=False, DECOMPRESS=False, FILENAME='myresult', DOWNLOAD_TYPE=None):
+    if not QUIET :
+        print "Download in progress ..."
     if not TARGET_DIR[-1] == '/':
         TARGET_DIR = TARGET_DIR + '/'    
-    for gaia_data in MEDIA_DATA_LIST:
-        gaia_data.get_file(TARGET_DIR, TYPE, QUIET, DECOMPRESS=DECOMPRESS)
-        
-def get_selection(MEDIA_DATA_LIST, TARGET_DIR="/tmp/", FILENAME='myresult'):
+    if DOWNLOAD_TYPE is not None :
+	media_get_selection(MEDIA_DATA_LIST, TARGET_DIR="/tmp/",FILENAME=FILENAME)
+    else:
+		for media_data in MEDIA_DATA_LIST:
+			media_data.get_file(TARGET_DIR, TYPE, QUIET, DECOMPRESS=DECOMPRESS)
+
+
+def media_get_selection(MEDIA_DATA_LIST, TARGET_DIR="/tmp/", FILENAME='myresult', QUIET=False):
     if not TARGET_DIR[-1] == '/':
         TARGET_DIR = TARGET_DIR + '/'    
     filenames = []
     for media in MEDIA_DATA_LIST:
         filenames.append(media.getItemByName('get'))
+    
     dataset = DataSet(SITOOLS_URL, datasetName=DATASET_NAME)
     search = dataset.getSearch()
     request = RelativeRequest()    
     request = EnumerateValues(request,'get', filenames)
     search.setQueries(request)
     result = search.download(TARGET_DIR+FILENAME)
-    print result + " is downloaded"         
+    if not QUIET :
+        print result + " is downloaded"         
 
+''' 
 def download(DATES, TARGET_DIR="/tmp/", FILENAME='toto'):
     if not TARGET_DIR[-1] == '/':
         TARGET_DIR = TARGET_DIR + '/'    
@@ -180,6 +194,7 @@ def download(DATES, TARGET_DIR="/tmp/", FILENAME='toto'):
     search.setQueries(request) 
     result = search.download(TARGET_DIR+FILENAME)
     print result + " is downloaded"
+'''
 
 if __name__ == "__main__":
     request = RelativeRequest()
