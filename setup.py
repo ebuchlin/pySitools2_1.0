@@ -53,3 +53,4 @@ else :
 		download_url = 'https://github.com/SITools2/pySitools2_1.0/archive/master.zip',
 		test_suite="tests"
 	)
+
