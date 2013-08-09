@@ -3,12 +3,12 @@
 
 @author: Pablo ALINGERY for IAS 28-08-2012
 """
-from gaia_client_medoc import *
+from sitools2.clients.gaia_client_medoc import *
 
 d1 = datetime(2012,8,10,0,0,0)
 d2 = d1 + timedelta(days=1)
 
-gaia_data_list = search( DATES=[d1,d2], nb_res_max=10)  
+gaia_data_list = gaia_search( DATES=[d1,d2], nb_res_max=10)  
 
 #for item in gaia_data_list :
 #	print item.date_obs
@@ -18,13 +18,13 @@ gaia_data_list = search( DATES=[d1,d2], nb_res_max=10)
 #get(GAIA_LIST=gaia_data_list, TARGET_DIR="results")
 
 #Need to get a tar ball do sthg like :
-get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
+gaia_get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="/tmp" ,FILENAME="my_dowload_file.tar")
 
 #Need to do it quietly 
-#get(GAIA_LIST=gaia_data_list, TARGET_DIR="results",QUIET=True)
+#gaia_get(GAIA_LIST=gaia_data_list, TARGET_DIR="results",QUIET=True)
 
 #specify TYPE you want to  retrieve , it should be in list 'temp','em','width','chi2' (TYPE=['all'] will do as well ), FILENAME would be the default one 
-#get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", TYPE=['temp','em'])
+#gaia_get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", TYPE=['temp','em'])
 #Warning TYPE will be ignored if you specify DOWNLOAD_TYPE
 
 #To specify FILENAME you want to retrieve, Use get_file() method 
@@ -36,7 +36,7 @@ get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME
 
 #########################Warning###########################
 #specify both FILENAME and TYPE is not allowed 
-#get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", FILENAME={'temp' :'temp.fits','em':'em.fits'}, TYPE=['temp','em'])
+#gaia_get(GAIA_LIST=gaia_data_list, TARGET_DIR="results", FILENAME={'temp' :'temp.fits','em':'em.fits'}, TYPE=['temp','em'])
 ###########################################################
 
 

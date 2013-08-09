@@ -15,20 +15,20 @@ __maintainer__="Pablo ALINGERY"
 __email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
 
 
-from pySitools2 import *
+from sitools2.core.pySitools2 import *
 
 sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 
-def get(MEDIA_DATA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, **kwds) :
+def media_get(MEDIA_DATA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
 	if DOWNLOAD_TYPE is not None :
-		get_selection(MEDIA_DATA_LIST=MEDIA_DATA_LIST, TARGET_DIR=TARGET_DIR, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
+		media_get_selection(MEDIA_DATA_LIST=MEDIA_DATA_LIST, TARGET_DIR=TARGET_DIR, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
 	else :
 		for item in MEDIA_DATA_LIST:
 			item.get_file(TARGET_DIR=TARGET_DIR, **kwds)
 
 
-def get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
+def media_get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 	"""Use __getSelection__ method providing search result as an entry"""
 	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
 	media_data_sunum_list=[]
@@ -37,7 +37,7 @@ def get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 	
 	sdo_dataset.__getSelection__(SUNUM_LIST=media_data_sunum_list, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
 
-def search(DATES=None,WAVES=['94','131','171','193','211','304','335','1600','1700'],CADENCE=['1 min'],NB_RES_MAX=-1,**kwds):
+def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','1600','1700'],CADENCE=['1 min'],NB_RES_MAX=-1,**kwds):
 	"""Use the generic search() from pySitools2 library for Sitools2 SDO instance located at IAS
 	Parameters available are DATES, WAVES, CADENCE and NB_RES_MAX
 	DATES is the interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1

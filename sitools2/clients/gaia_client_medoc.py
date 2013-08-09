@@ -12,11 +12,11 @@ __maintainer__="Pablo ALINGERY"
 __email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
 
 
-from pySitools2_idoc import *
+from sitools2.core.pySitools2 import *
 
 sitools2_url='http://medoc-dem.ias.u-psud.fr'
 
-def get(GAIA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, TYPE=None, **kwds) :
+def gaia_get(GAIA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, TYPE=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
 	kwds=kwds
 	if DOWNLOAD_TYPE is not None :
@@ -42,7 +42,7 @@ def get_selection(GAIA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 	
 	gaia_dataset.__getSelection__(SUNUM_LIST=gaia_data_sunum_list, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
 
-def search(DATES=None,NB_RES_MAX=-1,**kwds):
+def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 	"""Uses the generic search() from pySitools2 library for Sitools2 GAIA instance located at IAS
 	Parameters available are DATES and NB_RES_MAX
 	DATES is the interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1
@@ -59,7 +59,7 @@ def search(DATES=None,NB_RES_MAX=-1,**kwds):
 			NB_RES_MAX=v
 
 	sitools_url='http://medoc-dem.ias.u-psud.fr'
-	print "Loading medoc-dem Sitools2 client : ",sitools_url
+	print "Loading GAIA-DEM Sitools2 client : ",sitools_url
 	gaia_dataset=Sdo_IAS_gaia_dataset(sitools_url+"/ws_SDO_DEM")
 	DATES_OPTIM=[]
 	if DATES is None:
@@ -172,7 +172,6 @@ class Gaia_data():
 	"""Definition de la classe Gaia_data """
 
 	def __init__(self,data):
-#		self.url=''
 		self.download=''
 		self.sunum_193=0
 		self.date_obs=''
@@ -184,7 +183,6 @@ class Gaia_data():
 		self.compute_attributes(data)
 
 	def compute_attributes(self, data) :
-#		self.url=data['uri']
 		self.download=data['download']
 		self.sunum_193=data['sunum_193']
 		self.date_obs=data['date_obs']
