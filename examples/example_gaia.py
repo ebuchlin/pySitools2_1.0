@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 """
 
 @author: Pablo ALINGERY for IAS 28-08-2012
