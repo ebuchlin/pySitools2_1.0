@@ -304,7 +304,7 @@ class Dataset():
 			raise Exception
 		sort_dictionary={}
 		sort_dictionary.update({
-		"field" : field[0].name ,
+		"field" : (field[0].name).encode('utf-8') ,
 		"direction" : field[1]
 		})
 		sort_dic_list.append(sort_dictionary)
