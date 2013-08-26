@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 """
 This script has been designed to give python programmers an easy way to interrogate media sitools2 interface.
 You can make a search with the following entries : a date range , a wavelenghth or multiple wavelengths , a cadence.
@@ -181,7 +181,7 @@ class Sdo_IAS_SDO_dataset(Dataset):
 			elif k=='quiet':
 				QUIET=v
 		if FILENAME is None :
-			FILENAME="IAS_SDO_export_"+datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")+"."+DOWNLOAD_TYPE.lower() #if not specified this is the default name
+			FILENAME="IAS_SDO_export_"+datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")+"."+DOWNLOAD_TYPE.lower() #if not specified this is the default name
 		if TARGET_DIR is not None:
 			if not os.path.isdir(TARGET_DIR) :
 				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
@@ -262,7 +262,7 @@ class Sdo_data():
 				QUIET=v
 
 		if FILENAME is None :
-			FILENAME="aia.lev1."+str(self.wave)+"A_"+self.date_obs.strftime('%Y-%m-%dT%H:%M:%S.')+"image_lev1.fits" #if not specified this is the default name
+			FILENAME="aia.lev1."+str(self.wave)+"A_"+self.date_obs.strftime('%Y-%m-%dT%H-%M-%S.')+"image_lev1.fits" #if not specified this is the default name
 		if TARGET_DIR is not None:
 			if not os.path.isdir(TARGET_DIR) :
 				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
