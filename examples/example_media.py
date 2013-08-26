@@ -9,22 +9,22 @@ from  sitools2.clients.sdo_client_medoc import *
 d1 = datetime(2011,01,01,0,0,0)
 d2 = d1 + timedelta(minutes=5)
 
-sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['1 min'], nb_res_max=10 ) 
+sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['1 min'], nb_res_max=2 ) 
 
 #To limit the results sent by the server set nb_res_max
 #sdo_data_list = search( DATES=[d1,d2], WAVES=['335','304'], nb_res_max= 5 ,CADENCE=['1 min'] ) 
 
 #The fastest way to retrieve data
 #PS : The directory 'results' has to be created !
-#media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results')
+media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
 
 #Need to get a tar ball or zip file :
 #A bit slower than the previous one
-media_get (MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE="tar", target_dir="/tmp" ,FILENAME="my_download_file.tar")
+#media_get (MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_download_file.tar")
 
 #And if you want to specifies files name do sthg like 
 #for item in sdo_data_list :
-#	file_date_obs=item.date_obs
+#	file_date_obs=item.date_obs.strftime('%Y-%m-%dT%H-%M-%S')
 #	file_wave=item.wave
 #	item.get_file( DECOMPRESS=False, FILENAME="toto_%s_%s.fits" %(file_date_obs,file_wave) , TARGET_DIR='results', QUIET=False )
 
