@@ -30,8 +30,8 @@ class TestMedia(unittest.TestCase):
     def testSearchMedia(self):
         d1 = datetime(2012,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
-        sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['1 min'] )
-        self.assertEqual( len(sdo_data_list), 2878)                            
+        sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['10 min'] )
+        self.assertEqual( len(sdo_data_list), 288)                            
 
 if __name__ == "__main__":
     unittest.main()
