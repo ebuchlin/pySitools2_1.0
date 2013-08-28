@@ -30,8 +30,8 @@ class TestGaia(unittest.TestCase):
     def testSearchGaia(self):
         d1 = datetime(2012,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
-        gaia_data_list = gaia_search( DATES=[d1,d2], NB_RES_MAX=1 )        
-        self.assertEqual( len(gaia_data_list), 1)                            
+        gaia_data_list = gaia_search( DATES=[d1,d2], NB_RES_MAX=10 )        
+        self.assertEqual( len(gaia_data_list), 8)                            
 
 if __name__ == "__main__":
     unittest.main()
