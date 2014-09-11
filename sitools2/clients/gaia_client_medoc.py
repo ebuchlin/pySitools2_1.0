@@ -143,7 +143,8 @@ class Sdo_IAS_gaia_dataset(Dataset):
 			FILENAME="IAS_GAIA_export_"+datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")+"."+DOWNLOAD_TYPE.lower() #if not specified this is the default name
 		if TARGET_DIR is not None:
 			if not os.path.isdir(TARGET_DIR) :
-				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
+#				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
+				os.mkdir(TARGET_DIR)
 			if TARGET_DIR[-1].isalnum():
 				FILENAME=TARGET_DIR+'/'+FILENAME
 			elif TARGET_DIR[-1]=='/':
