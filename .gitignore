@@ -1,5 +1,7 @@
 /build/
 /dist/
 /pySitools2_1.0.egg-info/
+/simplejson-3.3.0-py2.7-linux-x86_64.egg/
+/examples/results/
 *.pyc
 *.py~
