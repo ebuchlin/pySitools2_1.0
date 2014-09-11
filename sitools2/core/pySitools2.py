@@ -328,7 +328,7 @@ class Dataset():
 			nbr_results=limit_to_nb_res_max
 			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url
 		elif  limit_to_nb_res_max>0 and  limit_to_nb_res_max >= kwargs['limit']:#if nbr to display is specified and >= 300
-			nbr_results=limit_to_nb_res_max
+			if limit_to_nb_res_max <nbr_results : nbr_results=limit_to_nb_res_max
 			kwargs['nocount']='true'
 			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url
 		while (nbr_results-kwargs['start'])>0 :#Do the job per 300 items till nbr_result is reached
