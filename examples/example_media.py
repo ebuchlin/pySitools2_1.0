@@ -16,7 +16,7 @@ sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['1 mi
 
 #The fastest way to retrieve data
 #PS : The directory 'results' has to be created !
-media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
+#media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
 
 #Need to get a tar ball or zip file :
 #A bit slower than the previous one
@@ -29,10 +29,10 @@ media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
 #	item.get_file( DECOMPRESS=False, FILENAME="toto_%s_%s.fits" %(file_date_obs,file_wave) , TARGET_DIR='results', QUIET=False )
 
 #Search meta data info
-#for item in sdo_data_list:
-#	print item.date_obs
-#	my_meta_search=item.metadata_search(KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1'])
-#	print my_meta_search
+for item in sdo_data_list:
+	print item.date_obs
+	my_meta_search=item.metadata_search(KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1'])
+	print my_meta_search
 #	if (my_meta_search['quality'] == 0) :
 #		#item.display()
 #	         item.get_file(TARGET_DIR='results')	
