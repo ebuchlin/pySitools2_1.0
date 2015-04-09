@@ -30,7 +30,7 @@ class TestSitools2Core(unittest.TestCase):
     def testNbProjects(self):
         sitools2 = Sitools2Instance('http://medoc-sdo.ias.u-psud.fr')
         projects = sitools2.list_project()
-        self.assertEqual( len(projects), 1)           
+        self.assertEqual( len(projects), 2)           
     
 
 if __name__ == '__main__':
