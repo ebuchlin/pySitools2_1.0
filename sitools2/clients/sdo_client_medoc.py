@@ -133,6 +133,46 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	print "%s results returned" % len(sdo_data_list)
 	return sdo_data_list
 
+
+def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[], **kwds):
+		"""Use search() results (the field recnum) in order to provide metadata information from the dataset webs_aia_dataset
+		KEYWORDS is the list of names of metadata that you wish to have in the output THAT MUST BE SPECIFIED 
+		RECNUM_LIST list of recnum result of media data search
+		"""
+#Allow lower case entries
+		for k,v  in kwds.iteritems():
+			if k not in ['keywords','recnum_list']:
+				sys.exit("Error get_file():\n'%s' entry for the search function is not allowed" % k) 
+			elif k=='keywords':
+				KEYWORDS=v
+			elif k=='recnum_list':
+				RECNUM_LIST=v
+
+		if len(KEYWORDS)==0 :
+			sys.exit("Error media_metadata_search():\nkeywords must be specified")
+		if type(KEYWORDS).__name__!='list' :
+			mess_err="Error in media_metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
+			sys.exit(mess_err)
+		ds_aia_lev1=Sdo_aia_dataset("http://medoc-sdo.ias.u-psud.fr/webs_aia_dataset")
+		if len(RECNUM_LIST)==0 :
+			mess_err="Error in media_metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
+			sys.exit(mess_err)
+		param_query_aia=[[ds_aia_lev1.fields_list[0]],RECNUM_LIST,'IN']
+		Q_aia=Query(param_query_aia)
+		O1_aia=[]
+		for key in KEYWORDS :
+			if ds_aia_lev1.fields_dict.has_key(key):
+				O1_aia.append(ds_aia_lev1.fields_dict[key])
+			else :
+				sys.exit("Error metadata_search(): %s keyword does not exist" % key)
+		S1_aia=[[ds_aia_lev1.fields_list[18],'ASC']]#sort by date_obs ascendant
+		return ds_aia_lev1.search([Q_aia],O1_aia,S1_aia)
+
+
+
+
+
+
 def metadata_info():
 	"""Displays information concerning the metadata dataset webs_aia_dataset 
 	For example if you need the list of the fields in aia_dataset use it  
@@ -283,7 +323,7 @@ class Sdo_data():
 			if not QUIET :
 				print "Download file %s completed" % FILENAME
 
-	def metadata_search(self, KEYWORDS=[], RECNUM_LIST=[], **kwds):
+	def metadata_search(self, KEYWORDS=[], **kwds):
 		"""Use search() results (the field recnum) in order to provide metadata information from the dataset webs_aia_dataset
 		KEYWORDS is the list of names of metadata that you wish to have in the output THAT MUST BE SPECIFIED 
 		RECNUM_LIST by designed values self.recnum 
@@ -303,8 +343,7 @@ class Sdo_data():
 			mess_err="Error in metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
 			sys.exit(mess_err)
 		ds_aia_lev1=Sdo_aia_dataset("http://medoc-sdo.ias.u-psud.fr/webs_aia_dataset")
-		if len(RECNUM_LIST)==0 :
-			RECNUM_LIST=[str(self.recnum)]
+		RECNUM_LIST=[str(self.recnum)]
 		param_query_aia=[[ds_aia_lev1.fields_list[0]],RECNUM_LIST,'IN']
 		Q_aia=Query(param_query_aia)
 		O1_aia=[]
@@ -320,12 +359,25 @@ class Sdo_data():
 def main():
 	d1=datetime(2012,8,10,0,0,0)
 	d2=d1+timedelta(days=1)
-	sdo_data_list=search(DATES=[d1,d2],waves=['335'],cadence=['1h'],nb_res_max=10) 
-	for data in sdo_data_list :
-		data.get_file(target_dir='results')
+	sdo_data_list=media_search(DATES=[d1,d2],waves=['335'],cadence=['1h'],nb_res_max=10) 
 
+# Unit test media_metadata_search
+	print "Test media_metadata_search"
+	recnum_list = []
+	for item in sdo_data_list :
+		recnum_list.append(str(item.recnum))
+	print recnum_list
+	meta=media_metadata_search(KEYWORDS=['recnum','sunum','date__obs','quality','cdelt1','cdelt2','crval1'], RECNUM_LIST=recnum_list)
+	print meta
+
+#Unit test get_file
+#	for data in sdo_data_list :
+#		data.get_file(target_dir='results')
+
+#Unit test metadata_search
+	print "Test metadata_search"
 	for item in sdo_data_list:
-		my_meta_search=item.metadata_search(keywords=['quality','cdelt1','cdelt2','crval1'])
+		my_meta_search=item.metadata_search(keywords=['sunum','recnum','quality','cdelt1','cdelt2','crval1'])
 		print my_meta_search
 if __name__ == "__main__":
 	main()
