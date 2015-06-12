@@ -11,7 +11,7 @@ The code defines several classes of Sitools2: Field, Query, Dataset and Project.
 
 ### Getting the sources
 
-	$ git clone https://github.com/SITools2/pySitools2_1.0.git pySitools2_1.0
+	$ git clone https://github.com/MedocIAS/pySitools2_1.0 pySitools2_1.0
 	
         The retrieved module structure is the following:
             LICENCE
