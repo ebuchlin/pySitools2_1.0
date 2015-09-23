@@ -12,7 +12,7 @@ __license__ = "GPLV3"
 __author__ ="Pablo ALINGERY"
 __credit__=["Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
-__email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
+__email__="medoc-contact@ias.u-psud.fr"
 
 
 from sitools2.core.pySitools2 import *
@@ -21,16 +21,45 @@ sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 
 def media_get(MEDIA_DATA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
-	if DOWNLOAD_TYPE is not None :
-		media_get_selection(MEDIA_DATA_LIST=MEDIA_DATA_LIST, TARGET_DIR=TARGET_DIR, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
-	else :
+
+	for k,v  in kwds.iteritems():
+		if k=='target_dir':
+			TARGET_DIR=v
+		if k=='download_type':
+			DOWNLOAD_TYPE=v
+		if k=='media_data_list':
+			MEDIA_DATA_LIST=v
+
+	if kwds.has_key('media_data_list'):
+		del kwds['media_data_list']
+
+	if len(MEDIA_DATA_LIST)==0 :
+		sys.exit("Nothing to download\n")
+
+	if DOWNLOAD_TYPE is None :
 		for item in MEDIA_DATA_LIST:
 			item.get_file(TARGET_DIR=TARGET_DIR, **kwds)
 
+	else :
+		media_get_selection(MEDIA_DATA_LIST=MEDIA_DATA_LIST, TARGET_DIR=TARGET_DIR, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
+		
 
 def media_get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 	"""Use __getSelection__ method providing search result as an entry"""
 	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
+	
+	for k,v  in kwds.iteritems():
+		if k=='download_type':
+			DOWNLOAD_TYPE=v
+		if k=='media_data_list':
+			MEDIA_DATA_LIST=v
+
+	if kwds.has_key('media_data_list'):
+		del kwds['media_data_list']
+
+	if len(MEDIA_DATA_LIST)==0 :
+		sys.exit("Nothing to download\n")
+
 	media_data_sunum_list=[]
 	for item in MEDIA_DATA_LIST:
 		media_data_sunum_list.append(item.sunum)
@@ -224,7 +253,7 @@ class Sdo_IAS_SDO_dataset(Dataset):
 			FILENAME="IAS_SDO_export_"+datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")+"."+DOWNLOAD_TYPE.lower() #if not specified this is the default name
 		if TARGET_DIR is not None:
 			if not os.path.isdir(TARGET_DIR) :
-#				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
+				print "Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..." % TARGET_DIR
 				os.mkdir(TARGET_DIR)
 			if TARGET_DIR[-1].isalnum():
 				FILENAME=TARGET_DIR+'/'+FILENAME
@@ -306,7 +335,8 @@ class Sdo_data():
 			FILENAME="aia.lev1."+str(self.wave)+"A_"+self.date_obs.strftime('%Y-%m-%dT%H-%M-%S.')+"image_lev1.fits" #if not specified this is the default name
 		if TARGET_DIR is not None:
 			if not os.path.isdir(TARGET_DIR) :
-				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
+				print "Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..." % TARGET_DIR
+				os.mkdir(TARGET_DIR)
 			if TARGET_DIR[-1].isalnum():
 				FILENAME=TARGET_DIR+'/'+FILENAME
 			elif TARGET_DIR[-1]=='/':
