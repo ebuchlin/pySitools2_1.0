@@ -106,3 +106,24 @@ This python module will allow you to :
         $ gaia_get( GAIA_LIST=gaia_data_list, TARGET_DIR="results", TYPE=['temp','em'] )
 
 NB : For more information see the [README ](http://sdo.ias.u-psud.fr/python/gaia-dem/README_GAIA.txt) file.
+
+## Update the module 
+
+	$ cd pySitools2_1.0
+	git pull origin master 
+	sudo python setup.py install
+
+##Remove the module 
+
+###For the system
+
+	$ cd pySitools2_1.0
+	sudo easy_install -m pySitools2_1.0
+	sudo rm -Rf /usr/local/lib/python2.7/dist-packages/pySitools2_1.0*.egg 
+
+###For the user
+
+	$ cd pySitools2_1.0
+	sudo easy_install -m pySitools2_1.0
+	sudo rm -Rf ~/.local/lib/python2.7/site-packages/pySitools2_1.0*.egg 
+

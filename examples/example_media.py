@@ -15,7 +15,7 @@ sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['1 mi
 #sdo_data_list = search( DATES=[d1,d2], WAVES=['335','304'], nb_res_max= 5 ,CADENCE=['1 min'] ) 
 
 #The fastest way to retrieve data
-#PS : The directory 'results' has to be created !
+#PS : The directory 'results' will be created if it does not exist
 #media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
 
 #Need to get a tar ball or zip file :
