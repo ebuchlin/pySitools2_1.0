@@ -142,7 +142,7 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[], **kwds):
 #Allow lower case entries
 		for k,v  in kwds.iteritems():
 			if k not in ['keywords','recnum_list']:
-				sys.exit("Error get_file():\n'%s' entry for the search function is not allowed" % k) 
+				sys.exit("Error media_metatada_search():\n'%s' entry for the search function is not allowed" % k) 
 			elif k=='keywords':
 				KEYWORDS=v
 			elif k=='recnum_list':
