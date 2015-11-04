@@ -124,7 +124,7 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 			mess_err="Error in search():\nWAVES= %s not allowed\nWAVES must be in list %s" % (WAVES,WAVES_allowed_list)
 			sys.exit(mess_err)
 	wave_param=[[sdo_dataset.fields_list[5]],WAVES,'IN']
-	CADENCE_allowed_list={'1m':'1 min', '2m':'2 min', '10m':'10 min', '30m': '30 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
+	CADENCE_allowed_list={'12s':'12 sec','1m':'1 min', '2m':'2 min', '10m':'10 min', '30m': '30 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
 	if type(CADENCE).__name__!='list' :
 			mess_err="Error in search():\nentry type for CADENCE is : %s\nCADENCE must be a list type" % type(CADENCE).__name__
 			sys.exit(mess_err)
@@ -153,7 +153,10 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	Q1=Query(dates_param)
 	Q2=Query(wave_param)
 	Q3=Query(cadence_param)
-	query_list=[Q1,Q2,Q3]
+	if CADENCE =='12s' :
+		query_list=[Q1,Q2]
+	else:
+		query_list=[Q1,Q2,Q3]
 	result=sdo_dataset.search(query_list,output_options,sort_options,limit_to_nb_res_max=NB_RES_MAX)
 	sdo_data_list=[]
 	if len(result) !=0 :
@@ -299,7 +302,10 @@ class Sdo_data():
 		self.sunum=data['sunum']
 		self.date_obs=data['date__obs']
 		self.wave=data['wavelnth']
-		self.ias_location=data['ias_location']
+		if data.has_key('ias_location') :
+			self.ias_location=data['ias_location']
+		else :
+			self.ias_location=''
 		self.exptime=data['exptime']
 		self.t_rec_index=data['t_rec_index']
 			
