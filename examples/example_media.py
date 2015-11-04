@@ -9,7 +9,7 @@ from  sitools2.clients.sdo_client_medoc import *
 d1 = datetime(2011,01,01,0,0,0)
 d2 = d1 + timedelta(minutes=5)
 
-sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['1 min'], nb_res_max=2 ) 
+sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['12 s'], nb_res_max=2 ) 
 
 #To limit the results sent by the server set nb_res_max
 #sdo_data_list = search( DATES=[d1,d2], WAVES=['335','304'], nb_res_max= 5 ,CADENCE=['1 min'] ) 
@@ -36,3 +36,5 @@ for item in sdo_data_list:
 #	if (my_meta_search['quality'] == 0) :
 #		#item.display()
 #	         item.get_file(TARGET_DIR='results')	
+
+
