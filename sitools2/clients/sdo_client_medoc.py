@@ -72,7 +72,7 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	DATES is the interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1
 	WAVES is the wavelength (in Angstrom), it must be a list of wave and wave must be in the list ['94','131','171','193','211','304','335','1600','1700']
 	if WAVES is not specified WAVES values ['94','131','171','193','211','304','335','1600','1700']
-	CADENCE is the cadence with you with to make a research, it must be a string and in list ['1 min', '2 min', '10 min', '30 min', '1 h', '2 h', '6 h', '12 h' , '1 day']
+	CADENCE is the cadence with you with to make a research, it must be a string and in list ['12 sec','1 min', '2 min', '10 min', '30 min', '1 h', '2 h', '6 h', '12 h' , '1 day']
 	if CADENCE is not specified, CADENCE values '1 min'
 	NB_RES_MAX is the nbr of results you wish to display from the results 
 	it must be an integer and if specified must be >0
@@ -124,7 +124,8 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 			mess_err="Error in search():\nWAVES= %s not allowed\nWAVES must be in list %s" % (WAVES,WAVES_allowed_list)
 			sys.exit(mess_err)
 	wave_param=[[sdo_dataset.fields_list[5]],WAVES,'IN']
-	CADENCE_allowed_list={'1m':'1 min', '2m':'2 min', '10m':'10 min', '30m': '30 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
+	CADENCE_allowed_list={'12s':'12 sec' , '1m':'1 min', '2m':'2 min', '10m':'10 min', '30m': '30 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
+	CADENCE_12s_allowed_list={'12s':'12 sec' , '12 sec':'12 sec'}
 	if type(CADENCE).__name__!='list' :
 			mess_err="Error in search():\nentry type for CADENCE is : %s\nCADENCE must be a list type" % type(CADENCE).__name__
 			sys.exit(mess_err)
@@ -153,7 +154,11 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	Q1=Query(dates_param)
 	Q2=Query(wave_param)
 	Q3=Query(cadence_param)
-	query_list=[Q1,Q2,Q3]
+	
+	if (cadence not in CADENCE_12s_allowed_list.keys() ) :
+		query_list=[Q1,Q2]
+	else :
+		query_list=[Q1,Q2,Q3]
 	result=sdo_dataset.search(query_list,output_options,sort_options,limit_to_nb_res_max=NB_RES_MAX)
 	sdo_data_list=[]
 	if len(result) !=0 :
@@ -299,7 +304,10 @@ class Sdo_data():
 		self.sunum=data['sunum']
 		self.date_obs=data['date__obs']
 		self.wave=data['wavelnth']
-		self.ias_location=data['ias_location']
+		if self.has_key('ias_location'):
+			self.ias_location=data['ias_location']
+		else :
+			self.ias_location=''
 		self.exptime=data['exptime']
 		self.t_rec_index=data['t_rec_index']
 			
