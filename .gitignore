@@ -4,6 +4,7 @@
 /simplejson-3.3.0-py2.7-linux-x86_64.egg/
 /examples/results/
 /tests/results/
+/results/
 *.pyc
 *.py~
 #reinstall_pySitools2.sh
