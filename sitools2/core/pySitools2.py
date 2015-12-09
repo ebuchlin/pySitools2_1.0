@@ -327,10 +327,12 @@ class Dataset():
 			kwargs['nocount']='true'
 			nbr_results=limit_to_nb_res_max
 			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url
+#			sys.stdout.write( "if url : "+url+"\n")
 		elif  limit_to_nb_res_max>0 and  limit_to_nb_res_max >= kwargs['limit']:#if nbr to display is specified and >= 300
 			if limit_to_nb_res_max <nbr_results : nbr_results=limit_to_nb_res_max
 			kwargs['nocount']='true'
 			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url
+#			sys.stdout.write( "elif url : "+url+"\n")
 		while (nbr_results-kwargs['start'])>0 :#Do the job per 300 items till nbr_result is reached
 #Check that request is done each 300 items
 			result_temp =simplejson.load(urllib.urlopen(url))
@@ -360,6 +362,7 @@ class Dataset():
 				result.append(result_dict)
 			kwargs['start'] += kwargs['limit']#increment the job by the kwargs limit given (by design)  
 			url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#encode new kwargs and build new url for request
+#			sys.stdout.write( "url : "+url+"\n")
 		return result
 	else :
 		out_mess="Not allowed\nNbr results (%d) exceeds limit_request param: %d\n" % (result_count['total'],limit_request)

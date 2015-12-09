@@ -38,8 +38,10 @@ def media_get(MEDIA_DATA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, **kwds) :
 
 	if DOWNLOAD_TYPE is None :
 		for item in MEDIA_DATA_LIST:
-			item.get_file(TARGET_DIR=TARGET_DIR, **kwds)
-
+			if item.ias_location!='':
+				item.get_file(TARGET_DIR=TARGET_DIR, **kwds)
+			else:
+				sys.stdout.write("The data for recnum %s is not at IAS \n" % str(item.recnum) )
 	else :
 		media_get_selection(MEDIA_DATA_LIST=MEDIA_DATA_LIST, TARGET_DIR=TARGET_DIR, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
 		
@@ -62,8 +64,10 @@ def media_get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 
 	media_data_sunum_list=[]
 	for item in MEDIA_DATA_LIST:
-		media_data_sunum_list.append(item.sunum)
-	
+		if item.ias_location!='':
+			media_data_sunum_list.append(item.sunum)
+		else :
+			sys.stdout.write("The data for recnum %s is not at IAS\n" % str(item.recnum))
 	sdo_dataset.__getSelection__(SUNUM_LIST=media_data_sunum_list, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
 
 def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','1600','1700'],CADENCE=['1 min'],NB_RES_MAX=-1,**kwds):
@@ -124,12 +128,9 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 			mess_err="Error in search():\nWAVES= %s not allowed\nWAVES must be in list %s" % (WAVES,WAVES_allowed_list)
 			sys.exit(mess_err)
 	wave_param=[[sdo_dataset.fields_list[5]],WAVES,'IN']
-<<<<<<< HEAD
-	CADENCE_allowed_list={'12s':'12 sec','1m':'1 min', '2m':'2 min', '10m':'10 min', '30m': '30 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
-=======
 	CADENCE_allowed_list={'12s':'12 sec' , '1m':'1 min', '2m':'2 min', '10m':'10 min', '30m': '30 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
 	CADENCE_12s_allowed_list={'12s':'12 sec' , '12 sec':'12 sec'}
->>>>>>> 5e585475f7933be775681f4b80199ef0c3c2c81d
+
 	if type(CADENCE).__name__!='list' :
 			mess_err="Error in search():\nentry type for CADENCE is : %s\nCADENCE must be a list type" % type(CADENCE).__name__
 			sys.exit(mess_err)
@@ -158,16 +159,10 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	Q1=Query(dates_param)
 	Q2=Query(wave_param)
 	Q3=Query(cadence_param)
-<<<<<<< HEAD
-	if CADENCE =='12s' :
-		query_list=[Q1,Q2]
-	else:
-=======
-	
-	if (cadence not in CADENCE_12s_allowed_list.keys() ) :
+
+	if (cadence in CADENCE_12s_allowed_list.keys() ) :
 		query_list=[Q1,Q2]
 	else :
->>>>>>> 5e585475f7933be775681f4b80199ef0c3c2c81d
 		query_list=[Q1,Q2,Q3]
 	result=sdo_dataset.search(query_list,output_options,sort_options,limit_to_nb_res_max=NB_RES_MAX)
 	sdo_data_list=[]
@@ -314,11 +309,7 @@ class Sdo_data():
 		self.sunum=data['sunum']
 		self.date_obs=data['date__obs']
 		self.wave=data['wavelnth']
-<<<<<<< HEAD
-		if data.has_key('ias_location') :
-=======
-		if self.has_key('ias_location'):
->>>>>>> 5e585475f7933be775681f4b80199ef0c3c2c81d
+		if data.has_key('ias_location'):
 			self.ias_location=data['ias_location']
 		else :
 			self.ias_location=''
