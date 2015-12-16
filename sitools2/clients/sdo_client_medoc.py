@@ -194,10 +194,9 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[], **kwds):
 			sys.exit(mess_err)
 		ds_aia_lev1=Sdo_aia_dataset("http://medoc-sdo.ias.u-psud.fr/webs_aia_dataset")
 		if len(RECNUM_LIST)==0 :
-			mess_err="Error in media_metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
+			mess_err="Error in media_metadata_search():\nNo recnum_list provided\nPlease check your request" 
 			sys.exit(mess_err)
-		param_query_aia=[[ds_aia_lev1.fields_list[0]],RECNUM_LIST,'IN']
-		Q_aia=Query(param_query_aia)
+		
 		O1_aia=[]
 		for key in KEYWORDS :
 			if ds_aia_lev1.fields_dict.has_key(key):
@@ -205,10 +204,28 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[], **kwds):
 			else :
 				sys.exit("Error metadata_search(): %s keyword does not exist" % key)
 		S1_aia=[[ds_aia_lev1.fields_list[18],'ASC']]#sort by date_obs ascendant
-		return ds_aia_lev1.search([Q_aia],O1_aia,S1_aia)
 
-
-
+		#initialize recnumlist				
+		recnumlist=[]
+		result=[]
+		i=0
+# Make a request for each 500 recnum
+		if len(RECNUM_LIST)>500 :
+			while i< len(RECNUM_LIST) :
+#				print i
+				recnumlist=RECNUM_LIST[i:i+499]
+				recnumlist=map(str,recnumlist)
+				param_query_aia=[[ds_aia_lev1.fields_list[0]],recnumlist,'IN']
+				Q_aia=Query(param_query_aia)
+				result+=ds_aia_lev1.search([Q_aia],O1_aia,S1_aia)
+				i=i+499
+#				print "taille result : ",len(result)
+		else :
+			recnumlist=map(str,RECNUM_LIST)
+			param_query_aia=[[ds_aia_lev1.fields_list[0]],recnumlist,'IN']
+			Q_aia=Query(param_query_aia)
+			result+=ds_aia_lev1.search([Q_aia],O1_aia,S1_aia)
+		return result
 
 
 
