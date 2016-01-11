@@ -16,7 +16,7 @@ __license__ = "GPLV3"
 __author__ ="Pablo ALINGERY"
 __credit__=["Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__="Pablo ALINGERY"
-__email__="pablo.alingery.ias.u-psud.fr, pablo.alingery@exelisvis.com"
+__email__="pablo.alingery.ias.u-psud.fr"
 
 
 import sys,os
@@ -447,7 +447,7 @@ class Project():
 		try :
         		domWadl = parseString(wadl)
 		except :
-			out_mess="Project : project.resources_list() not allowed, please contact admin for more info"
+			out_mess="Project %s : project.resources_list() not allowed, please contact admin for more info\n" % self.name
 			sys.stdout.write(out_mess)
 		else : 
         		resources = domWadl.getElementsByTagName('resource')          
