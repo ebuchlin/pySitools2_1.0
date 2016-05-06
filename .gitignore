@@ -6,6 +6,7 @@
 /tests/results/
 /results/
 *.pyc
+*.swp
 *.py~
 #reinstall_pySitools2.sh
 reinstall_pySitools2.sh~
