@@ -31,7 +31,6 @@ class TestSitools2Core(unittest.TestCase):
         sitools2 = Sitools2Instance('http://idoc-solar-test.ias.u-psud.fr')
         projects = sitools2.list_project()
 #	print projects[0].dataset_list()
-no	print projects[1].dataset_list()
         self.assertEqual( len(projects), 2)           
     
 
