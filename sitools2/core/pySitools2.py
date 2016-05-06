@@ -318,6 +318,7 @@ class Dataset():
 	url_count=self.url+"/count"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#Build url just for count
 #	sys.stdout.write( "url_count : "+url_count+"\n")
 	url=self.url+"/records"+'?'+urllib.urlencode(kwargs)+"&"+temp_url#Build url for the request
+#	sys.stdout.write( "url : "+url+"\n")
 	result_count =simplejson.load(urllib.urlopen(url_count))
 	nbr_results=result_count['total']
 	result=[]
