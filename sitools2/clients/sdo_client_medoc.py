@@ -159,7 +159,6 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	Q2=Query(wave_param)
 	Q3=Query(cadence_param)
 
-		query_list=[Q1,Q2,Q3]
 	query_list=[Q1,Q2,Q3]
 
 	result=sdo_dataset.search(query_list,output_options,sort_options,limit_to_nb_res_max=NB_RES_MAX)
