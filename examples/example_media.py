@@ -31,7 +31,7 @@ for result in my_meta_search :
 
 #The fastest way to retrieve data
 #PS : The directory 'results' will be created if it does not exist
-media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=True)
+media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=False)
 
 #Need to get a tar ball or zip file :
 #A bit slower than the previous one
