@@ -14,11 +14,10 @@ gaia_data_list = gaia_search( DATES=[d1,d2], nb_res_max=10)
 #	print item.date_obs
 
 #the fastest way to retrieve data
-#PS : The directory 'results' has to be created !
-#get(GAIA_LIST=gaia_data_list, TARGET_DIR="results")
+get(GAIA_LIST=gaia_data_list, TARGET_DIR="results")
 
 #Need to get a tar ball do sthg like :
-gaia_get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
+#gaia_get(GAIA_LIST=gaia_data_list,DOWNLOAD_TYPE="tar", target_dir="results" ,FILENAME="my_dowload_file.tar")
 
 #Need to do it quietly 
 #gaia_get(GAIA_LIST=gaia_data_list, TARGET_DIR="results",QUIET=True)
