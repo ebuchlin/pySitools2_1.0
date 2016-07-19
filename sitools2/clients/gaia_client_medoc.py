@@ -265,11 +265,12 @@ class Gaia_data():
 				
 		if TARGET_DIR is not None:
 			if not os.path.isdir(TARGET_DIR) :
-				sys.exit("Error get_file():\nCheck the parameter TARGET_DIR, '%s' directory does not exist." % TARGET_DIR)
+				sys.stdout.write("Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..." % TARGET_DIR)
+				os.mkdir(TARGET_DIR)
 			if TARGET_DIR[-1].isalnum():
 				TARGET_DIR=TARGET_DIR+'/'
 			else :
-				sys.exit("Error get_file():\nCheck the param TARGET_DIR, special char %s at the end of TARGET_DIR is not allowed." % TARGET_DIR[-1])
+				sys.stdout.write("Error get_file():\nCheck the param TARGET_DIR, special char %s at the end of TARGET_DIR is not allowed." % TARGET_DIR[-1])
 
 		for (item,url) in filename_dict.iteritems():
 			try :	
