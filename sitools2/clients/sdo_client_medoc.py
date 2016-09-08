@@ -17,8 +17,9 @@ __email__="medoc-contact@ias.u-psud.fr"
 
 from sitools2.core.pySitools2 import *
 
-#sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
+#sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 sitools2_url='http://idoc-solar-portal-test.ias.u-psud.fr'
+#sitools2_url='http://localhost:8182'
 
 def media_get(MEDIA_DATA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
@@ -57,7 +58,7 @@ def media_get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 	elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIE.startswith('hmi') :
 		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_hmi_dataset")
 	elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIE.startswith('aia') :
-		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_aia_datasets")
+		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_aia_dataset")
 
 	for k,v  in kwds.iteritems():
 		if k=='download_type':
@@ -110,12 +111,12 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	sys.stdout.write ("Loading MEDIA Sitools2 client : %s " % sitools2_url)
 
 #Define dataset url
-	if sitools2_url=='http://medoc-sdo-test.ias.u-psud.fr' :
+	if sitools2_url.startswith('http://medoc-sdo') :
 		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
 	elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIE.startswith('hmi') :
-		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_hmi_dataset")
+		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_HMI_dataset")
 	elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIE.startswith('aia') :
-		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_aia_datasets")
+		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_AIA_dataset")
 #	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_HMI_SDO_dataset")
 #	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_hmi_dataset")
 	print sdo_dataset
@@ -228,7 +229,7 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	Q2=Query(wave_param)
 	Q3=Query(cadence_param)
 	Q4=Query(serie_param)
-#	print Q1
+#print Q1
 #	print Q2
 #	print Q3
 #	print Q4
@@ -250,14 +251,21 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIE='aia.lev1', **kwds):
 		KEYWORDS is the list of names of metadata that you wish to have in the output THAT MUST BE SPECIFIED 
 		RECNUM_LIST list of recnum result of media data search
 		"""
-#Allow lower case entries
+
+#		sys.stdout.write("Keywords list is : %s \n" % KEYWORDS)
+#		sys.stdout.write("Recnum list is : %s \n" % RECNUM_LIST)
+#		sys.stdout.write("Serie is : %s \n" % SERIE)
+
+		#Allow lower case entries
 		for k,v  in kwds.iteritems():
-			if k not in ['keywords','recnum_list']:
+			if k not in ['keywords','recnum_list','serie']:
 				sys.stdout.write("Error media_metatada_search():\n'%s' entry for the search function is not allowed" % k) 
 			elif k=='keywords':
 				KEYWORDS=v
 			elif k=='recnum_list':
 				RECNUM_LIST=v
+			elif k=='serie' :
+				SERIE=v
 
 #Controls 
 		if len(KEYWORDS)==0 :
@@ -273,11 +281,18 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIE='aia.lev1', **kwds):
 			return(-1)
 
 #Define dataset target 
-		if sitools2_url=='http://medoc-sdo-test.ias.u-psud.fr' :
+		if sitools2_url.startswith('http://medoc-sdo') :
 			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_aia_dataset")
-		elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' :
-			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+SERIE+"_dataset")
 
+		elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIE=='aia.lev1' :
+			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+"aia_dataset")
+		
+		elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIE.startswith('hmi') :
+			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+SERIE+"_dataset")
+#coquille
+#			metadata_ds=Sdo_aia_dataset(sitools2_url+"/"+SERIE+"")
+
+		sys.stdout.write("Dataset is : %s uri : %s \n" % (metadata_ds.name,metadata_ds.uri))
 
 		O1_aia=[]
 		for key in KEYWORDS :
@@ -286,7 +301,7 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIE='aia.lev1', **kwds):
 			else :
 				sys.stdout.write("Error metadata_search(): %s keyword does not exist" % key)
 				return(-1)
-		S1_aia=[[metadata_ds.fields_dict['date_obs'],'ASC']]#sort by date_obs ascendant
+		S1_aia=[[metadata_ds.fields_dict['date__obs'],'ASC']]#sort by date_obs ascendant
 
 		#initialize recnumlist				
 		recnumlist=[]
@@ -316,7 +331,7 @@ def metadata_info(SERIE='aia.lev1'):
 	"""Displays information concerning the metadata dataset webs_aia_dataset 
 	For example if you need the list of the fields in aia_dataset use it  
 	"""
-	
+
 	#Define dataset url
 	if sitools2_url=='http://medoc-sdo-test.ias.u-psud.fr' :
 		metadata_ds=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_aia_dataset")

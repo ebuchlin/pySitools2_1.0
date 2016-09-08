@@ -29,17 +29,17 @@ def main():
                 for ds in p.dataset_list() :
                         ds_list.append(ds)
 
-#        if len(ds_list)!=0 :
-#                print "%d dataset(s) found :" % len(ds_list)
-#                for i,dataset in enumerate(ds_list) :
-#                        print "%d) %s" % (i, dataset.name)
+        if len(ds_list)!=0 :
+                print "%d dataset(s) found :" % len(ds_list)
+                for i,dataset in enumerate(ds_list) :
+                        print "%d) %s" % (i, dataset.name)
 #        p1=prj_list[0]
 #        print p1
 #       print "\nTarget project :\n\t",p1.name 
 #        ds_lst=p1.dataset_list()
 #	for ds in ds_lst :
 #		print ds.name
-        ds1=ds_list[13]
+        ds1=ds_list[70]
         ds1.display()
         #display() or print works as well
 #       print ds1

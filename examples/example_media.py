@@ -10,7 +10,7 @@ d1 = datetime(2011,01,01,0,0,0)
 d2 = datetime(2011,01,01,5,12,0)
 #d2 = d1 + timedelta(minutes=5)
 
-sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335'], CADENCE=['12s'], nb_res_max=10 ) 
+sdo_data_list=media_search(DATES=[d1,d2], WAVES=['335'], CADENCE=['12s'], nb_res_max=10) 
 ##sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['12 s'], nb_res_max=2 ) 
 recnum_list=[]
 for result in sdo_data_list :
@@ -31,7 +31,7 @@ for result in my_meta_search :
 
 #The fastest way to retrieve data
 #PS : The directory 'results' will be created if it does not exist
-media_get (MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=False)
+media_get(MEDIA_DATA_LIST=sdo_data_list,TARGET_DIR='results', DECOMPRESS=False)
 
 #Need to get a tar ball or zip file :
 #A bit slower than the previous one
