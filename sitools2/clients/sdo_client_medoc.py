@@ -538,19 +538,20 @@ class Sdo_data():
 		if not DECOMPRESS and self.series_name=='aia.lev1':
 			self.url=self.url+";compress=rice"
 		
-#Define filename_and file_url
+#Define filename_path and file_url
 		for file_suff in list_files :
-			if (self.series_name).startswith('hmi.sharp') :
-				filename_path=filename_pre+file_suff+'.fits'
+			filename_path=filename_pre+file_suff+'.fits'
+			if (self.series_name).startswith('hmi') :
+			#	filename_path=filename_pre+file_suff+'.fits'
 			#	print "filename_path :", filename_path
 				file_url=self.url+"/"+file_suff+'.fits'
 			#	file_url=self.url+"/"+file_suff+'.fits'
 			#	print "filename_url :", file_url
 			elif self.series_name==('aia.lev1') :
-				filename_path=filename_pre+file_suff+'.fits'
-				print "filename_path :", filename_path
+			#	filename_path=filename_pre+file_suff+'.fits'
+			#	print "filename_path :", filename_path
 				file_url=self.url
-				print "filename_url :", file_url
+			#	print "filename_url :", file_url
 #Retrieve data 
 			try :	
 				urllib.urlretrieve(file_url, filename_path)
@@ -582,7 +583,7 @@ class Sdo_data():
 			mess_err="Error in metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
 			sys.stdout.write(mess_err)
 			return(-1)
-		if sitools2_url=='http://medoc-sdo-test.ias.u-psud.fr' :
+		if sitools2_url=='http://medoc-sdo.ias.u-psud.fr' :
 			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_aia_dataset")
 		elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' :
 			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+self.series_name+"dataset")
