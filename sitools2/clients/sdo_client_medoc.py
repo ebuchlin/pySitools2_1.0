@@ -113,10 +113,14 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 #Define dataset url
 	if sitools2_url.startswith('http://medoc-sdo') :
 		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
-	elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIE.startswith('hmi') :
+	elif sitools2_url.startswith('http://idoc-solar-portal') and SERIE.startswith('hmi') :
 		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_HMI_dataset")
-	elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIE.startswith('aia') :
+	elif sitools2_url.startswith('http://idoc-solar-portal') and SERIE.startswith('aia') :
 		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_AIA_dataset")
+	elif sitools2_url.startswith('http://localhost') and SERIE.startswith('aia') :
+		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_AIA_dataset")
+	elif sitools2_url.startswith('http://localhost') and SERIE.startswith('hmi') :
+		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_HMI_dataset")
 #	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_HMI_SDO_dataset")
 #	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_hmi_dataset")
 	print sdo_dataset
@@ -141,11 +145,12 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 			sys.stdout.write(mess_err)
 			return(-1)
 		else :
-#Trick to adapt to date format on solar-portal-test :
-			if sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' :
-				DATES_OPTIM.append(str(date.strftime("%Y-%m-%dT%H:%M:%S"))+".000")
-			else :
+#Trick to adapt to date format on solar-portal-test (to be fixed and that trick removed):
+			if sitools2_url.startswith('http://medoc-sdo'):
 				DATES_OPTIM.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
+			else :
+				DATES_OPTIM.append(str(date.strftime("%Y-%m-%dT%H:%M:%S"))+".000")
+
 	if DATES[1]<= DATES[0]:
 		mess_err="Error in search():\nd1=%s\nd2=%s\nfor DATES =[d1,d2] d2 should be > d1" %(DATES[1].strftime("%Y-%m-%dT%H:%M:%S"),DATES[2].strftime("%Y-%m-%dT%H:%M:%S"))
 		sys.stdout.write(mess_err)
