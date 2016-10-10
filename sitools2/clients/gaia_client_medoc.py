@@ -15,6 +15,7 @@ __email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
 from sitools2.core.pySitools2 import *
 
 sitools2_url='http://medoc-dem.ias.u-psud.fr'
+#sitools2_url='http://idoc-solar-portal-test.ias.u-psud.fr'
 
 def gaia_get(GAIA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, TYPE=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
@@ -58,9 +59,8 @@ def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 		elif k=='nb_res_max':
 			NB_RES_MAX=v
 
-	sitools_url='http://medoc-dem.ias.u-psud.fr'
-	print "Loading GAIA-DEM Sitools2 client : ",sitools_url
-	gaia_dataset=Sdo_IAS_gaia_dataset(sitools_url+"/ws_SDO_DEM")
+	print "Loading GAIA-DEM Sitools2 client : ",sitools2_url
+	gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/ws_SDO_DEM")
 	DATES_OPTIM=[]
 	if DATES is None:
 		sys.exit("Error in search():\nDATES entry must be specified")
@@ -87,9 +87,13 @@ def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 		mess_err="Error in search():\nNB_RES_MAX= %s not allowed\nNB_RES_MAX must be >0" % NB_RES_MAX
 		sys.exit(mess_err)
 #Ask for download,date_obs,sunum_193,filename,temp_fits_rice,em_fits_rice,width_fits_rice,chi2_fits_rice
-	output_options=[gaia_dataset.fields_list[0],gaia_dataset.fields_list[1],gaia_dataset.fields_list[5],gaia_dataset.fields_list[8],gaia_dataset.fields_list[18],gaia_dataset.fields_list[19],gaia_dataset.fields_list[20],gaia_dataset.fields_list[21]]
+#	output_options=[gaia_dataset.fields_list[0],gaia_dataset.fields_list[1],gaia_dataset.fields_list[5],gaia_dataset.fields_list[8],gaia_dataset.fields_list[18],gaia_dataset.fields_list[19],\
+#	gaia_dataset.fields_list[20],gaia_dataset.fields_list[21]]
+	output_options=[gaia_dataset.fields_dict['download'],gaia_dataset.fields_dict['date_obs'],gaia_dataset.fields_dict['sunum_193'],gaia_dataset.fields_dict['filename'],\
+	gaia_dataset.fields_dict['temp_fits_rice'],gaia_dataset.fields_dict['em_fits_rice'],gaia_data_list['width_fits_rice'],gaia_dataset.fields_dict['chi2_fits_rice'] ]
 #Sort date_obs ASC
-	sort_options=[[gaia_dataset.fields_list[1],'ASC']]
+#	sort_options=[[gaia_dataset.fields_list[1],'ASC']]
+	sort_options=[[gaia_dataset.fields_dict['date_obs'],'ASC']]
 	Q1=Query(dates_param)
 	query_list=[Q1]
 	result=gaia_dataset.search(query_list,output_options,sort_options,limit_to_nb_res_max=NB_RES_MAX)
