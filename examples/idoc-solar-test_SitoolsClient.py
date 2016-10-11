@@ -18,6 +18,8 @@ def main():
 #       sitools_url='http://idoc-herschel.ias.u-psud.fr'
 #       sitools_url='http://idoc-corotn2-public-v2.ias.u-psud.fr'
 	sitools_url='http://idoc-solar-portal-test.ias.u-psud.fr'
+#	sitools_url='http://localhost:8184'
+
 
         print "Loading SitoolsClient for",sitools_url
         SItools1=Sitools2Instance(sitools_url)
@@ -119,7 +121,9 @@ def main():
         recnum_list=[]
         for record in result:
                 recnum_list.append(str(record['recnum']))
-        ds_hmi=Dataset(sitools_url+"/hmi.sharp_cea_720s_nrt")
+        ds_hmi=Dataset(sitools_url+"/webs_hmi.sharp_cea_720s_nrt_dataset")
+
+#Old url for idoc-solar-portal-test for aia
 #        ds_aia=Dataset(sitools_url+"/webs_aia_dataset")
         ds_hmi.display()
 #        print recnum_list
