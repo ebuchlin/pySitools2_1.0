@@ -14,8 +14,8 @@ __email__="pablo.alingery.ias.u-psud.fr,pablo.alingery@exelisvis.com"
 
 from sitools2.core.pySitools2 import *
 
-sitools2_url='http://medoc-dem.ias.u-psud.fr'
-#sitools2_url='http://idoc-solar-portal-test.ias.u-psud.fr'
+#sitools2_url='http://medoc-dem.ias.u-psud.fr'
+sitools2_url='http://idoc-solar-portal-test.ias.u-psud.fr'
 
 def gaia_get(GAIA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, TYPE=None, **kwds) :
 	"""Use search result as an entry to call get_file method"""
@@ -60,7 +60,13 @@ def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 			NB_RES_MAX=v
 
 	print "Loading GAIA-DEM Sitools2 client : ",sitools2_url
-	gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/ws_SDO_DEM")
+	if sitools2_url.startswith('http://medoc-dem') :
+		gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/ws_SDO_DEM")
+	elif sitools2_url.startswith('http://idoc-solar-portal') :
+		gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/webs_GAIA-DEM_dataset")
+	elif sitools2_url.startswith('http://localhost'):
+		gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/webs_GAIA-DEM-dataset")
+	print gaia_dataset
 	DATES_OPTIM=[]
 	if DATES is None:
 		sys.exit("Error in search():\nDATES entry must be specified")
@@ -74,12 +80,14 @@ def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 		if type(date).__name__!='datetime' :
 			mess_err="Error in search() : type for DATES element is %s \nDATES list element must be a datetime type" % type(date).__name__
 			sys.exit(mess_err)
-		else :
+		elif sitools2_url.startswith('http://medoc-sdo') :
 			DATES_OPTIM.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
+		elif sitools2_url.startswith('http://idoc-solar-portal') :
+			DATES_OPTIM.append(str(date.strftime("%Y-%m-%dT%H:%M:%S"))+".000")
 	if DATES[1]<= DATES[0]:
 		mess_err="Error in search():\nd1=%s\nd2=%s\nfor DATES =[d1,d2] d2 should be > d1" %(DATES[1].strftime("%Y-%m-%dT%H:%M:%S"),DATES[2].strftime("%Y-%m-%dT%H:%M:%S"))
 		sys.exit(mess_err)
-	dates_param=[[gaia_dataset.fields_list[1]],DATES_OPTIM,'DATE_BETWEEN']
+	dates_param=[[gaia_dataset.fields_dict['date_obs']],DATES_OPTIM,'DATE_BETWEEN']
 	if type(NB_RES_MAX).__name__!='int' :
 			mess_err="Error in search():\nentry type for NB_RES_MAX is : %s\nNB_RES_MAX must be a int type" % type(NB_RES_MAX).__name__
 			sys.exit(mess_err)
@@ -90,7 +98,7 @@ def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 #	output_options=[gaia_dataset.fields_list[0],gaia_dataset.fields_list[1],gaia_dataset.fields_list[5],gaia_dataset.fields_list[8],gaia_dataset.fields_list[18],gaia_dataset.fields_list[19],\
 #	gaia_dataset.fields_list[20],gaia_dataset.fields_list[21]]
 	output_options=[gaia_dataset.fields_dict['download'],gaia_dataset.fields_dict['date_obs'],gaia_dataset.fields_dict['sunum_193'],gaia_dataset.fields_dict['filename'],\
-	gaia_dataset.fields_dict['temp_fits_rice'],gaia_dataset.fields_dict['em_fits_rice'],gaia_data_list['width_fits_rice'],gaia_dataset.fields_dict['chi2_fits_rice'] ]
+	gaia_dataset.fields_dict['temp_fits_rice'],gaia_dataset.fields_dict['em_fits_rice'],gaia_dataset.fields_dict['width_fits_rice'],gaia_dataset.fields_dict['chi2_fits_rice'] ]
 #Sort date_obs ASC
 #	sort_options=[[gaia_dataset.fields_list[1],'ASC']]
 	sort_options=[[gaia_dataset.fields_dict['date_obs'],'ASC']]

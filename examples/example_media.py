@@ -13,8 +13,9 @@ d2 = datetime(2011,01,01,5,12,0)
 sdo_data_list=media_search(DATES=[d1,d2], WAVES=['335'], CADENCE=['12s'], nb_res_max=10) 
 ##sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['12 s'], nb_res_max=2 ) 
 recnum_list=[]
+print  "sunum, recnum, date__obs"
 for result in sdo_data_list :
-#	print result.sunum ,result.recnum, result.date_obs  
+	print result.sunum ,result.recnum, result.date_obs  
 	recnum_list.append(result.recnum)
 
 #Test media_metada_search

@@ -10,7 +10,7 @@ d1 = datetime(2016,01,01,0,0,0)
 d2 = datetime(2016,01,01,5,12,0)
 #d2 = d1 + timedelta(minutes=5)
 
-sdo_hmi_data_list=media_search(DATES=[d1,d2],serie='hmi.sharp_cea_720s_nrt',cadence=['1h'],nb_res_max=10) 
+sdo_hmi_data_list=media_search(DATES=[d1,d2],series='hmi.sharp_cea_720s_nrt',cadence=['1h'],nb_res_max=10) 
 for data in sdo_hmi_data_list :
 	print data
 
