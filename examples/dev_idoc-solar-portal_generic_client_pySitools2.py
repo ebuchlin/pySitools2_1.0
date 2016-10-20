@@ -7,8 +7,8 @@
 from sitools2.core.pySitools2 import *
 
 def main():
-
 	sitools_url='http://idoc-solar-portal-test.ias.u-psud.fr'
+#	sitools_url='http://localhost:8184'
 
         SItools1=Sitools2Instance(sitools_url)
         prj_list=SItools1.list_project()
@@ -35,8 +35,8 @@ def main():
                 for i,dataset in enumerate(ds_list) :
                         print "%d) %s %s" % (i, dataset.name, dataset.url)
 
-
         ds1_url=sitools_url+"/webs_aia_dataset?media=json"
+		
         print ds1_url
 
         try:
