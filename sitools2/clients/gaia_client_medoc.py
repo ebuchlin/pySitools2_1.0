@@ -66,7 +66,7 @@ def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 		gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/webs_GAIA-DEM_dataset")
 	elif sitools2_url.startswith('http://localhost'):
 		gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/webs_GAIA-DEM-dataset")
-	print gaia_dataset
+#	print gaia_dataset
 	DATES_OPTIM=[]
 	if DATES is None:
 		sys.exit("Error in search():\nDATES entry must be specified")
