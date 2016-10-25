@@ -511,20 +511,22 @@ class Sdo_data():
 		elif FILENAME is None and (self.series_name).startswith('hmi') :
 			filename_pre=self.series_name+"_"+str(self.wave)+"A_"+self.date_obs.strftime('%Y-%m-%dT%H-%M-%S.')
 		elif FILENAME is not None :
-			sys.stdout.write("FILENAME defined by user : %s" % FILENAME)
+			sys.stdout.write("FILENAME defined by user : %s\n" % FILENAME)
 			filename_pre=FILENAME
 
 #Define SEGMENT if it does not exist 
-		if SEGMENT is None and self.series_name=='aia.lev1' :
+		if SEGMENT is None and FILENAME is None and self.series_name=='aia.lev1' :
 			list_files=['image_lev1']
-		elif SEGMENT is None and (self.series_name).startswith('hmi.sharp') :
+		elif SEGMENT is None and FILENAME is None and (self.series_name).startswith('hmi.sharp') :
 			list_files=['bitmap','Bp_err','Bp','Br_err','Br','Bt_err','Bt','conf_disambig','continuum', 'Dopplergram', 'magnetogram']
-		elif SEGMENT is None and (self.series_name).startswith('hmi.ic') :
+		elif SEGMENT is None and FILENAME is None and (self.series_name).startswith('hmi.ic') :
 			list_files=['continuum']
-		elif SEGMENT is None and (self.series_name).startswith('hmi.m') :
+		elif SEGMENT is None and FILENAME is None and (self.series_name).startswith('hmi.m') :
 			list_files=['magnetogram']
-		elif SEGMENT is not None :
+		elif SEGMENT is not None and FILENAME is None :
 			list_files=SEGMENT
+		elif FILENAME is not None :
+			list_files=[FILENAME]
 
 #Create target location if it does not exist 
 		if TARGET_DIR is not None:
@@ -545,7 +547,13 @@ class Sdo_data():
 		
 #Define filename_path and file_url
 		for file_suff in list_files :
-			filename_path=filename_pre+file_suff+'.fits'
+			if FILENAME is None :
+				filename_path=filename_pre+file_suff+'.fits'
+			else :
+				filename_path=FILENAME
+				file_url=self.url
+
+
 			if (self.series_name).startswith('hmi') :
 			#	filename_path=filename_pre+file_suff+'.fits'
 			#	print "filename_path :", filename_path
@@ -554,9 +562,12 @@ class Sdo_data():
 			#	print "filename_url :", file_url
 			elif self.series_name==('aia.lev1') :
 			#	filename_path=filename_pre+file_suff+'.fits'
-			#	print "filename_path :", filename_path
 				file_url=self.url
-			#	print "filename_url :", file_url
+
+#			print "filename_url :", file_url
+#			print "filename_path :", filename_path
+
+
 #Retrieve data 
 			try :	
 				urllib.urlretrieve(file_url, filename_path)
