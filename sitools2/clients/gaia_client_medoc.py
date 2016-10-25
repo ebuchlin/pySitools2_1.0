@@ -283,7 +283,8 @@ class Gaia_data():
 				TARGET_DIR=TARGET_DIR+'/'
 			else :
 				sys.stdout.write("Error get_file():\nCheck the param TARGET_DIR, special char %s at the end of TARGET_DIR is not allowed." % TARGET_DIR[-1])
-
+		else :
+			TARGET_DIR=""
 		for (item,url) in filename_dict.iteritems():
 			try :	
 				urllib.urlretrieve(url, "%s%s" % (TARGET_DIR,item))
