@@ -248,7 +248,7 @@ class Gaia_data():
 		elif FILENAME is None and TYPE is not None:
 			for type_spec in TYPE :
 				if type_spec not in url_dict.keys() and type_spec!='all':
-					sys.exit("Error get_file():\nTYPE = %s entry for the search function is not allowed\nTYPE value should be in list 'temp','em','width','chi2', 'all'\n" % TYPE) 
+					sys.exit("Error get_file():\nFILENAME = %s entry for the get function is not allowed\nTYPE value should be in list 'temp','em','width','chi2', 'all'\n" % TYPE) 
 				elif type_spec=='all':
 					for value in url_dict.values() :
 						key=value.split("/")[-1]
@@ -268,7 +268,7 @@ class Gaia_data():
 		else :
 			for k,v in FILENAME.iteritems() :
 				if k not in url_dict.keys(): 
-					sys.exit("Error get_file():\nTYPE = %s entry for the search function is not allowed\n \
+					sys.exit("Error get_file():\nTYPE = %s entry for the get function is not allowed\n \
 					TYPE value should be in list 'temp','em','width','chi2'\n" % k)
  				else : 
 					key=FILENAME[k]
