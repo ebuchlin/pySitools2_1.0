@@ -189,6 +189,8 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 			return(-1)
 	if SERIES.startswith('hmi'):
 			WAVES=['6173']
+	if SERIES.startswith('hmi'):
+		CADENCE_allowed_list={'12m':'12 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
 	for cadence in CADENCE:
 		if (cadence not in CADENCE_allowed_list.keys()) and (cadence not in CADENCE_allowed_list.values()) :
 			mess_err="Error in search():\nCADENCE= %s not allowed\nCADENCE must be in list %s" % (CADENCE,CADENCE_allowed_list)
