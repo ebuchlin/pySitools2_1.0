@@ -18,6 +18,7 @@ __email__="medoc-contact@ias.u-psud.fr"
 from sitools2.core.pySitools2 import *
 
 #sitools2_url='http://medoc-sdo.ias.u-psud.fr'
+#sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
 sitools2_url='http://idoc-solar-portal-test.ias.u-psud.fr'
 #sitools2_url='http://localhost:8182'
 
@@ -601,9 +602,9 @@ class Sdo_data():
 			mess_err="Error in metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
 			sys.stdout.write(mess_err)
 			return(-1)
-		if sitools2_url=='http://medoc-sdo.ias.u-psud.fr' :
+		if sitools2_url.startswith('http://medoc-sdo') :
 			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_aia_dataset")
-		elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' :
+		elif sitools2_url.startswith('http://idoc-solar-portal') :
 			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+self.series_name+"dataset")
 
 		RECNUM_LIST=[str(self.recnum)]
@@ -615,7 +616,7 @@ class Sdo_data():
 				O1_aia.append(metadata_ds.fields_dict[key])
 			else :
 				sys.stdout.write("Error metadata_search(): %s keyword does not exist" % key)
-		S1_aia=[[metadata_ds.fields_dict['date_obs'],'ASC']]#sort by date_obs ascendant
+		S1_aia=[[metadata_ds.fields_dict['date__obs'],'ASC']]#sort by date_obs ascendant
 		return metadata_ds.search([Q_aia],O1_aia,S1_aia)[0]
 
 
