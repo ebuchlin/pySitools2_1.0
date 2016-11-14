@@ -82,7 +82,7 @@ def media_get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 			sys.stdout.write("The data for recnum %s is not at IAS\n" % str(item.recnum))
 	sdo_dataset.__getSelection__(SUNUM_LIST=media_data_sunum_list, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
 
-def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','1600','1700'],SERIES='aia.lev1',CADENCE=['1 min'],NB_RES_MAX=-1,**kwds):
+def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','1600','1700'],SERIES=None,CADENCE=['1 min'],NB_RES_MAX=-1,**kwds):
 	"""Use the generic search() from pySitools2 library for Sitools2 SDO instance located at IAS
 	Parameters available are DATES, WAVES, CADENCE and NB_RES_MAX
 	DATES is the interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1
@@ -180,6 +180,8 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 		mess_err="Error in search():\n%d elements specified for CADENCE\nCADENCE param must be specified and a list of only one element" % len(DATES)
 		sys.stdout.write(mess_err)
 		return(-1)
+	if SERIES is None:
+		raise("Error in media_metadata_search():\nSERIES entry must be specified")
 	if type(SERIES).__name__!='str' :
 			mess_err="Error in search():\nentry type for SERIES is : %s\nSERIES must be a str type" % type(SERIES).__name__
 			sys.stdout.write(mess_err)
@@ -254,7 +256,7 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	return sdo_data_list
 
 
-def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIES='aia.lev1', **kwds):
+def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIES=None, **kwds):
 		"""Use search() results (the field recnum) in order to provide metadata information from the dataset webs_aia_dataset
 		KEYWORDS is the list of names of metadata that you wish to have in the output THAT MUST BE SPECIFIED 
 		RECNUM_LIST list of recnum result of media data search
@@ -266,7 +268,7 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIES='aia.lev1', **kwds)
 
 		#Allow lower case entries
 		for k,v  in kwds.iteritems():
-			if k not in ['keywords','recnum_list','series']:
+			if k not in ['keywords','recnum_list','series','segment']:
 				sys.stdout.write("Error media_metatada_search():\n'%s' entry for the search function is not allowed" % k) 
 			elif k=='keywords':
 				KEYWORDS=v
@@ -274,6 +276,9 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIES='aia.lev1', **kwds)
 				RECNUM_LIST=v
 			elif k=='series' :
 				SERIES=v
+			elif k=='segment' :
+				SEGMENT=v
+
 
 #Controls 
 		if len(KEYWORDS)==0 :
@@ -287,6 +292,9 @@ def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIES='aia.lev1', **kwds)
 			mess_err="Error in media_metadata_search():\nNo recnum_list provided\nPlease check your request" 
 			sys.stdout.write(mess_err)
 			return(-1)
+
+		if SERIES is None:
+			raise ValueError("Error in media_metadata_search():\nSERIES entry must be specified")
 
 #Define dataset target 
 		if sitools2_url.startswith('http://medoc-sdo') :
@@ -490,7 +498,7 @@ class Sdo_data():
 
 #Allow lower case entries
 		for k,v  in kwds.iteritems():
-			if k not in ['decompress','filename','target_dir','quiet']:
+			if k not in ['decompress','filename','target_dir','quiet', 'segment']:
 				sys.stdout.write("Error get_file():\n'%s' entry for the search function is not allowed" % k) 
 				return(-1)
 			elif k=='decompress':
@@ -501,6 +509,9 @@ class Sdo_data():
 				TARGET_DIR=v
 			elif k=='quiet':
 				QUIET=v
+			elif k=='segment' :
+				SEGMENT=v
+
 		list_files=[]
 		filename_pre=""
 
@@ -517,6 +528,7 @@ class Sdo_data():
 			sys.stdout.write("FILENAME defined by user : %s\n" % FILENAME)
 			filename_pre=FILENAME
 
+
 #Define SEGMENT if it does not exist 
 		if SEGMENT is None and FILENAME is None and self.series_name=='aia.lev1' :
 			list_files=['image_lev1']
@@ -530,6 +542,11 @@ class Sdo_data():
 			list_files=SEGMENT
 		elif FILENAME is not None :
 			list_files=[FILENAME]
+
+		SEGMENT_allowed=['image_lev1','bitmap','Bp_err','Bp','Br_err','Br','Bt_err','Bt','conf_disambig','continuum', 'Dopplergram', 'magnetogram']
+		for seg in SEGMENT :
+			if seg not in SEGMENT_allowed :
+				raise ValueError("%s SEGMENT value not allowed\nSegment allowed :%s" % (seg,SEGMENT_allowed))
 
 #Create target location if it does not exist 
 		if TARGET_DIR is not None:
