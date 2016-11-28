@@ -6,21 +6,26 @@
 
 from  sitools2.clients.sdo_client_medoc import *
 
-d1 = datetime(2011,01,01,0,0,0)
-d2 = datetime(2011,01,01,5,12,0)
+d1 = datetime(2016,06,01,5,0,0)
+d2 = datetime(2016,06,01,10,12,0)
 #d2 = d1 + timedelta(minutes=5)
 
-sdo_data_list=media_search(DATES=[d1,d2], WAVES=['335'], CADENCE=['12s'], nb_res_max=10) 
-##sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['12 s'], nb_res_max=2 ) 
-recnum_list=[]
-print  "sunum, recnum, date__obs"
-for result in sdo_data_list :
-	print result.sunum ,result.recnum, result.date_obs  
-	recnum_list.append(result.recnum)
+#sdo_data_list = media_search(DATES=[d1,d2], WAVES=['335'], CADENCE=['12s'], nb_res_max=10, server='http://medoc-sdo.ias.u-psud.fr') 
+#sdo_data_list = media_search(DATES=[d1,d2], WAVES=[335,'304'], CADENCE=['12s'], nb_res_max=10, server='http://medoc-sdo.ias.u-psud.fr') 
+#sdo_data_list = media_search(DATES=[d1,d2], WAVES=['335']) 
+#sdo_data_list=media_search(DATES=[d1,d2], WAVES=['335'], CADENCE=['12s'], nb_res_max=10) 
+#sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['12s'], nb_res_max=2 ) 
+#sdo_data_list = media_search(DATES=[d1,d2], WAVES=[335,304], CADENCE=['12s'], nb_res_max=10, server='http://idoc-solar-portal-test.ias.u-psud.fr') 
+sdo_data_list = media_search(DATES=[d1,d2], SERIES='hmi.m_720s', nb_res_max=10, server='http://idoc-solar-portal-test.ias.u-psud.fr')
+#print  "sunum, recnum, date__obs"
+print sdo_data_list
+#recnum_list=[item.recnum 
+#			 for item in sdo_data_list ]
 
 #Test media_metada_search
 print "Exemple media_metadata_search()"
-my_meta_search=media_metadata_search(KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1', 'sunum', 'recnum'], recnum_list=recnum_list)
+#my_meta_search=media_metadata_search(KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1', 'sunum', 'recnum'],SERIES='aia.lev1', recnum_list=recnum_list)
+my_meta_search=media_metadata_search(KEYWORDS=['date__obs','quality','cdelt1','cdelt2', 'sunum', 'recnum'], MEDIA_DATA_LIST=sdo_data_list)
 i=0
 for result in my_meta_search :
 	print i+1,")",result,"\n"

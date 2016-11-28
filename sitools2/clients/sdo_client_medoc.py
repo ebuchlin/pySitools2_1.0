@@ -16,6 +16,7 @@ __email__="medoc-contact@ias.u-psud.fr"
 
 
 from sitools2.core.pySitools2 import *
+from collections import Counter
 
 #sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 #sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
@@ -34,11 +35,11 @@ def media_get(MEDIA_DATA_LIST=[], TARGET_DIR=None, DOWNLOAD_TYPE=None, **kwds) :
 			MEDIA_DATA_LIST=v
 
 	if kwds.has_key('media_data_list'):
-		del kwds['media_data_list']
+		del kwds['media_data_list']#don't pass it twice
 
 	if len(MEDIA_DATA_LIST)==0 :
-		sys.stdout.write("Nothing to download\n")
-		return(-1)
+		mess_err="Nothing to download\n"
+		raise ValueError(mess_err)
 
 	if DOWNLOAD_TYPE is None :
 		for item in MEDIA_DATA_LIST:
@@ -71,8 +72,8 @@ def media_get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 		del kwds['media_data_list']
 
 	if len(MEDIA_DATA_LIST)==0 :
-		sys.stdout.write("Nothing to download\n")
-		return(-1)
+		mess_err="Nothing to download\n"
+		raise ValueError(mess_err)
 
 	media_data_sunum_list=[]
 	for item in MEDIA_DATA_LIST:
@@ -82,7 +83,7 @@ def media_get_selection(MEDIA_DATA_LIST=[], DOWNLOAD_TYPE="TAR", **kwds) :
 			sys.stdout.write("The data for recnum %s is not at IAS\n" % str(item.recnum))
 	sdo_dataset.__getSelection__(SUNUM_LIST=media_data_sunum_list, DOWNLOAD_TYPE=DOWNLOAD_TYPE, **kwds)
 
-def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','1600','1700'],SERIES=None,CADENCE=['1 min'],NB_RES_MAX=-1,**kwds):
+def media_search(SERVER=None,DATES=None,WAVES=None,SERIES=None,CADENCE=None,NB_RES_MAX=-1,**kwds):
 	"""Use the generic search() from pySitools2 library for Sitools2 SDO instance located at IAS
 	Parameters available are DATES, WAVES, CADENCE and NB_RES_MAX
 	DATES is the interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1
@@ -93,125 +94,196 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	NB_RES_MAX is the nbr of results you wish to display from the results 
 	it must be an integer and if specified must be >0
 	"""
+
 #Allow lower case entries
+	allowed_params=['dates','waves','cadence','nb_res_max','series', 'server']
 	for k,v  in kwds.iteritems():
-		if k not in ['dates','waves','cadence','nb_res_max','series']:
-			sys.stdout.write("Error in search():\n'%s' entry for the search function is not allowed" % k)
-			return(-1) 
-		elif k=='dates':
-			DATES=v
-		elif k=='waves':
-			WAVES=v
-		elif k=='cadence':
-			CADENCE=v
-		elif k=='nb_res_max':
-			NB_RES_MAX=v
-		elif k=='series':
-			SERIES=v
+		if k not in allowed_params:
+			mess_err="Error in search():\n'%s' entry for the search function is not allowed\n" % k
+			raise ValueError(mess_err) 
+		else :
+			if k=='server' :
+				SERVER=v
+			if k=='dates' :
+				DATES=v
+			if k=='waves':
+				WAVES=v
+			if k=='series' :
+				SERIES=v
+			if k=='cadence':
+				CADENCE=v
+			if k=='nb_res_max':
+				NB_RES_MAX=v
 
-	sys.stdout.write ("Loading MEDIA Sitools2 client : %s \n" % sitools2_url)
 
-#Define dataset url
-	if sitools2_url.startswith('http://medoc-sdo') :
-		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_dataset")
-	elif sitools2_url.startswith('http://idoc-solar-portal') and SERIES.startswith('hmi') :
-		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_HMI_dataset")
-	elif sitools2_url.startswith('http://idoc-solar-portal') and SERIES.startswith('aia') :
-		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_AIA_dataset")
-	elif sitools2_url.startswith('http://localhost') and SERIES.startswith('aia') :
-		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_AIA_dataset")
-	elif sitools2_url.startswith('http://localhost') and SERIES.startswith('hmi') :
-		sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_IAS_SDO_HMI_dataset")
-#	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_HMI_SDO_dataset")
-#	sdo_dataset=Sdo_IAS_SDO_dataset(sitools2_url+"/webs_hmi_dataset")
-#	print sdo_dataset
+
 
 	DATES_OPTIM=[]
 
 ######################CONTROL_START
+	waves_allowed_aia_list=['94','131','171','193','211','304','335','1600','1700']
+	waves_allowed_hmi_list=['6173']
+	CADENCE_allowed_list={'12s':'12 sec' , '1m':'1 min', '2m':'2 min', '10m':'10 min', '30m': '30 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
+	
+#SERVER
+	if SERVER is None and SERIES is None:
+		SERVER='http://medoc-sdo.ias.u-psud.fr'
+		sys.stdout.write("SERVER parameter not specified, default value is set : SERVER='http://medoc-sdo.ias.u-psud.fr'\n")
+	elif SERVER is None and SERIES.startswith('aia') :
+		SERVER='http://medoc-sdo.ias.u-psud.fr'
+		sys.stdout.write("SERVER parameter not specified, default value is set : SERVER='http://medoc-sdo.ias.u-psud.fr'\n")
+	elif  SERVER is None and SERIES.startswith('hmi') :
+		SERVER='http://idoc-solar-portal-test.ias.u-psud.fr'
+		
+#DATES
 	if DATES is None:
-		sys.stdout.write("Error in search():\nDATES entry must be specified")
-		return(-1)
+		mess_err = "Error in search():\nDATES entry must be specified"
+		raise ValueError(mess_err)
 	if type(DATES).__name__!='list' :
 			mess_err="Error in search():\nentry type for DATES is : %s\nDATES must be a list type" % type(DATES).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
+			raise TypeError(mess_err)
 	if len(DATES)!=2:
 		mess_err="Error in search() : %d elements specified for DATES\nDATES param must be specified and a list of 2 elements" %len(DATES)
-		sys.stdout.write(mess_err)
-		return(-1)
+		raise ValueError(mess_err)
 	for date in DATES :
 		if type(date).__name__!='datetime' :
 			mess_err="Error in search() : type for DATES element is %s \nDATES list element must be a datetime type" % type(date).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
+			raise TypeError(mess_err)
 		else :
 #Trick to adapt to date format on solar-portal-test (to be fixed and that trick removed):
-			if sitools2_url.startswith('http://medoc-sdo'):
+			if SERVER.startswith('http://medoc-sdo'):
 				DATES_OPTIM.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
 			else :
 				DATES_OPTIM.append(str(date.strftime("%Y-%m-%dT%H:%M:%S"))+".000")
-
 	if DATES[1]<= DATES[0]:
 		mess_err="Error in search():\nd1=%s\nd2=%s\nfor DATES =[d1,d2] d2 should be > d1" %(DATES[1].strftime("%Y-%m-%dT%H:%M:%S"),DATES[2].strftime("%Y-%m-%dT%H:%M:%S"))
-		sys.stdout.write(mess_err)
-		return(-1)
-	WAVES_allowed_list=['94','131','171','193','211','304','335','1600','1700','6173']
-	SERIES_allowed_list=['aia.lev1','hmi.sharp_720s','hmi.sharp_720s_nrt','hmi.m_720s','hmi.sharp_cea_720s_nrt','hmi.ic_720s','hmi.ic_nolimbdark_720s_nrt']
-	if type(WAVES).__name__!='list' :
-			mess_err="Error in search():\nentry type for WAVES is : %s\nWAVES must be a list type" % type(WAVES).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
+		raise ValueError(mess_err)
+
+#WAVES
+
+	if WAVES is None and SERIES is None:
+		WAVES = ['94','131','171','193','211','304','335','1600','1700']
+		sys.stdout.write("WAVES parameter not specified, default value is set : WAVES = ['94','131','171','193','211','304','335','1600','1700'] \n")
+	if WAVES is None and SERIES=='aia.lev1':
+		WAVES = ['94','131','171','193','211','304','335','1600','1700']
+		sys.stdout.write("WAVES parameter not specified, 'aia.lev1' default value is set : WAVES = ['94','131','171','193','211','304','335','1600','1700'] \n")
+	elif WAVES is None and SERIES.startswith('hmi'):
+		WAVES = [6173]
+	#print type(WAVES).__name__
+	if type(WAVES).__name__=='int' :
+		WAVES=[str(WAVES)]
+
+	elif type(WAVES).__name__=='list' :
+		waves_type_list=[type(wave).__name__ 
+							for wave in WAVES]
+#		print waves_type_list
+		counter_waves_type= Counter(waves_type_list)
+		# print counter_waves_type
+		# print "keys : ", counter_waves_type.keys()
+		# print "type : ",counter_waves_type.keys()[0]
+		if len(counter_waves_type.keys())==1 and counter_waves_type.keys()[0]=='int' :#same type
+			WAVES_STR = [str(wave) for wave in WAVES ]
+			WAVES=WAVES_STR
+		elif len(counter_waves_type.keys())>1 : 
+			raise ValueError("WAVES parameter must have same type !!!!\n")
+	else  :
+		mess_err = "Error in search():\nentry type for WAVES is : %s\nWAVES must be a list or int type " % type(WAVES).__name__
+		raise TypeError(mess_err)
+
 	for wave in WAVES :
 		if type(wave).__name__!='str' :
-			mess_err="Error in search():\nEntry type for WAVES element is %s\nlist element for WAVES must be a string type" % type(wave).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
-		if wave not in WAVES_allowed_list:
-			mess_err="Error in search():\nWAVES= %s not allowed\nWAVES must be in list %s" % (WAVES,WAVES_allowed_list)
-			sys.stdout.write(mess_err)
-			return(-1)
-	CADENCE_allowed_list={'12s':'12 sec' , '1m':'1 min', '2m':'2 min', '10m':'10 min', '30m': '30 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
-	if type(CADENCE).__name__!='list' :
-			mess_err="Error in search():\nentry type for CADENCE is : %s\nCADENCE must be a list type" % type(CADENCE).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
-	if len(CADENCE)!=1 :
-		mess_err="Error in search():\n%d elements specified for CADENCE\nCADENCE param must be specified and a list of only one element" % len(DATES)
-		sys.stdout.write(mess_err)
-		return(-1)
-	if SERIES is None:
-		raise("Error in media_metadata_search():\nSERIES entry must be specified")
+			mess_err = "Error in search():\nEntry type for WAVES element is %s\nlist element for WAVES must be a string type" % type(wave).__name__
+			raise TypeError(mess_err)
+
+		if wave not in waves_allowed_aia_list and wave not in waves_allowed_hmi_list : 
+			mess_err = "Error in search():\nWAVES= %s not allowed\nWAVES must be in list %s" % (WAVES,waves_allowed_aia_list+waves_allowed_hmi_list)
+			raise ValueError(mess_err)
+
+	
+			
+#SERIES
+	SERIES_allowed_list = ['aia.lev1','hmi.sharp_720s','hmi.sharp_720s_nrt','hmi.m_720s','hmi.sharp_cea_720s_nrt','hmi.ic_720s','hmi.ic_nolimbdark_720s_nrt']
+	if SERIES is None and '6173' not in WAVES:
+		SERIES='aia.lev1'
+		sys.stdout.write("SERIES parameter not specified, default value is set : SERIES='aia.lev1'\n")
+	elif SERIES is None and '6173' in WAVES :
+		mess_err="SERIES parameter must be specified"
+		raise ValueError()
 	if type(SERIES).__name__!='str' :
-			mess_err="Error in search():\nentry type for SERIES is : %s\nSERIES must be a str type" % type(SERIES).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
+		mess_err="Error in search():\nentry type for SERIES is : %s\nSERIES must be a str type" % type(SERIES).__name__
+		raise TypeError(mess_err)
 	if SERIES not in SERIES_allowed_list  :
-			mess_err="Error in search():\nSERIES= %s not allowed\nSERIES must be in list %s" % (SERIES,SERIES_allowed_list)
-			sys.stdout.write(mess_err)
-			return(-1)
+		mess_err="Error in search():\nSERIES= %s not allowed\nSERIES must be in list %s" % (SERIES,SERIES_allowed_list)
+		raise ValueError(mess_err)
 	if SERIES.startswith('hmi'):
-			WAVES=['6173']
-	if SERIES.startswith('hmi'):
+		if WAVES != ['6173'] :
+			raise ValueError("WAVES value %s does not correspond to the SERIES specified : %s " % (",".join(WAVES), SERIES))
 		CADENCE_allowed_list={'12m':'12 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
+		if CADENCE is None :
+			CADENCE=['12m']
+			sys.stdout.write("cadence not specified, default value for %s is set : cadence=['12m']\n" % SERIES)
+
+#CADENCE
+	if CADENCE is None and SERIES.startswith('aia.lev1'):
+		CADENCE=['1m']
+		sys.stdout.write("CADENCE parameter not specified, default value for aia.lev1 is set : CADENCE=[1m]\n")
+	elif CADENCE is None and SERIES.startswith('hmi'):
+		CADENCE=['12m']
+		sys.stdout.write("CADENCE parameter not specified, default value for %s is set : CADENCE=[1m]\n" %SERIES)
+	if type(CADENCE).__name__=='str' :
+		CADENCE=[CADENCE]
+	if type(CADENCE).__name__!='list' :
+		mess_err="Entry type for CADENCE is : %s\nCADENCE must be a list or a string type" % type(CADENCE).__name__
+		raise ValueError(mess_err)
+	if len(CADENCE)!=1 :
+		mess_err="Error in search():\n%d elements specified for CADENCE\nCADENCE param must be specified and a list of only one element" % len(CADENCE)
+		raise ValueError(mess_err)
+
 	for cadence in CADENCE:
 		if (cadence not in CADENCE_allowed_list.keys()) and (cadence not in CADENCE_allowed_list.values()) :
-			mess_err="Error in search():\nCADENCE= %s not allowed\nCADENCE must be in list %s" % (CADENCE,CADENCE_allowed_list)
-			sys.stdout.write(mess_err)
-			return(-1)
+			mess_err="Error in search():\nCADENCE= %s not allowed\nCADENCE for %s must be in list :\n%s\n" % (CADENCE,SERIES,CADENCE_allowed_list)
+			raise ValueError(mess_err)
 		elif cadence in CADENCE_allowed_list.values():
 			CADENCE=[cadence]
 		else :
 			CADENCE=[CADENCE_allowed_list[cadence]]
+	
+#NB_RES_MAX	
 	if type(NB_RES_MAX).__name__!='int' :
 			mess_err="Error in search():\nentry type for NB_RES_MAX is : %s\nNB_RES_MAX must be a int type" % type(NB_RES_MAX).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
+			raise TypeError(mess_err)
 	if NB_RES_MAX!=-1 and  NB_RES_MAX<0 :
 		mess_err="Error in search():\nNB_RES_MAX= %s not allowed\nNB_RES_MAX must be >0" % NB_RES_MAX
-		sys.stdout.write(mess_err)
-		return(-1)
+		raise ValueError(mess_err)
 #######################CONTROL_END 
+
+
+
+
+#Server definition
+#Define dataset url
+	if SERVER.startswith('http://medoc-sdo') :
+		sdo_dataset = Sdo_IAS_SDO_dataset(SERVER+"/webs_IAS_SDO_dataset")
+	elif SERVER.startswith('http://idoc-solar-portal') and SERIES.startswith('hmi') :
+		sdo_dataset=Sdo_IAS_SDO_dataset(SERVER+"/webs_IAS_SDO_HMI_dataset")
+	elif SERVER.startswith('http://idoc-solar-portal') and SERIES.startswith('aia') :
+		sdo_dataset=Sdo_IAS_SDO_dataset(SERVER+"/webs_IAS_SDO_AIA_dataset")
+	elif SERVER.startswith('http://localhost') and SERIES.startswith('aia') :
+		sdo_dataset=Sdo_IAS_SDO_dataset(SERVER+"/webs_IAS_SDO_AIA_dataset")
+	elif SERVER.startswith('http://localhost') and SERIES.startswith('hmi') :
+		sdo_dataset=Sdo_IAS_SDO_dataset(SERVER+"/webs_IAS_SDO_HMI_dataset")
+	else :
+		sdo_dataset=Sdo_IAS_SDO_dataset(SERVER+"/webs_IAS_SDO_dataset")
+		sys.stdout.write("sdo_data_set not detected corretly default value "
+						"is set : sdo_dataset=Sdo_IAS_SDO_dataset(SERVER+\"/webs_IAS_SDO_HMI_dataset\")")
+
+#	sdo_dataset=Sdo_IAS_SDO_dataset(SERVER+"/webs_IAS_SDO_HMI_dataset")
+#	sdo_dataset=Sdo_IAS_SDO_dataset(SERVER+"/webs_hmi_dataset")
+#	print sdo_dataset
+	sys.stdout.write ("Loading MEDIA Sitools2 client : %s \n" % SERVER)
+
+
+
 
 #Param
 	dates_param=[[sdo_dataset.fields_dict['date__obs']],DATES_OPTIM,'DATE_BETWEEN']
@@ -219,19 +291,25 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	serie_param=[[sdo_dataset.fields_dict['series_name']],[SERIES],'IN']
 	cadence_param=[[sdo_dataset.fields_dict['mask_cadence']],CADENCE,'CADENCE']
 
-#Old Param definition
-#	dates_param=[[sdo_dataset.fields_list[4]],DATES_OPTIM,'DATE_BETWEEN']
-#	wave_param=[[sdo_dataset.fields_list[5]],WAVES,'IN']
-#	serie_param=[[sdo_dataset.fields_list[3]],[SERIES],'IN']
-#	cadence_param=[[sdo_dataset.fields_list[10]],CADENCE,'CADENCE']
-
 #OUTPUT get,recnum,sunum,series_name,date__obs,wave,ias_location,exptime,t_rec_index,ias_path
 	if SERIES=='aia.lev1':
-		output_options=output_options=[sdo_dataset.fields_dict['get'], sdo_dataset.fields_dict['recnum'],sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],sdo_dataset.fields_dict['ias_location'],sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'], sdo_dataset.fields_dict['ias_path'] ]
+		output_options=[sdo_dataset.fields_dict['get'], sdo_dataset.fields_dict['recnum'],\
+						sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],sdo_dataset.fields_dict['date__obs'],\
+						sdo_dataset.fields_dict['wavelnth'],sdo_dataset.fields_dict['ias_location'],sdo_dataset.fields_dict['exptime'],\
+						sdo_dataset.fields_dict['t_rec_index'],sdo_dataset.fields_dict['ias_path'] ]
 	elif SERIES.startswith('hmi.sharp'):
-		output_options=[sdo_dataset.fields_dict['recnum'],sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],sdo_dataset.fields_dict['ias_location'],sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'], sdo_dataset.fields_dict['ias_path'], sdo_dataset.fields_dict['harpnum'] ]
+		output_options=[sdo_dataset.fields_dict['recnum'],sdo_dataset.fields_dict['sunum'],\
+						sdo_dataset.fields_dict['series_name'],sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],\
+						sdo_dataset.fields_dict['ias_location'],sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'],\
+						sdo_dataset.fields_dict['ias_path'], sdo_dataset.fields_dict['harpnum'] ]
 	elif SERIES.startswith('hmi'):
-		output_options=[sdo_dataset.fields_dict['recnum'],sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],sdo_dataset.fields_dict['ias_location'],sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'], sdo_dataset.fields_dict['ias_path'] ]
+		output_options=[sdo_dataset.fields_dict['recnum'],sdo_dataset.fields_dict['sunum'],	sdo_dataset.fields_dict['series_name'],\
+						sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],sdo_dataset.fields_dict['ias_location'],\
+						sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'], sdo_dataset.fields_dict['ias_path'] ]
+
+#	output_options=[sdo_dataset.fields_dict['recnum'],sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],\
+#					sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],sdo_dataset.fields_dict['ias_location'],\
+#					sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'], sdo_dataset.fields_dict['ias_path'] ]
 
 #Sort date_obs ASC, wave ASC
 	sort_options=[[sdo_dataset.fields_dict['date__obs'],'ASC'],[sdo_dataset.fields_dict['wavelnth'],'ASC']]
@@ -246,6 +324,7 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 
 
 	query_list=[Q1,Q2,Q3,Q4]
+#	query_list=[Q1]
 
 	result=sdo_dataset.search(query_list,output_options,sort_options,limit_to_nb_res_max=NB_RES_MAX)
 	sdo_data_list=[]
@@ -256,90 +335,102 @@ def media_search(DATES=None,WAVES=['94','131','171','193','211','304','335','160
 	return sdo_data_list
 
 
-def media_metadata_search(KEYWORDS=[], RECNUM_LIST=[],SERIES=None, **kwds):
-		"""Use search() results (the field recnum) in order to provide metadata information from the dataset webs_aia_dataset
-		KEYWORDS is the list of names of metadata that you wish to have in the output THAT MUST BE SPECIFIED 
-		RECNUM_LIST list of recnum result of media data search
-		"""
+def media_metadata_search(MEDIA_DATA_LIST=[],KEYWORDS=[], RECNUM_LIST=[],SERIES=None, **kwds):
+	"""Use search() results (the field recnum) in order to provide metadata information from the dataset webs_aia_dataset
+	KEYWORDS is the list of names of metadata that you wish to have in the output THAT MUST BE SPECIFIED 
+	RECNUM_LIST list of recnum result of media data search
+	"""
 
 #		sys.stdout.write("Keywords list is : %s \n" % KEYWORDS)
 #		sys.stdout.write("Recnum list is : %s \n" % RECNUM_LIST)
 #		sys.stdout.write("Serie is : %s \n" % SERIES)
 
-		#Allow lower case entries
-		for k,v  in kwds.iteritems():
-			if k not in ['keywords','recnum_list','series','segment']:
-				sys.stdout.write("Error media_metatada_search():\n'%s' entry for the search function is not allowed" % k) 
-			elif k=='keywords':
-				KEYWORDS=v
-			elif k=='recnum_list':
-				RECNUM_LIST=v
-			elif k=='series' :
-				SERIES=v
-			elif k=='segment' :
-				SEGMENT=v
+	#Allow lower case entries
+	for k,v  in kwds.iteritems():
+		if k not in ['keywords','recnum_list','series','segment']:
+			sys.stdout.write("Error media_metatada_search():\n'%s' entry for the search function is not allowed\n" % k) 
+		elif k=='keywords':
+			KEYWORDS=v
+		elif k=='recnum_list':
+			RECNUM_LIST=v
+		elif k=='series' :
+			SERIES=v
+		elif k=='segment' :
+			SEGMENT=v
+		if k=='media_data_list':
+			MEDIA_DATA_LIST=v
 
 
 #Controls 
-		if len(KEYWORDS)==0 :
-			sys.stdout.write("Error media_metadata_search():\nkeywords must be specified")
-			return(-1)
-		if type(KEYWORDS).__name__!='list' :
-			mess_err="Error in media_metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
-		if len(RECNUM_LIST)==0 :
-			mess_err="Error in media_metadata_search():\nNo recnum_list provided\nPlease check your request" 
-			sys.stdout.write(mess_err)
-			return(-1)
+	if len(KEYWORDS)==0 :
+		raise ValueError("KEYWORD must be specified")
+	if type(KEYWORDS).__name__!='list' :
+		mess_err="Error in media_metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
+		raise TypeError(mess_err)
 
-		if SERIES is None:
-			raise ValueError("Error in media_metadata_search():\nSERIES entry must be specified")
+	if len(MEDIA_DATA_LIST)!=0 :
+		series_list= [item.series_name 
+						for item in MEDIA_DATA_LIST]
+		count_series_list=Counter(series_list)
+		#print count_series_list
+		#print count_series_list.keys()
+		if len(count_series_list.keys()) > 1 :
+			print "Several series_name detected in MEDIA_DATA_LIST\n"
+			result=[item.metadata_search(KEYWORDS) for item in MEDIA_DATA_LIST]	
+			return result
+		else :	
+			RECNUM_LIST=[item.recnum for item in MEDIA_DATA_LIST]
+			SERIES=MEDIA_DATA_LIST[0].series_name
+
+	if len(RECNUM_LIST)==0 :
+		mess_err="Error in media_metadata_search():\nNo recnum_list provided\nPlease check your request\n" 
+		raise ValueError(mess_err)
+
+	if SERIES is None and len(MEDIA_DATA_LIST)==0:
+		raise ValueError("Error in media_metadata_search():\nSERIES parameter must be specified\n")
 
 #Define dataset target 
-		if sitools2_url.startswith('http://medoc-sdo') :
-			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_aia_dataset")
+	if sitools2_url.startswith('http://medoc-sdo') :
+		metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_aia_dataset")
 
-		elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIES=='aia.lev1' :
-			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+"aia_dataset")
-		
-		elif sitools2_url=='http://idoc-solar-portal-test.ias.u-psud.fr' and SERIES.startswith('hmi') :
-			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+SERIES+"_dataset")
-#coquille
-#			metadata_ds=Sdo_aia_dataset(sitools2_url+"/"+SERIES+"")
+	elif sitools2_url.startswith('http://idoc-solar-portal') and SERIES=='aia.lev1' :
+		metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+"aia_dataset")
+	
+	elif sitools2_url.startswith('http://idoc-solar-portal') and SERIES.startswith('hmi') :
+		metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+SERIES+"_dataset")
 
-		sys.stdout.write("Dataset is : %s uri : %s \n" % (metadata_ds.name,metadata_ds.uri))
 
-		O1_aia=[]
-		for key in KEYWORDS :
-			if metadata_ds.fields_dict.has_key(key):
-				O1_aia.append(metadata_ds.fields_dict[key])
-			else :
-				sys.stdout.write("Error metadata_search(): %s keyword does not exist" % key)
-				return(-1)
-		S1_aia=[[metadata_ds.fields_dict['date__obs'],'ASC']]#sort by date_obs ascendant
 
-		#initialize recnumlist				
-		recnumlist=[]
-		result=[]
-		i=0
-# Make a request for each 500 recnum
-		if len(RECNUM_LIST)>500 :
-			while i< len(RECNUM_LIST) :
-#				print i
-				recnumlist=RECNUM_LIST[i:i+499]
-				recnumlist=map(str,recnumlist)
-				param_query_aia=[[metadata_ds.fields_dict['recnum']],recnumlist,'IN']
-				Q_aia=Query(param_query_aia)
-				result+=metadata_ds.search([Q_aia],O1_aia,S1_aia)
-				i=i+499
-#				print "taille result : ",len(result)
+	O1_aia=[]
+	for key in KEYWORDS :
+		if metadata_ds.fields_dict.has_key(key):
+			O1_aia.append(metadata_ds.fields_dict[key])
 		else :
-			recnumlist=map(str,RECNUM_LIST)
+			mess_err="Error metadata_search(): %s keyword does not exist for series : %s \n" % (key, SERIES)
+			raise ValueError(mess_err)
+	S1_aia=[[metadata_ds.fields_dict['date__obs'],'ASC']]#sort by date_obs ascendant
+
+	#initialize recnumlist				
+	recnumlist=[]
+	result=[]
+	i=0
+# Make a request for each 500 recnum
+	if len(RECNUM_LIST)>500 :
+		while i< len(RECNUM_LIST) :
+#				print i
+			recnumlist=RECNUM_LIST[i:i+499]
+			recnumlist=map(str,recnumlist)
 			param_query_aia=[[metadata_ds.fields_dict['recnum']],recnumlist,'IN']
 			Q_aia=Query(param_query_aia)
 			result+=metadata_ds.search([Q_aia],O1_aia,S1_aia)
-		return result
+			i=i+499
+#				print "taille result : ",len(result)
+	else :
+		recnumlist=map(str,RECNUM_LIST)
+		param_query_aia=[[metadata_ds.fields_dict['recnum']],recnumlist,'IN']
+		Q_aia=Query(param_query_aia)
+		result+=metadata_ds.search([Q_aia],O1_aia,S1_aia)
+	return result
 
 
 
@@ -367,6 +458,12 @@ def singleton(class_def):
 #This following classes will only have one instance 
 @singleton
 class Sdo_aia_dataset(Dataset):
+	"""Definition de la classe Sdo_aia_dataset that heritates of Dataset"""
+
+	def __init__(self,url):
+		Dataset.__init__(self,url)
+
+class Sdo_dataset(Dataset):
 	"""Definition de la classe Sdo_aia_dataset that heritates of Dataset"""
 
 	def __init__(self,url):
@@ -499,8 +596,8 @@ class Sdo_data():
 #Allow lower case entries
 		for k,v  in kwds.iteritems():
 			if k not in ['decompress','filename','target_dir','quiet', 'segment']:
-				sys.stdout.write("Error get_file():\n'%s' entry for the search function is not allowed" % k) 
-				return(-1)
+				mess_err="Error get_file():\n'%s' parameter for the search function is not allowed \n" % k 
+				raise ValueError(mess_err)
 			elif k=='decompress':
 				DECOMPRESS=v
 			elif k=='filename':
@@ -512,7 +609,6 @@ class Sdo_data():
 			elif k=='segment' :
 				SEGMENT=v
 
-		list_files=[]
 		filename_pre=""
 
 #Define filename if not provided 
@@ -531,19 +627,19 @@ class Sdo_data():
 
 #Define SEGMENT if it does not exist 
 		if SEGMENT is None and FILENAME is None and self.series_name=='aia.lev1' :
-			list_files=['image_lev1']
+			SEGMENT=['image_lev1']
 		elif SEGMENT is None and FILENAME is None and (self.series_name).startswith('hmi.sharp') :
-			list_files=['bitmap','Bp_err','Bp','Br_err','Br','Bt_err','Bt','conf_disambig','continuum', 'Dopplergram', 'magnetogram']
+			SEGMENT=['bitmap','Bp_err','Bp','Br_err','Br','Bt_err','Bt','conf_disambig','continuum', 'Dopplergram', 'magnetogram']
 		elif SEGMENT is None and FILENAME is None and (self.series_name).startswith('hmi.ic') :
-			list_files=['continuum']
+			SEGMENT=['continuum']
 		elif SEGMENT is None and FILENAME is None and (self.series_name).startswith('hmi.m') :
-			list_files=['magnetogram']
-		elif SEGMENT is not None and FILENAME is None :
-			list_files=SEGMENT
+			SEGMENT=['magnetogram']
 		elif FILENAME is not None :
-			list_files=[FILENAME]
+			SEGMENT=[FILENAME]
+
 
 		SEGMENT_allowed=['image_lev1','bitmap','Bp_err','Bp','Br_err','Br','Bt_err','Bt','conf_disambig','continuum', 'Dopplergram', 'magnetogram']
+
 		for seg in SEGMENT :
 			if seg not in SEGMENT_allowed :
 				raise ValueError("%s SEGMENT value not allowed\nSegment allowed :%s" % (seg,SEGMENT_allowed))
@@ -558,15 +654,15 @@ class Sdo_data():
 			elif TARGET_DIR[-1]=='/':
 				filename_pre=TARGET_DIR+filename_pre
 			else :
-				sys.stdout.write("Error get_file():\nCheck the param TARGET_DIR, special char %s at the end of TARGET_DIR is not allowed." % TARGET_DIR[-1])
-				return(-1)
+				mess_err="Error get_file():\nCheck the param TARGET_DIR, special char %s at the end of TARGET_DIR is not allowed.\n" % TARGET_DIR[-1]
+				raise ValueError(mess_err)
 
 #Specification for aia.lev1 and COMPRESS param 
 		if not DECOMPRESS and self.series_name=='aia.lev1':
 			self.url=self.url+";compress=rice"
 		
 #Define filename_path and file_url
-		for file_suff in list_files :
+		for file_suff in SEGMENT :
 			if FILENAME is None :
 				filename_path=filename_pre+file_suff+'.fits'
 			else :
@@ -597,45 +693,52 @@ class Sdo_data():
 				if not QUIET :
 					print "Download file %s completed" % filename_path
 
-	def metadata_search(self, KEYWORDS=[], **kwds):
+	def metadata_search(self, SERVER=None , KEYWORDS=[], **kwds):
 		"""Use search() results (the field recnum) in order to provide metadata information from the dataset webs_aia_dataset
+		SERVER is the name of the server targetted can be http://medoc-sdo.ias.u-psud.fr or http://idoc-medoc.ias.u-psud.fr
 		KEYWORDS is the list of names of metadata that you wish to have in the output THAT MUST BE SPECIFIED 
-		RECNUM_LIST by designed values self.recnum 
 		"""
 #Allow lower case entries
 		for k,v  in kwds.iteritems():
-			if k not in ['keywords','recnum_list']:
-				sys.stdout.write("Error get_file():\n'%s' entry for the search function is not allowed" % k) 
-				return(-1)
+			if k not in ['server','keywords']:
+				raise ValueError("Error get_file():\n'%s' entry for the search function is not allowed" % k) 
 			elif k=='keywords':
-				KEYWORDS=v
-			elif k=='recnum_list':
-				RECNUM_LIST=v
-
+				KEYWORDS = v
+			elif k=='server':
+				SERVER = v
+		if SERVER is None :
+			SERVER =self.url.split('ias.u-psud.fr')[-1]+"ias.u-psud.fr"
+			print SERVER
 		if len(KEYWORDS)==0 :
-			sys.stdout.write("Error metadata_search():\nkeywords must be specified")
-			return(-1)
+			raise ValueError("KEYWORDS must be specified")
 		if type(KEYWORDS).__name__!='list' :
 			mess_err="Error in metadata_search():\nentry type for KEYWORDS is : %s\nKEYWORDS must be a list type" % type(KEYWORDS).__name__
-			sys.stdout.write(mess_err)
-			return(-1)
-		if sitools2_url.startswith('http://medoc-sdo') :
+			raise TypeError(mess_err)
+		if SERVER.startswith('http://medoc-sdo') :
 			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_aia_dataset")
-		elif sitools2_url.startswith('http://idoc-solar-portal') :
-			metadata_ds=Sdo_aia_dataset(sitools2_url+"/webs_"+self.series_name+"dataset")
+		elif SERVER.startswith('http://idoc-solar-portal') :
+			metadata_ds=Sdo_dataset(sitools2_url+"/webs_"+self.series_name+"_dataset")
+		else :
+			raise ValueError("metadata_ds is not valued please check your SERVER param\n")
 
+#		print "Dataset targetted :" ,metadata_ds.name ,metadata_ds.uri
+#		print "Query is for %s recnum %s " % (self.series_name, self.recnum) 
+		#controls 
 		RECNUM_LIST=[str(self.recnum)]
-		param_query_aia=[[metadata_ds.fields_dict['recnum']],RECNUM_LIST,'IN']
-		Q_aia=Query(param_query_aia)
-		O1_aia=[]
+		param_query=[[metadata_ds.fields_dict['recnum']],RECNUM_LIST,'IN']
+		Q1=Query(param_query)
+		O1=[]
 		for key in KEYWORDS :
 			if metadata_ds.fields_dict.has_key(key):
-				O1_aia.append(metadata_ds.fields_dict[key])
+				O1.append(metadata_ds.fields_dict[key])
 			else :
-				sys.stdout.write("Error metadata_search(): %s keyword does not exist" % key)
-		S1_aia=[[metadata_ds.fields_dict['date__obs'],'ASC']]#sort by date_obs ascendant
-		return metadata_ds.search([Q_aia],O1_aia,S1_aia)[0]
-
+				raise ValueError("Error metadata_search(): %s keyword does not exist for %s " % (key,metadata_ds.name) )
+		S1=[[metadata_ds.fields_dict['date__obs'],'ASC']]#sort by date_obs ascendant
+		print metadata_ds.search([Q1],O1,S1)
+		if len (metadata_ds.search([Q1],O1,S1)) !=0 :
+			return metadata_ds.search([Q1],O1,S1)[0]
+		else :
+			raise ValueError("No data found for your request\nCheck your parameters")
 
 def main():
 	d1=datetime(2016,6,10,0,0,0)
