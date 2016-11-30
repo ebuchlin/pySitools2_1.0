@@ -16,7 +16,7 @@ d2 = datetime(2016,06,01,10,12,0)
 #sdo_data_list=media_search(DATES=[d1,d2], WAVES=['335'], CADENCE=['12s'], nb_res_max=10) 
 #sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['12s'], nb_res_max=2 ) 
 #sdo_data_list = media_search(DATES=[d1,d2], WAVES=[335,304], CADENCE=['12s'], nb_res_max=10, server='http://idoc-solar-portal-test.ias.u-psud.fr') 
-sdo_data_list = media_search(DATES=[d1,d2], SERIES='hmi.m_720s', nb_res_max=10, server='http://idoc-solar-portal-test.ias.u-psud.fr')
+sdo_data_list = media_search(DATES=[d1,d2], SERIES='hmi.m_720s', nb_res_max=10)
 #print  "sunum, recnum, date__obs"
 print sdo_data_list
 #recnum_list=[item.recnum 
