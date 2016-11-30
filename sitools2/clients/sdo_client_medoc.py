@@ -218,6 +218,8 @@ def media_search(SERVER=None,DATES=None,WAVES=None,SERIES=None,CADENCE=None,NB_R
 	if SERIES.startswith('hmi'):
 		if WAVES != ['6173'] :
 			raise ValueError("WAVES value %s does not correspond to the SERIES specified : %s " % (",".join(WAVES), SERIES))
+		if SERVER.startswith('http://medoc-sdo'):
+			raise ValueError("SERVER %s only for aia.lev1 data\n" % SERVER)
 		CADENCE_allowed_list={'12m':'12 min', '1h' :'1 h', '2h':'2 h', '6h': '6 h', '12h':'12 h' , '1d': '1 day'}
 		if CADENCE is None :
 			CADENCE=['12m']
