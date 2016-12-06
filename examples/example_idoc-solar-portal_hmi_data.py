@@ -7,15 +7,12 @@
 from  sitools2.clients.sdo_client_medoc import *
 
 d1 = datetime(2016,01,01,0,0,0)
-d2 = d1 + timedelta(minutes=120)
+d2 = datetime(2016,06,01,0,0,0)
 
-sdo_hmi_data_list = media_search( DATES=[d1,d2], SERIES='hmi.sharp_cea_720s_nrt', CADENCE=['1 h'], nb_res_max=10 ) 
+sdo_hmi_data_list = media_search( DATES=[d1,d2], SERIES='hmi.sharp_cea_720s_nrt', CADENCE=['1d'], nb_res_max=100 ) 
 
-
-recnum_list = []
-for item in sdo_hmi_data_list :
-	print item
-	recnum_list.append(str(item.recnum))
+#build a recnum list
+recnum_list=[item.recnum for item in sdo_hmi_data_list]
 
 #Metadata info 
 print recnum_list
