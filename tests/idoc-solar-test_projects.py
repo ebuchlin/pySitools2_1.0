@@ -28,9 +28,9 @@ class TestSitools2Core(unittest.TestCase):
         pass
     
     def testNbProjects(self):
-        sitools2 = Sitools2Instance('http://idoc-solar-test.ias.u-psud.fr')
+        sitools2 = Sitools2Instance('http://idoc-solar-portal-test.ias.u-psud.fr')
         projects = sitools2.list_project()
-	print projects
+        print(projects)
         self.assertEqual( len(projects), 2)           
     
 
