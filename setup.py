@@ -19,7 +19,7 @@ try :
 	from setuptools import setup,find_packages
 except :
 	messageError = "Import failed, module 'setuptools' is required.\nTo install it on Ubuntu linux distribution type in terminal:\n'sudo apt-get install python-setuptools'"
-	print messageError
+	print (messageError)
 
 else :
 	setup (
