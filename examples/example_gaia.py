@@ -10,7 +10,7 @@ d2 = d1 + timedelta(days=1)
 
 gaia_data_list = gaia_search( DATES=[d1,d2], nb_res_max=10)  
 for item in gaia_data_list :
-	print item
+	print (item)
 
 #the fastest way to retrieve data
 #gaia_get(GAIA_LIST=gaia_data_list, TARGET_DIR="results")
