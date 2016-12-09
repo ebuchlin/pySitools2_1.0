@@ -6,13 +6,13 @@
 
 from  sitools2.clients.sdo_client_medoc import *
 
-d1 = datetime(2016,01,01,0,0,0)
-d2 = datetime(2016,01,01,5,12,0)
+d1 = datetime(2016,1,1,0,0,0)
+d2 = datetime(2016,1,1,5,12,0)
 #d2 = d1 + timedelta(minutes=5)
 
 sdo_hmi_data_list=media_search(DATES=[d1,d2],series='hmi.sharp_cea_720s_nrt',cadence=['1h'],nb_res_max=10) 
 for data in sdo_hmi_data_list :
-	print data
+	print (data)
 
 ##sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['12 s'], nb_res_max=2 ) 
 #recnum_list=[]
