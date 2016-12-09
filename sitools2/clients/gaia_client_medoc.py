@@ -59,7 +59,7 @@ def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 		elif k=='nb_res_max':
 			NB_RES_MAX=v
 
-	print "Loading GAIA-DEM Sitools2 client : ",sitools2_url
+	sys.stdout.write("Loading GAIA-DEM Sitools2 client : ",sitools2_url)
 	if sitools2_url.startswith('http://medoc-dem') :
 		gaia_dataset=Sdo_IAS_gaia_dataset(sitools2_url+"/ws_SDO_DEM")
 	elif sitools2_url.startswith('http://idoc-solar-portal') :
@@ -109,7 +109,7 @@ def gaia_search(DATES=None,NB_RES_MAX=-1,**kwds):
 	if len(result) !=0 :
 		for data in result :
 			gaia_data_list.append(Gaia_data(data))
-	print "%s results returned" % len(gaia_data_list)
+	sys.stdout.write( "%s results returned" % len(gaia_data_list))
 	return gaia_data_list
 
 #Define decorator
@@ -169,15 +169,15 @@ class Sdo_IAS_gaia_dataset(Dataset):
 		else :
 			plugin_id=""
 		if not QUIET :
-			print "Download %s file in progress ..." % DOWNLOAD_TYPE.lower()		
+			sys.stdout.write( "Download %s file in progress ..." % DOWNLOAD_TYPE.lower())		
 	#	Dataset.execute_plugin(self,plugin_name=plugin_id, pkey_list=SUNUM_LIST, FILENAME=FILENAME)
 		try :
 			Dataset.execute_plugin(self,plugin_name=plugin_id, pkey_list=SUNUM_LIST, FILENAME=FILENAME)
 		except :
-			print "Error downloading selection %s " % FILENAME
+			sys.stdout.write( "Error downloading selection %s " % FILENAME)
 		else :
 			if not QUIET :
-				print "Download selection %s completed" % FILENAME
+				sys.stdout.write("Download selection %s completed" % FILENAME)
 
 
 		
@@ -206,10 +206,10 @@ class Gaia_data():
 		self.chi2_fits_rice_uri=data['chi2_fits_rice']
 
 	def display(self):
-		print self.__repr__()
+		print (self.__repr__())
 
-        def __repr__(self):
-            return ("sunum_193 : %d, date_obs : %s, download : %s, filename : %s,\ntemp_fits_rice : %s,\nem_fits_rice : %s,\nwidth_fits_rice : %s,\nchi2_fits_rice : %s\n" %(self.sunum_193,self.date_obs,self.download,self.filename,self.temp_fits_rice_uri,self.em_fits_rice_uri,self.width_fits_rice_uri,self.chi2_fits_rice_uri))
+	def __repr__(self):
+        	return ("sunum_193 : %d, date_obs : %s, download : %s, filename : %s,\ntemp_fits_rice : %s,\nem_fits_rice : %s,\nwidth_fits_rice : %s,\nchi2_fits_rice : %s\n" %(self.sunum_193,self.date_obs,self.download,self.filename,self.temp_fits_rice_uri,self.em_fits_rice_uri,self.width_fits_rice_uri,self.chi2_fits_rice_uri))
 
 	def get_file(self, FILENAME=None, TARGET_DIR=None, QUIET=False, TYPE=None, **kwds ):
 		"""This method is used to retrieve the data on the client side 
@@ -270,11 +270,11 @@ class Gaia_data():
 				if k not in url_dict.keys(): 
 					sys.exit("Error get_file():\nTYPE = %s entry for the get function is not allowed\n \
 					TYPE value should be in list 'temp','em','width','chi2'\n" % k)
- 				else : 
+				else :
 					key=FILENAME[k]
 					value=sitools2_url+url_dict[k]
 					filename_dict[key]=value
-				
+
 		if TARGET_DIR is not None:
 			if not os.path.isdir(TARGET_DIR) :
 				sys.stdout.write("Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..." % TARGET_DIR)
@@ -289,10 +289,10 @@ class Gaia_data():
 			try :	
 				urllib.urlretrieve(url, "%s%s" % (TARGET_DIR,item))
 			except :
-				print "Error downloading %s%s " % (TARGET_DIR,item)
+				sys.stdout.write("Error downloading %s%s " % (TARGET_DIR,item))
 			else :
 				if not QUIET :
-					print "Download file %s%s completed" % (TARGET_DIR,item)
+					sys.stdout.write("Download file %s%s completed" % (TARGET_DIR,item))
 
 def main():
 	d1=datetime(2012,8,10,0,0,0)
