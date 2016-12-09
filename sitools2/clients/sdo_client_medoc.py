@@ -462,7 +462,7 @@ def media_metadata_search(server=None, media_data_list=[],keywords=[], recnum_li
     #Allow lower case entries
     for k,v  in kwds.iteritems():
         if k not in ['KEYWORDS','RECNUM_LIST','SERIES','SEGMENT','SERVER','MEDIA_DATA_LIST']:
-           raise ValueError("Error media_metatada_search():\n'%s' entry for the search function is not allowed\n" % k) 
+           raise ValueError("Error media_metatada_search():\n'%s' parameter for media_search() function is not allowed\n" % k) 
         if k=='KEYWORDS':
             keywords=v
         if k=='RECNUM_LIST':
