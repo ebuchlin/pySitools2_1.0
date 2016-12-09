@@ -26,7 +26,7 @@ class TestMedia(unittest.TestCase):
     
     def setUp(self):
         pass
-    
+
     def testSearchMedia(self):
         d1 = datetime(2012,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
@@ -37,7 +37,7 @@ class TestMedia(unittest.TestCase):
         d1 = datetime(2012,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
         sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['10 min'], nb_res_max=2 )
-	media_get(MEDIA_DATA_LIST=sdo_data_list )
+        media_get(MEDIA_DATA_LIST=sdo_data_list )
 
 if __name__ == "__main__":
     unittest.main()
