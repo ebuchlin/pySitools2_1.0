@@ -17,11 +17,11 @@ def main():
 #       sitools_url='http://medoc-dem.ias.u-psud.fr'
 #       sitools_url='http://idoc-herschel.ias.u-psud.fr'
 #       sitools_url='http://idoc-corotn2-public-v2.ias.u-psud.fr'
-	sitools_url='http://idoc-solar-portal-test.ias.u-psud.fr'
-#	sitools_url='http://localhost:8184'
+        sitools_url='http://idoc-solar-portal-test.ias.u-psud.fr'
+#       sitools_url='http://localhost:8184'
 
 
-        print "Loading SitoolsClient for",sitools_url
+        print("Loading SitoolsClient for",sitools_url)
         SItools1=Sitools2Instance(sitools_url)
         prj_list=SItools1.list_project()
 #       print "Nombre de projets : ",len(prj_list)
@@ -32,22 +32,22 @@ def main():
                         ds_list.append(ds)
 
         if len(ds_list)!=0 :
-                print "%d dataset(s) found :" % len(ds_list)
+                print ("%d dataset(s) found :" % len(ds_list))
                 for i,dataset in enumerate(ds_list) :
-                        print "%d) %s" % (i, dataset.name)
+                        print ("%d) %s" % (i, dataset.name))
 #        p1=prj_list[0]
 #        print p1
 #       print "\nTarget project :\n\t",p1.name 
 #        ds_lst=p1.dataset_list()
-#	for ds in ds_lst :
-#		print ds.name
+#       for ds in ds_lst :
+#               print ds.name
         ds1=ds_list[70]
         ds1.display()
         #display() or print works as well
 #       print ds1
 
         #date__ob
-	#Format must be somthing like 2015-11-01T00:00:00.000 in version Sitools2 3.0
+        #Format must be somthing like 2015-11-01T00:00:00.000 in version Sitools2 3.0
 
         param_query1=[[ds1.fields_list[3]],['2015-11-01T00:00:00.000','2015-11-01T01:00:00.000'],'DATE_BETWEEN']
 #       param_query1=[[ds1.fields_list[9]],['1123977851', '1123981271'],'NUMERIC_BETWEEN']
@@ -60,9 +60,9 @@ def main():
 #       param_query3=[[ds1.fields_list[10]],['1 min'],'CADENCE']
         #exptime
 #        param_query4=[[ds1.fields_list[8]],['2.900849'],'LTE']
-	#series_name 
-#	param_query2=[[ds1.fields_list[3]],['hmi.m_720s'],'IN']
-	param_query2=[[ds1.fields_list[2]],['hmi.sharp_cea_720s_nrt'],'IN']
+        #series_name 
+#       param_query2=[[ds1.fields_list[3]],['hmi.m_720s'],'IN']
+        param_query2=[[ds1.fields_list[2]],['hmi.sharp_cea_720s_nrt'],'IN']
         Q1=Query(param_query1)
         Q2=Query(param_query2)
 #        Q3=Query(param_query3)
@@ -96,7 +96,7 @@ def main():
 #       for field in ds1.fields_list :
 #               field.display()
 
-        print "\nPrint Query  ..."
+        print ("\nPrint Query  ...")
         Q1.display()
         Q2.display()
 #       Q3.display()
@@ -108,14 +108,14 @@ def main():
         result=ds1.search([Q1,Q2],O1,S1)
 #        result=ds1.search([Q1,Q2],O1,S1,limit_to_nb_res_max=10)
         if len(result) !=0 :
-                print "Results :"
+                print ("Results :")
                 for i,data in enumerate(result) :
-                        print "%d) %s" % (i+1,data)
-#	else :
-#		sys.stdout.write("For the following queries :\n")
-#		Q1.display()
- #     		Q2.display()
-#		sys.stdout.write("No results found\n")
+                        print ("%d) %s" % (i+1,data))
+#       else :
+#               sys.stdout.write("For the following queries :\n")
+#               Q1.display()
+ #              Q2.display()
+#               sys.stdout.write("No results found\n")
 #        ds2=Dataset("http://sol-palinger-old:8182/webs_IAS_SDO_dataset")
 #        ds2.display()
         recnum_list=[]
@@ -134,13 +134,13 @@ def main():
         #quality
 
         O1_hmi=[ds_hmi.fields_list[0],ds_hmi.fields_list[1],ds_hmi.fields_list[114]]
-        print "output : ",ds_hmi.fields_list[114].name
+        print ("output : ",ds_hmi.fields_list[114].name)
         S1_hmi=[[ds_hmi.fields_list[114],'ASC']]
 #       for field in ds_aia.fields_list :
 #               field.display()
         result_hmi=ds_hmi.search([Q_hmi],O1_hmi,S1_hmi)
         for data in result_hmi:
-                print data
+                print (data)
 
 if __name__ == "__main__":
         main()
