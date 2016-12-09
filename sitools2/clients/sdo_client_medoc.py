@@ -335,7 +335,7 @@ def media_search(server=None,dates=None,waves=None,series=None,cadence=None,nb_r
 	if len(result) !=0 :
 		for i, data in enumerate(result) :
 			sdo_data_list.append(Sdo_data(data))
-	print "%s results returned" % len(sdo_data_list)
+	sys.stdout.write("%s results returned" % len(sdo_data_list))
 	return sdo_data_list
 
 
@@ -378,7 +378,7 @@ def media_metadata_search(media_data_list=[],keywords=[], recnum_list=[],series=
 		#print count_series_list
 		#print count_series_list.keys()
 		if len(count_series_list.keys()) > 1 :
-			print "Several series_name detected in media_data_list\n"
+			sys.stdout.write("Several series_name detected in media_data_list\n")
 			result=[item.metadata_search(keywords) for item in media_data_list]	
 			return result
 		else :	
@@ -501,7 +501,7 @@ class Sdo_IAS_SDO_dataset(Dataset):
 			filename="IAS_SDO_export_"+datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")+"."+download_type.lower() #if not specified this is the default name
 		if target_dir is not None:
 			if not os.path.isdir(target_dir) :
-				print "Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..." % target_dir
+				sys.stdout.write("Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..." % target_dir)
 				os.mkdir(target_dir)
 			if target_dir[-1].isalnum():
 				filename=target_dir+'/'+filename
@@ -515,15 +515,15 @@ class Sdo_IAS_SDO_dataset(Dataset):
 		else :
 			plugin_id="plugin03"
 		if not quiet :
-			print "Download %s file in progress ..." % download_type.lower()		
+			sys.stdout.write("Download %s file in progress ..." % download_type.lower())		
 	#	Dataset.execute_plugin(self,plugin_name=plugin_id, pkey_list=sunum_list, filename=filename)
 		try :
 			Dataset.execute_plugin(self,plugin_name=plugin_id, pkey_list=sunum_list, filename=filename)
 		except :
-			print "Error downloading selection %s " % filename
+			sys.stdout.write("Error downloading selection %s " % filename)
 		else :
 			if not quiet :
-				print "Download selection %s completed" % filename
+				sys.stdout.write("Download selection %s completed" % filename)
 
 
 		
@@ -580,13 +580,13 @@ class Sdo_data():
 			
 
 	def display(self):
-		print self.__repr__()
+		print(self.__repr__())
 
-        def __repr__(self):
-	    if  (self.series_name).startswith('hmi.sharp'):
-		    return ("url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, harpnum : %d\n" %(self.url,self.recnum,self.sunum,self.series_name,self.date_obs,self.wave,self.ias_location,self.exptime,self.t_rec_index,self.harpnum))
-	    else:
-		    return ("url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, ias_path : %s\n" %(self.url,self.recnum,self.sunum,self.series_name,self.date_obs,self.wave,self.ias_location,self.exptime,self.t_rec_index, self.ias_path))
+	def __repr__(self):
+		if(self.series_name).startswith('hmi.sharp'):
+			return ("url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, harpnum : %d\n" %(self.url,self.recnum,self.sunum,self.series_name,self.date_obs,self.wave,self.ias_location,self.exptime,self.t_rec_index,self.harpnum))
+		else:
+			return ("url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, ias_path : %s\n" %(self.url,self.recnum,self.sunum,self.series_name,self.date_obs,self.wave,self.ias_location,self.exptime,self.t_rec_index, self.ias_path))
 
 	def get_file(self, decompress=False, filename=None, target_dir=None, quiet=False, segment=None, **kwds ):
 		"""This method is used to retrieve the data on the client side 
@@ -650,7 +650,7 @@ class Sdo_data():
 #Create target location if it does not exist 
 		if target_dir is not None:
 			if not os.path.isdir(target_dir) :
-				print "Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..." % target_dir
+				sys.stdout.write("Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..." % target_dir)
 				os.mkdir(target_dir)
 			if target_dir[-1].isalnum():
 				filename_pre=target_dir+'/'+filename_pre
@@ -691,10 +691,10 @@ class Sdo_data():
 			try :	
 				urllib.urlretrieve(file_url, filename_path)
 			except :
-				print "Error downloading %s " % filename_path
+				sys.stdout.write( "Error downloading %s " % filename_path)
 			else :
 				if not quiet :
-					print "Download file %s completed" % filename_path
+					sys.stdout.write( "Download file %s completed" % filename_path)
 
 	def metadata_search(self, server=None , keywords=[], **kwds):
 		"""Use search() results (the field recnum) in order to provide metadata information from the dataset webs_aia_dataset
@@ -737,7 +737,7 @@ class Sdo_data():
 			else :
 				raise ValueError("Error metadata_search(): %s keyword does not exist for %s " % (key,metadata_ds.name) )
 		S1=[[metadata_ds.fields_dict['date__obs'],'ASC']]#sort by date_obs ascendant
-		print metadata_ds.search([Q1],O1,S1)
+		print (metadata_ds.search([Q1],O1,S1))
 		if len (metadata_ds.search([Q1],O1,S1)) !=0 :
 			return metadata_ds.search([Q1],O1,S1)[0]
 		else :
@@ -749,15 +749,15 @@ def main():
 	#sdo_data_list=media_search(dates=[d1,d2],waves=['335'],cadence=['1h'],nb_res_max=10) 
 #	print sdo_data_list
 	sdo_data_list=media_search(dates=[d1,d2],series='hmi.sharp_cea_720s_nrt',cadence=['1h'],nb_res_max=10) 
-	print sdo_data_list
+	print(sdo_data_list)
 # Unit test media_metadata_search
-	print "Test media_metadata_search"
+	print ("Test media_metadata_search")
 	recnum_list = []
 	for item in sdo_data_list :
 		recnum_list.append(str(item.recnum))
-	print recnum_list
+	print (recnum_list)
 	meta=media_metadata_search(keywords=['recnum','sunum','date__obs','quality','cdelt1','cdelt2','crval1'], series="hmi.sharp_cea_720s_nrt", recnum_list=recnum_list)
-	print meta
+	print (meta)
 
 #Unit test get_file
 #	for data in sdo_data_list :
