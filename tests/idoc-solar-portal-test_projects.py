@@ -31,8 +31,7 @@ class TestSitools2Core(unittest.TestCase):
         sitools2 = Sitools2Instance('http://idoc-solar-portal-test.ias.u-psud.fr')
         projects = sitools2.list_project()
         print(projects)
-        self.assertEqual( len(projects), 2)           
-    
+        self.assertEqual( len(projects), 1)           
 
 if __name__ == '__main__':
     unittest.main()
