@@ -1076,8 +1076,8 @@ class Sdo_data():
             filename_pre = filename
 
 #Define segment if it does not exist 
-        if segment is None and filename is None and 
-            self.series_name == 'aia.lev1':
+        if segment is None and filename is None and (
+            self.series_name == 'aia.lev1'):
                 segment = ['image_lev1']
         elif segment is None and filename is None and (
                 self.series_name).startswith('hmi.sharp'):
