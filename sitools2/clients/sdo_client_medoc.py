@@ -46,7 +46,10 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
 
     Example  
     -------
-    >>> sdo_data_list = media_search(dates=[d1,d2], series='hmi.m_720s', nb_res_max=10)
+    >>> sdo_data_list = media_search(
+                            dates=[d1,d2], 
+                            series='hmi.m_720s', 
+                            nb_res_max=10)
     >>> media_get(MEDIA_DATA_LIST=sdo_data_list)
 
     >>> media_get(MEDIA_DATA_LIST=sdo_data_list, target_dir='results')
@@ -102,7 +105,7 @@ def media_get_selection(server=None,
     server : str 
         Name of the MEDOC SOLAR server 
     media_data_list : list of Sdo_data objects
-        The result of media_search can be passed as an argument of that function.
+        The result of media_search can be passed as an argument
     download_type : str
         Can be 'TAR' or 'ZIP' 
     **kwds  : any type  
@@ -186,13 +189,17 @@ def media_search(server=None, dates=None, waves=None, series=None,
         Name of the MEDOC SOLAR server 
     
     dates : datetime 
-        Interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1
+        Interval of dates within you wish to make a research, 
+        It must be specifed and composed of 2 datetime elements d1 d2, 
+        with d2 >d1
     
     waves  : list 
         Wavelength (in Angstrom)
         Must be a list of wave integer or str
         waves must be in the list [94,131,171,193,211,304,335,1600,1700,6173]
-        default value if not specified ['94','131','171','193','211','304','335','1600','1700'] so aia.lev1 data 
+        default value if not specified 
+        ['94','131','171','193','211','304','335','1600','1700']
+        So aia.lev1 data 
 
     series : str
         Series name of the data 
@@ -200,7 +207,9 @@ def media_search(server=None, dates=None, waves=None, series=None,
         default value aia.lev1 if not specified 
 
     cadence : str 
-        Can be a string and in list ['12 sec','1 min', '2 min', '10 min', '30 min', '1 h', '2 h', '6 h', '12 h' , '1 day', '12 min']
+        Can be a string and in list 
+        ['12 sec','1 min', '2 min', '10 min', '30 min', 
+        '1 h', '2 h', '6 h', '12 h' , '1 day', '12 min']
         cadence default values '1 min' or 12 min for hmi data
 
     nb_res_max : integer
@@ -209,7 +218,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
 
     Returns 
     -------
-        Sdo_data list 
+        Sdo_data object list 
 
     Example
     -------
@@ -584,8 +593,13 @@ def media_metadata_search(
 
     Examples
     --------
-        >>>sdo_data_list = media_search(DATES=[d1,d2], SERIES='hmi.m_720s', nb_res_max=10)
-        >>>>meta = media_metadata_search(MEDIA_DATA_LIST=sdo_data_list,KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1'])    
+        >>>sdo_data_list = media_search(
+                                DATES=[d1,d2], 
+                                SERIES='hmi.m_720s', 
+                                nb_res_max=10)
+        >>>>meta = media_metadata_search(
+                MEDIA_DATA_LIST=sdo_data_list, 
+                KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1'])    
     
     """
 
@@ -763,8 +777,10 @@ def metadata_info(server=None, series='aia.lev1'):
 
     return metadata_ds.display()
 
-
+#Define a decorator only one instance 
 def singleton(class_def):
+    """Decorate a class so only one instance exist 
+    """
     instances = {}
 
     def get_instance(Class_heritage):
@@ -868,7 +884,46 @@ class Sdo_ias_sdo_dataset(Dataset):
 
 
 class Sdo_data():
-    """Definition de la classe Sdo_data """
+    """Definition de la classe Sdo_data 
+
+    Attributes
+    ---------
+    url : str
+        The url of the data on MEDOC server 
+    recnum : int
+        Id of the resource in data db
+        number of records in level-1 file
+        Attention recnum is unique for a serie 
+    sunum : int
+        Another Id of the SDO data_sums db
+        Attention you can several records wih same sunum
+    date_obs : str
+        Observation date (UTC) without time zone of the record computed by IAS
+    series_name : str 
+        Name of the series name , can b hmi.m_720s or aia.lev1 etc ...
+    wave : int
+        Wavelenght of the record 
+    ias_location : str 
+        Location of the data at IAS MEDOC disks
+    ias_path : str
+        URL of the data , used for hmi redonnant with url 
+        To analysed : remove it ...
+    exptime : float
+        Exposure time 
+    t_rec_index : int
+        index of T_REC in db 
+        Can be used to identify a record in db 
+    harpnum : int 
+        Hmi active region patch number for hmi sharp data 
+
+    Methods
+    -------
+    get_file()
+        Donwload the record 
+    metadata_serch()
+        Print meta information
+
+    """
 
     def __init__(self, data):
         self.url = ''
@@ -919,21 +974,29 @@ class Sdo_data():
             self.harpnum = 0
 
     def display(self):
+        """Display a representation of SDO data from MEDOC server 
+
+        Returns 
+        -------
+        print __repr__() 
+
+        """
+
         print(self.__repr__())
 
-        def __repr__(self):
-            if (self.series_name).startswith('hmi.sharp'):
-                return (
-                    "url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, harpnum : %d\n"
-                    % (self.url, self.recnum, self.sunum, self.series_name,
-                       self.date_obs, self.wave, self.ias_location,
-                       self.exptime, self.t_rec_index, self.harpnum))
-            else:
-                return (
-                    "url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, ias_path : %s\n"
-                    % (self.url, self.recnum, self.sunum, self.series_name,
-                       self.date_obs, self.wave, self.ias_location,
-                       self.exptime, self.t_rec_index, self.ias_path))
+    def __repr__(self):
+        if (self.series_name).startswith('hmi.sharp'):
+            return (
+                "url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, harpnum : %d\n"
+                % (self.url, self.recnum, self.sunum, self.series_name,
+                   self.date_obs, self.wave, self.ias_location,
+                   self.exptime, self.t_rec_index, self.harpnum))
+        else:
+            return (
+                "url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, ias_path : %s\n"
+                % (self.url, self.recnum, self.sunum, self.series_name,
+                   self.date_obs, self.wave, self.ias_location,
+                   self.exptime, self.t_rec_index, self.ias_path))
 
     def get_file(self,
                  decompress=False,
@@ -942,19 +1005,42 @@ class Sdo_data():
                  quiet=False,
                  segment=None,
                  **kwds):
-        """This method is used to retrieve the data on the client side 
-           decompress is set by default to False so compressed file are downloaded, to get uncompressed files set decompress=True
-           filename is by design aia.lev1.waveA_date_obs.image_lev1.fits you can change it providing a filename  
-           target_dir the path of the targetted directory, by design the files are downloaded in the current dir
-           quiet output active or not, by design the output is active , for a quiet get_file process set quiet=True 
+        """Donwload hmi and aia data from MEDOC server 
+
+        Parameters
+        ----------
+        decompress : boolean 
+            fits SDO data are rice-compressed 
+            That param indicated that you wish to get uncompressed data 
+            Defautl value is False
+        filename : str
+            Specify a file name so the file retrieve will be name as specified
+            Default value None
+        target_dir : str 
+            User can specify the directory of download
+            By design the files are downloaded in the current dir
+        quiet : boolean
+            set print output active or not
+            By design the output is active
+            For a quiet get_file process set quiet=True
+        segment : str
+            Type of the file 
+            Can value aia.lev1 or spikes for SDO/AIA-LEV1 
+            Can value 'bitmap', 'Bp_err', 'Bt','conf_disambig', ...
+                
+        Returns 
+        -------
+        Files located in the target_dir directory 
+
         """
 
-        #Allow lower case entries
+        #Allow upper case entries
         for k, v in iteritems(kwds):
             if k not in [
                     'DECOMPRESS', 'FILENAME', 'TARGET_DIR', 'QUIET', 'SEGMENT'
             ]:
-                mess_err = "Error get_file():\n'%s' parameter for the search function is not allowed \n" % k
+                mess_err = "Error get_file():\n""'%s' parameter " % k
+                mess_err += "for the search function is not allowed \n" 
                 raise ValueError(mess_err)
             elif k == 'DECOMPRESS':
                 decompress = v
@@ -990,8 +1076,9 @@ class Sdo_data():
             filename_pre = filename
 
 #Define segment if it does not exist 
-        if segment is None and filename is None and self.series_name == 'aia.lev1':
-            segment = ['image_lev1']
+        if segment is None and filename is None and 
+            self.series_name == 'aia.lev1':
+                segment = ['image_lev1']
         elif segment is None and filename is None and (
                 self.series_name).startswith('hmi.sharp'):
             segment = [
@@ -1021,17 +1108,19 @@ class Sdo_data():
 #Create target location if it does not exist 
         if target_dir is not None:
             if not os.path.isdir(target_dir):
-                sys.stdout.write(
-                    "Warning get_file(): \n'%s' directory does not exist.\nCreation of directory in progress ... \n"
-                    % target_dir)
+                mess_warn = "Warning get_file(): \n'%s' directory " % target_dir
+                mess_warn += "does not exist.\n"
+                mess_warn += "Creation of directory in progress ... \n"
+                sys.stdout.write( mess_warn)
                 os.mkdir(target_dir)
             if target_dir[-1].isalnum():
                 filename_pre = target_dir + '/' + filename_pre
             elif target_dir[-1] == '/':
                 filename_pre = target_dir + filename_pre
             else:
-                mess_err = "Error get_file()\nCheck the parma target_dir, special char %s at the end of the target_dir is not allowed.\n" % target_dir[
-                    -1]
+                mess_err = "Error get_file()\nCheck the parma target_dir, "
+                mess_err += "special char %s at the end of"% target_dir[-1]
+                mess_err += " the target_dir is not allowed.\n" 
                 raise ValueError(mess_err)
 
 #Specification for aia.lev1 and COMPRESS param 
@@ -1071,10 +1160,21 @@ class Sdo_data():
                     sys.stdout.flush()
 
     def metadata_search(self, server=None, keywords=[], **kwds):
-        """Use search() results (the field recnum) in order to provide metadata information from the dataset webs_aia_dataset
-        server is the name of the server targetted can be http://medoc-sdo.ias.u-psud.fr or http://idoc-medoc.ias.u-psud.fr
-        keywords is the list of names of metadata that you wish to have in the output THAT MUST BE SPECIFIED 
+        """Provide metadata information from MEDOC server  
+
+            Parameters
+            ----------
+            server : str 
+                Name of the MEDOC SOLAR server 
+            keywords : list of str
+                List of names of metadata that you wish to have in the output.
+            
+            Returns 
+            -------
+                List of dictionaries of the data requested 
+                Returns the exact data from db  
         """
+
         #Allow lower case entries
         for k, v in iteritems(kwds):
             if k not in ['SERVER', 'KEYWORDS']:
