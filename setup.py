@@ -28,7 +28,7 @@ else:
         packages=find_packages(),
 
         # Declare your packages' dependencies here, for eg:
-        install_requires=['simplejson', 'future'],
+        install_requires=['simplejson', 'future', 'pip'],
 
         # Fill in these to make your Egg ready for upload to
         # PyPI
