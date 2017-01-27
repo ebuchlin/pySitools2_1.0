@@ -11,27 +11,29 @@ d1 = datetime(2016, 1, 1, 0, 0, 0)
 d2 = datetime(2016, 1, 1, 5, 12, 0)
 #d2 = d1 + timedelta(minutes=5)
 
-sdo_hmi_data_list = media_search(
-    DATES=[d1, d2],
-    series='hmi.sharp_cea_720s_nrt',
-    cadence=['1h'],
-    nb_res_max=10)
-for data in sdo_hmi_data_list:
-    print(data)
+#sdo_hmi_data_list=media_search(DATES=[d1,d2],series='hmi.sharp_cea_720s_nrt',cadence=['1h'],nb_res_max=10) 
+sdo_data_list = media_search(
+    DATES=[d1, d2], WAVES=['335', '193'], CADENCE=['1m'], nb_res_max=2)
 
-    ##sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','193'], CADENCE=['12 s'], nb_res_max=2 ) 
-    #recnum_list=[]
-    #for result in sdo_data_list :
-    #	print result.sunum ,result.recnum, result.date_obs  
-    #	recnum_list.append(result.recnum)
+#Build Recnum list [optional]
+recnum_list = []
+for result in sdo_data_list:
+    #for result in sdo_hmi_data_list :
+    print(result.sunum, result.recnum, result.date_obs)
+    recnum_list.append(result.recnum)
 
-    #Test media_metada_search
-    #print "Exemple media_metadata_search()"
-    #my_meta_search=media_metadata_search(KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1', 'sunum', 'recnum'], recnum_list=recnum_list)
-    #i=0
-    #for result in my_meta_search :
-    #	print i+1,")",result,"\n"
-    #	i+= 1
+#Test media_metada_search
+#print "Exemple media_metadata_search()"
+#my_meta_search = media_metadata_search(KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1', 'sunum', 'recnum'], recnum_list=recnum_list,series='hmi.sharp_cea_720s_nrt')
+my_meta_search = media_metadata_search(
+    KEYWORDS=[
+        'date__obs', 'quality', 'cdelt1', 'cdelt2', 'crval1', 'sunum', 'recnum'
+    ],
+    MEDIA_DATA_LIST=sdo_data_list)
+i = 0
+for result in my_meta_search:
+    print("%s) %s " % (i + 1, result))
+    i += 1
 
     #print my_meta_search
     #To limit the results sent by the server set nb_res_max
@@ -39,8 +41,9 @@ for data in sdo_hmi_data_list:
 
     #The fastest way to retrieve data
     #PS : The directory 'results' will be created if it does not exist
-    for data in sdo_hmi_data_list:
-        data.get_file(target_dir='results', SEGMENT=['Br'])
+    for data in sdo_data_list :
+    #	data.get_file(target_dir='results', IAS_PATH=True)
+        data.get_file(target_dir='results')
 
 #Need to get a tar ball or zip file :
 #A bit slower than the previous one
