@@ -48,6 +48,28 @@ def gaia_get(gaia_list=[],
     Files located in the target_dir directory 
     """
     kwds = kwds
+
+    allowed_params = [
+        'GAIA_LIST', 'TARGET_DIR', 'DOWNLOAD_TYPE'
+    ]
+    for k, v in iteritems(kwds):
+        if k not in allowed_params:
+            mess_err = "Error in search():\n'%s' entry for the media_get function is not allowed\n" % k
+            raise ValueError(mess_err)
+        if k == 'TARGET_DIR':
+            target_dir = v
+        if k == 'DOWNLOAD_TYPE':
+            download_type = v
+        if k == 'GAIA_LIST':
+            gaia_list = v
+
+    if 'GAIA_LIST' in kwds:
+        del kwds['GAIA_LIST']  #don't pass it twice
+
+    if len(gaia_list) == 0:
+        mess_err = "Nothing to download\n"
+        raise ValueError(mess_err)
+
     if download_type is not None:
         #filetype is ignored
         get_selection(
