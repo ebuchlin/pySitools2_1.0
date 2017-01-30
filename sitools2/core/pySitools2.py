@@ -74,18 +74,23 @@ class Sitools2Instance():
         kwargs.update({'media': 'json'})
         url = sitools_url + '/sitools/portal/projects' + '?' + urlencode(
             kwargs)
+ #       print("url portal : %s" % url)
         result = simplejson.load(urlopen(url))
         out_mess = "%s projects detected\n" % result['total']
         sys.stdout.write(out_mess)
+        sys.stdout.flush()
         projects = result['data']
+#        print ("projects : %s\n" % projects)
         for i, project in enumerate(projects):
             p_url = sitools_url + project['sitoolsAttachementForUsers']
+#             print ("project url : %s" % p_url)
             try:
                 data.append(Project(p_url))
             except:
                 out_mess = "Error in Sitools2Instance.list_project() :\nCannot create object project %s, %s protected \nContact admin for more info\n" % (
                     project['name'], p_url)
                 sys.stdout.write(out_mess)
+                sys.stdout.flush()
                 raise Exception
         return data
 
