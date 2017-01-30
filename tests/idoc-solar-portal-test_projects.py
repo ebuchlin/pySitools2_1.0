@@ -28,6 +28,7 @@ class TestSitools2Core(unittest.TestCase):
         pass
     
     def testNbProjects(self):
+    	print ("####Test idoc-solar-portal-test  nbr projects ###############")
         sitools2 = Sitools2Instance('http://idoc-solar-portal-test.ias.u-psud.fr')
         projects = sitools2.list_project()
         print(projects)
