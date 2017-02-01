@@ -15,6 +15,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 __author__ = "Jean-Christophe Malapert"
 __date__ = "$8 mai 2013 04:03:39$"
+
 try:
     from setuptools import setup, find_packages
 except:
