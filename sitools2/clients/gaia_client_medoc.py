@@ -16,7 +16,7 @@ from future.utils import iteritems
 from future.moves.urllib.request import urlretrieve
 
 #sitools2_url='http://medoc-dem.ias.u-psud.fr'
-sitools2_url = 'http://idoc-solar-portal-test.ias.u-psud.fr'
+sitools2_url = 'http://idoc-medoc-test.ias.u-psud.fr'
 
 
 def gaia_get(gaia_list=[],
@@ -147,7 +147,7 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
     sys.stdout.write("Loading GAIA-DEM Sitools2 client : %s \n" % sitools2_url)
     if sitools2_url.startswith('http://medoc-dem'):
         gaia_dataset = Sdo_IAS_gaia_dataset(sitools2_url + "/ws_SDO_DEM")
-    elif sitools2_url.startswith('http://idoc-solar-portal'):
+    elif sitools2_url.startswith('http://idoc-medoc'):
         gaia_dataset = Sdo_IAS_gaia_dataset(sitools2_url +
                                             "/webs_GAIA-DEM_dataset")
     elif sitools2_url.startswith('http://localhost'):
@@ -172,7 +172,7 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
             raise ValueError(mess_err)
         elif sitools2_url.startswith('http://medoc-sdo'):
             dates_optim.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
-        elif sitools2_url.startswith('http://idoc-solar-portal'):
+        elif sitools2_url.startswith('http://idoc-medoc'):
             dates_optim.append(
                 str(date.strftime("%Y-%m-%dT%H:%M:%S")) + ".000")
     if dates[1] <= dates[0]:

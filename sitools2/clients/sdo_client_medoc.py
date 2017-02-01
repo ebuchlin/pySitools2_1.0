@@ -22,7 +22,7 @@ from future.moves.urllib.request import urlretrieve
 
 #sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 #sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
-sitools2_url = 'http://idoc-solar-portal-test.ias.u-psud.fr'
+sitools2_url = 'http://idoc-medoc-test.ias.u-psud.fr'
 
 #sitools2_url='http://localhost:8182'
 
@@ -150,7 +150,9 @@ def media_get_selection(server=None,
 #server
     allowed_server = [
         'http://medoc-sdo.ias.u-psud.fr', 
-        'http://medoc-sdo-test.ias.u-psud.fr'
+        'http://medoc-sdo-test.ias.u-psud.fr',
+        'http://idoc-medoc-test.ias.u-psud.fr',
+        'http://idoc-medoc.ias.u-psud.fr'
     ]
     if server is None:
         server = 'http://medoc-sdo.ias.u-psud.fr'
@@ -272,8 +274,10 @@ def media_search(server=None, dates=None, waves=None, series=None,
         '1d': '1 day'
     }
     allowed_server = [
-        'http://medoc-sdo.ias.u-psud.fr',
+        'http://medoc-sdo.ias.u-psud.fr', 
         'http://medoc-sdo-test.ias.u-psud.fr',
+        'http://idoc-medoc-test.ias.u-psud.fr',
+        'http://idoc-medoc.ias.u-psud.fr',
         'http://idoc-solar-portal-test.ias.u-psud.fr'
     ]
     #server
@@ -288,7 +292,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
             "server parameter not specified, default value is set : server='http://medoc-sdo.ias.u-psud.fr'\n"
         )
     elif server is None and series.startswith('hmi'):
-        server = 'http://idoc-solar-portal-test.ias.u-psud.fr'
+        server = 'http://idoc-medoc-test.ias.u-psud.fr'
     if server is not None and server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" %
                          (server, allowed_server))
@@ -465,10 +469,10 @@ def media_search(server=None, dates=None, waves=None, series=None,
 #Define dataset url
     if server.startswith('http://medoc-sdo'):
         sdo_dataset = Sdo_ias_sdo_dataset(server + "/webs_IAS_SDO_dataset")
-    elif server.startswith('http://idoc-solar-portal') and series.startswith(
+    elif server.startswith('http://idoc-medoc') and series.startswith(
             'hmi'):
         sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_HMI_dataset")
-    elif server.startswith('http://idoc-solar-portal') and series.startswith(
+    elif server.startswith('http://idoc-medoc') and series.startswith(
             'aia'):
         sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_AIA_dataset")
     elif server.startswith('http://localhost') and series.startswith('aia'):
@@ -632,7 +636,8 @@ def media_metadata_search(
     allowed_server = [
         'http://medoc-sdo.ias.u-psud.fr',
         'http://medoc-sdo-test.ias.u-psud.fr',
-        'http://idoc-solar-portal-test.ias.u-psud.fr'
+        'http://idoc-medoc.ias.u-psud.fr',
+        'http://idoc-medoc-test.ias.u-psud.fr'
     ]
 
     #Controls 
@@ -653,7 +658,7 @@ def media_metadata_search(
             sys.stdout.write(
                 "Several series_name detected in media_data_list\n")
             if server is None:
-                server = 'http://idoc-solar-portal-test.ias.u-psud.fr'
+                server = 'http://idoc-medoc-test.ias.u-psud.fr'
             result = [
                 item.metadata_search(keywords) for item in media_data_list
             ]
@@ -675,7 +680,7 @@ def media_metadata_search(
             "server parameter not specified, default value is set : server='http://medoc-sdo.ias.u-psud.fr'\n"
         )
     elif server is None and series.startswith('hmi'):
-        server = 'http://idoc-solar-portal-test.ias.u-psud.fr'
+        server = 'http://idoc-medoc-test.ias.u-psud.fr'
     if server is not None and server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" %
                          (server, allowed_server))
@@ -690,10 +695,10 @@ def media_metadata_search(
         metadata_ds = Sdo_aia_dataset(server + "/webs_aia_dataset")
 
     elif server.startswith(
-            'http://idoc-solar-portal') and series == 'aia.lev1':
+            'http://idoc-medoc') and series == 'aia.lev1':
         metadata_ds = Sdo_aia_dataset(server + "/webs_" + "aia_dataset")
 
-    elif server.startswith('http://idoc-solar-portal') and series.startswith(
+    elif server.startswith('http://idoc-medoc') and series.startswith(
             'hmi'):
         metadata_ds = Sdo_aia_dataset(server + "/webs_" + series + "_dataset")
 
@@ -753,7 +758,7 @@ def metadata_info(server=None, series='aia.lev1'):
     allowed_server = [
         'http://medoc-sdo.ias.u-psud.fr',
         'http://medoc-sdo-test.ias.u-psud.fr',
-        'http://idoc-solar-portal-test.ias.u-psud.fr'
+        'http://idoc-medoc-test.ias.u-psud.fr'
     ]
     #Controls 
     ##server
@@ -763,7 +768,7 @@ def metadata_info(server=None, series='aia.lev1'):
             "server parameter not specified, default value is set : server='http://medoc-sdo.ias.u-psud.fr'\n"
         )
     elif server is None and series.startswith('hmi'):
-        server = 'http://idoc-solar-portal-test.ias.u-psud.fr'
+        server = 'http://idoc-medoc-test.ias.u-psud.fr'
     if server is not None and server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" %
                          (server, allowed_server))
@@ -771,7 +776,7 @@ def metadata_info(server=None, series='aia.lev1'):
     #Define dataset url
     if server == 'http://medoc-sdo-test.ias.u-psud.fr':
         metadata_ds = Sdo_IAS_SDO_dataset(server + "/webs_aia_dataset")
-    elif server == 'http://idoc-solar-portal-test.ias.u-psud.fr':
+    elif server == 'http://idoc-medoc-test.ias.u-psud.fr':
         metadata_ds = Sdo_IAS_SDO_dataset(server + "/webs_" + series +
                                           "_dataset")
 
@@ -1196,7 +1201,7 @@ class Sdo_data():
             raise TypeError(mess_err)
         if server.startswith('http://medoc-sdo'):
             metadata_ds = Sdo_aia_dataset(sitools2_url + "/webs_aia_dataset")
-        elif server.startswith('http://idoc-solar-portal'):
+        elif server.startswith('http://idoc-medoc'):
             metadata_ds = Sdo_dataset(sitools2_url + "/webs_" +
                                       self.series_name + "_dataset")
         else:
