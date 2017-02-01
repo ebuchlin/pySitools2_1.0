@@ -23,7 +23,7 @@ sdo_data_list = media_search(
     WAVES=['335', '304'],
     CADENCE=['12s'],
     nb_res_max=10,
-    server='http://medoc-sdo.ias.u-psud.fr')
+    server='http://idoc-medoc-test.ias.u-psud.fr')
 
 #sdo_data_list = media_search(DATES=[d1,d2], WAVES=['335']) 
 #sdo_data_list = media_search(

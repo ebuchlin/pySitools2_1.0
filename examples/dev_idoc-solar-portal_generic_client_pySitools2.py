@@ -8,7 +8,7 @@ from sitools2.core.pySitools2 import *
 
 
 def main():
-    sitools_url = 'http://idoc-solar-portal-test.ias.u-psud.fr'
+    sitools_url = 'http://idoc-medoc-test.ias.u-psud.fr'
     #       sitools_url = 'http://localhost:8184'
 
     SItools1 = Sitools2Instance(sitools_url)

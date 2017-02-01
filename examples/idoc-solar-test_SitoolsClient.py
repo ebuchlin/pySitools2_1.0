@@ -18,7 +18,7 @@ def main():
     #       sitools_url = 'http://medoc-dem.ias.u-psud.fr'
     #       sitools_url = 'http://idoc-herschel.ias.u-psud.fr'
     #       sitools_url = 'http://idoc-corotn2-public-v2.ias.u-psud.fr'
-    sitools_url = 'http://idoc-solar-portal-test.ias.u-psud.fr'
+    sitools_url = 'http://idoc-medoc-test.ias.u-psud.fr'
     #       sitools_url = 'http://localhost:8184'
 
     print("Loading SitoolsClient for", sitools_url)
