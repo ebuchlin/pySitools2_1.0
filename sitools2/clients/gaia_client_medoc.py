@@ -448,7 +448,7 @@ class Gaia_data():
             try:
                 urlretrieve(url, "%s%s" % (target_dir, item))
             except:
-                sys.stdout.write("Error downloading %s%s " %
+                sys.stdout.write("Error downloading %s%s \n" %
                                  (target_dir, item))
             else:
                 if not quiet:
