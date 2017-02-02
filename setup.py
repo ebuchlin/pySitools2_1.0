@@ -13,44 +13,41 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-__author__="Jean-Christophe Malapert"
-__date__ ="$8 mai 2013 04:03:39$"
-try :
-	from setuptools import setup,find_packages
-except :
-	messageError = "Import failed, module 'setuptools' is required.\nTo install it on Ubuntu linux distribution type in terminal:\n'sudo apt-get install python-setuptools'"
-	print messageError
+__author__ = "Jean-Christophe Malapert"
+__date__ = "$8 mai 2013 04:03:39$"
 
-else :
-	setup (
-		name = 'pySitools2_1.0',
-		version = '0.1',
-		packages = find_packages(),
+try:
+    from setuptools import setup, find_packages
+except:
+    messageError = "Import failed, module 'setuptools' is required.\nTo install it on Ubuntu linux distribution type in terminal:\n'sudo apt-get install python-setuptools'"
+    print(messageError)
 
-  # Declare your packages' dependencies here, for eg:
-		install_requires=['simplejson'],
+else:
+    setup(
+        name='pySitools2_1.0',
+        version='0.1',
+        packages=find_packages(),
 
-  # Fill in these to make your Egg ready for upload to
-  # PyPI
-		author = 'Pablo ALINGERY',
-		author_email = 'pablo.alingery@ias.u-psud.fr',
+        # Declare your packages' dependencies here, for eg:
+        install_requires=['simplejson', 'future', 'pip'],
 
-		description = 'A generic python Sitools2 client with some specific clients (GAIA, SDO)',
-		url = 'http://sitools2.github.com/pySitools2_1.0/',
-		license = 'GPLv3',
-		long_description = open("README.md").read(),
+        # Fill in these to make your Egg ready for upload to
+        # PyPI
+        author='Pablo ALINGERY',
+        author_email='pablo.alingery@ias.u-psud.fr',
+        description='A generic python Sitools2 client with some specific clients (GAIA, SDO)',
+        url='http://sitools2.github.com/pySitools2_1.0/',
+        license='GPLv3',
+        long_description=open("README.md").read(),
 
-  # could also include long_description, download_url, classifiers, etc.
-  # see https://pypi.python.org/pypi?%3Aaction=list_classifiers
-		classifiers = [
-		'Development Status :: 2 - Pre-Alpha',
-		'Environment :: Web Environment',
-		'Framework :: SITools2 :: 1.0',
-		'Intended Audience :: Developers',
-		'Intended Audience :: Science/Research',
-		'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
-		],
-		download_url = 'https://github.com/SITools2/pySitools2_1.0/archive/master.zip',
-		test_suite="tests"
-	)
-
+        # could also include long_description, download_url, classifiers, etc.
+        # see https://pypi.python.org/pypi?%3Aaction=list_classifiers
+        classifiers=[
+            'Development Status :: 2 - Pre-Alpha',
+            'Environment :: Web Environment', 'Framework :: SITools2 :: 1.0',
+            'Intended Audience :: Developers',
+            'Intended Audience :: Science/Research',
+            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
+        ],
+        download_url='https://github.com/SITools2/pySitools2_1.0/archive/master.zip',
+        test_suite="tests")

@@ -1,6 +1,16 @@
 #!/bin/bash
 
-sudo easy_install -m pySitools2_1.0 
-sudo rm -Rf /usr/local/lib/python2.7/dist-packages/pySitools2_1.0-0.1-py2.7.egg
-sudo rm -Rf ~/.local/lib/python2.7/site-packages/pySitools2_1.0-0.1-py2.7.egg
-sudo python setup.py install 
+source ~/.bashrc
+
+python_version=$(python --version 2>&1| awk '{print $2}' |awk -F. '{print $1}')
+
+if [ $python_version = "2" ]
+then
+	pip_cmd='pip'
+else
+	pip_cmd='pip3'
+fi
+
+#New 24-01-2017 Avoid easy_install issue repported by A.Beeeleme 
+#sudo pip uninstall -y pySitools2-1.0
+sudo -H $pip_cmd install --upgrade .

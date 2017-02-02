@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
 #    SITools2 client for Python
 #    Copyright (C) 2013 - Institut d'astrophysique spatiale
@@ -16,24 +16,25 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Pablo ALINGERY"
-__date__ ="$8 janvier 2015 19:38:58$"
+__author__="Jean-Christophe Malapert"
+__date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
-from sitools2.core.pySitools2 import *
+from sitools2.clients.gaia_client_medoc import *
 
-class TestSitools2Core(unittest.TestCase):        
-    
+class TestGaia(unittest.TestCase):
     def setUp(self):
         pass
     
-    def testNbProjects(self):
-        print ("####Test idoc-solar-portal-test  nbr projects ###############")
-        sitools2 = Sitools2Instance('http://idoc-medoc-test.ias.u-psud.fr')
-        projects = sitools2.list_project()
-        print(projects)
-        self.assertEqual( len(projects), 1)           
+    def testSearchGaia(self):
+        print ("####Test gaia_get#############################")
+        d1 = datetime(2012,8,10,0,0,0)
+        d2 = d1 + timedelta(days=1)
+        gaia_data_list = gaia_search( DATES=[d1,d2], NB_RES_MAX=10 )
+        try :
+            gaia_get(gaia_list=gaia_data_list)
+        except :
+    	    raise ValueError("Error Test gaia_get()")
 
-if __name__ == '__main__':
-    unittest.main()
-
+if __name__ == "__main__":
+	unittest.main()
