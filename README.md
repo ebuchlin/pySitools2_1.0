@@ -111,19 +111,26 @@ NB : For more information see the [README ](http://sdo.ias.u-psud.fr/python/gaia
 
 	$ cd pySitools2_1.0
 	git pull origin master 
-	sudo python setup.py install
+	sudo -H pip## install . --upgrade
+
+    where 
+    ## is your pip version
 
 ##Remove the module 
 
 ###For the system
 
 	$ cd pySitools2_1.0
-	sudo easy_install -m pySitools2_1.0
-	sudo rm -Rf /usr/local/lib/python2.7/dist-packages/pySitools2_1.0*.egg 
+	sudo pip## uninstall pySitools2_1.0
+	sudo rm -Rf /usr/local/lib/python##/dist-packages/pySitools2_1.0*.egg 
 
+    where 
+    ## is your pip/python version  
 ###For the user
 
 	$ cd pySitools2_1.0
-	sudo easy_install -m pySitools2_1.0
-	sudo rm -Rf ~/.local/lib/python2.7/site-packages/pySitools2_1.0*.egg 
+	sudo pip## uninstall pySitools2_1.0
+	sudo rm -Rf ~/.local/lib/python##/site-packages/pySitools2_1.0*.egg 
 
+    where 
+    ## is your pip/python version
