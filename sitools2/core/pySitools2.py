@@ -473,11 +473,11 @@ class Dataset():
                 str(pkey) for pkey in pkey_list)
         })
         url = self.url + "/" + plugin_name + "?" + urlencode(kwargs)
-#        print ("url plugin : ", url)
+        print ("url plugin : ", url)
         try :
             request=urlopen(url)
-#            print ("info : %s" % request.info())
-#           print ("code : %s" % request.getcode())
+            print ("info : %s" % request.info())
+            print ("code : %s" % request.getcode())
         except HTTPError as e :
             print (e.code)
             print (e.reason)
