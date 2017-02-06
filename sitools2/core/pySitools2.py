@@ -20,17 +20,9 @@ __email__ = "pablo.alingery.ias.u-psud.fr"
 
 import sys, os
 from datetime import *
-
-#Python2.n
-# try :
-#     from urllib import urlopen,urlencode
-# except:
-#     sys.stderr.write("Import failed in module sdo_client_medoc :\n\turlib module is required\n")
-#     raise ImportError
-
-#Python2 and python compatible
 from future.moves.urllib.parse import urlencode
-from future.moves.urllib.request import urlopen
+from future.moves.urllib.request import urlopen, urlretrieve
+from future.moves.urllib.error import HTTPError
 
 try:
     import simplejson
@@ -481,7 +473,16 @@ class Dataset():
                 str(pkey) for pkey in pkey_list)
         })
         url = self.url + "/" + plugin_name + "?" + urlencode(kwargs)
-        return urlretrieve('%s' % url, FILENAME)
+#        print ("url plugin : ", url)
+        try :
+            request=urlopen(url)
+#            print ("info : %s" % request.info())
+#           print ("code : %s" % request.getcode())
+        except HTTPError as e :
+            print (e.code)
+            print (e.reason)
+        else :
+            return urlretrieve('%s' % url, FILENAME)
 
 
 class Project():
