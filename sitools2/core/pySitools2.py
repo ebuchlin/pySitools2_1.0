@@ -18,8 +18,8 @@ __credit__ = ["Pablo ALINGERY", "Elie SOUBRIE"]
 __maintainer__ = "Pablo ALINGERY"
 __email__ = "pablo.alingery.ias.u-psud.fr"
 
-import sys, os
-from datetime import *
+from sys import stdout, stdout 
+from datetime import datetime,timedelta
 from future.moves.urllib.parse import urlencode
 from future.moves.urllib.request import urlopen, urlretrieve
 from future.moves.urllib.error import HTTPError
@@ -364,7 +364,8 @@ class Dataset():
         result_count = simplejson.load(urlopen(url_count))
         nbr_results = result_count['total']
         result = []
-        if nbr_results < limit_request:  #Check if the request does not exceed 350 000 items 
+        #Check if the request does not exceed 350 000 items
+        if nbr_results < limit_request:   
             if limit_to_nb_res_max > 0 and limit_to_nb_res_max < kwargs[
                     'limit']:  #if nbr to display is specified and < 300
                 kwargs['limit'] = limit_to_nb_res_max
