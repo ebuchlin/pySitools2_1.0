@@ -28,7 +28,8 @@ try:
     import simplejson
 except:
     sys.stderr.write(
-        "Import failed in module sdo_client_medoc :\n\tsimplejson module is required\n"
+        "Import failed in module sdo_client_medoc :\n\tsimplejson module is"
+        "required\n"
     )
     raise ImportError
 try:
@@ -36,7 +37,8 @@ try:
 
 except:
     sys.stderr.write(
-        "Import failed in module sdo_client_medoc :\n\txml.dom.minidom module is required\n"
+        "Import failed in module sdo_client_medoc :\n\txml.dom.minidom module "
+        "is required\n"
     )
     raise ImportError
 
@@ -69,8 +71,8 @@ class Sitools2Instance():
  #       print("url portal : %s" % url)
         result = simplejson.load(urlopen(url))
         out_mess = "%s projects detected\n" % result['total']
-        sys.stdout.write(out_mess)
-        sys.stdout.flush()
+        stdout.write(out_mess)
+        stdout.flush()
         projects = result['data']
 #        print ("projects : %s\n" % projects)
         for i, project in enumerate(projects):
@@ -81,8 +83,8 @@ class Sitools2Instance():
             except:
                 out_mess = "Error in Sitools2Instance.list_project() :\nCannot create object project %s, %s protected \nContact admin for more info\n" % (
                     project['name'], p_url)
-                sys.stdout.write(out_mess)
-                sys.stdout.flush()
+                stdout.write(out_mess)
+                stdout.flush()
                 raise Exception
         return data
 
@@ -251,7 +253,7 @@ class Dataset():
                                              .getAttribute('path'))
         except:
             out_mess = "\t\t\tError in Dataset.ressources_list() not allowed, please contact admin for more info\n"
-            sys.stdout.write(out_mess)
+            stdout.write(out_mess)
 
 #Throw a research request on Sitools2 server, inside limit 350000 so > 1 month full cadence for SDO project 
 
@@ -353,14 +355,14 @@ class Dataset():
         temp_kwargs.update({'sort': {"ordersList": sort_dic_list}})
         temp_url = urlencode(temp_kwargs).replace('+', '').replace('%27',
                                                                    '%22')
-        #        sys.stdout.write( "temp_url : "+temp_url+"\n")
-        #        sys.stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
+        #        stdout.write( "temp_url : "+temp_url+"\n")
+        #        stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
         url_count = self.url + "/count" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url just for count
-        #        sys.stdout.write( "url_count : "+url_count+"\n")
+        #        stdout.write( "url_count : "+url_count+"\n")
         url = self.url + "/records" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url for the request
-        #        sys.stdout.write( "url : "+url+"\n")
+        #        stdout.write( "url : "+url+"\n")
         result_count = simplejson.load(urlopen(url_count))
         nbr_results = result_count['total']
         result = []
@@ -373,7 +375,7 @@ class Dataset():
                 nbr_results = limit_to_nb_res_max
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs) + "&" + temp_url
-#                sys.stdout.write( "if url : "+url+"\n")
+#                stdout.write( "if url : "+url+"\n")
             elif limit_to_nb_res_max > 0 and limit_to_nb_res_max >= kwargs[
                     'limit']:  #if nbr to display is specified and >= 300
                 if limit_to_nb_res_max < nbr_results:
@@ -381,7 +383,7 @@ class Dataset():
                 kwargs['nocount'] = 'true'
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs) + "&" + temp_url
-#                sys.stdout.write( "elif url : "+url+"\n")
+#                stdout.write( "elif url : "+url+"\n")
             while (nbr_results - kwargs['start']
                    ) > 0:  #Do the job per 300 items till nbr_result is reached
                 #Check that request is done each 300 items
@@ -410,12 +412,12 @@ class Dataset():
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs
                 ) + "&" + temp_url  #encode new kwargs and build new url for request
-#                sys.stdout.write( "url : "+url+"\n")
+#                stdout.write( "url : "+url+"\n")
             return result
         else:
             out_mess = "Not allowed\nNbr results (%d) exceeds limit_request param: %d\n" % (
                 result_count['total'], limit_request)
-            sys.stdout.write(out_mess)
+            stdout.write(out_mess)
             return result
 
 #Output attributes of Dataset
@@ -520,7 +522,7 @@ class Project():
             domWadl = parseString(wadl)
         except:
             out_mess = "Project %s : project.resources_list() not allowed, please contact admin for more info\n" % self.name
-            sys.stdout.write(out_mess)
+            stdout.write(out_mess)
         else:
             resources = domWadl.getElementsByTagName('resource')
             for i in range(len(resources)):
@@ -560,5 +562,5 @@ class Project():
                     data.append(Dataset(ds_url))
         except:
             out_mess = "Error in Project.dataset_list() :\nCannot dataset %s is protected\nContact admin for more info\n" % url
-            sys.stdout.write(out_mess)
+            stdout.write(out_mess)
         return data

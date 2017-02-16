@@ -12,6 +12,8 @@ __maintainer__ = "Pablo ALINGERY"
 __email__ = "pablo.alingery.ias.u-psud.fr"
 
 from sitools2.core.pySitools2 import *
+from sys import stdout,stderr
+from os import path,mkdir
 from future.utils import iteritems
 from future.moves.urllib.request import urlretrieve
 
@@ -144,7 +146,7 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
         elif k == 'NB_RES_MAX':
             nb_res_max = v
 
-    sys.stdout.write("Loading GAIA-DEM Sitools2 client : %s \n" % sitools2_url)
+    stdout.write("Loading GAIA-DEM Sitools2 client : %s \n" % sitools2_url)
     if sitools2_url.startswith('http://medoc-dem'):
         gaia_dataset = Sdo_IAS_gaia_dataset(sitools2_url + "/ws_SDO_DEM")
     elif sitools2_url.startswith('http://idoc-medoc'):
@@ -208,7 +210,7 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
     if len(result) != 0:
         for data in result:
             gaia_data_list.append(Gaia_data(data))
-    sys.stdout.write("%s results returned\n" % len(gaia_data_list))
+    stdout.write("%s results returned\n" % len(gaia_data_list))
     return gaia_data_list
 
 
@@ -284,7 +286,7 @@ class Sdo_IAS_gaia_dataset(Dataset):
         else:
             plugin_id = ""
         if not quiet:
-            sys.stdout.write("Download %s file in progress ...\n" %
+            stdout.write("Download %s file in progress ...\n" %
                              download_type.lower())
 
     #   Dataset.execute_plugin(self,plugin_name=plugin_id, pkey_list=sunum_list, filename=filename)
@@ -295,12 +297,12 @@ class Sdo_IAS_gaia_dataset(Dataset):
                 pkey_list=sunum_list,
                 filename=filename)
         except:
-            sys.stdout.write("Error downloading selection %s \n" % filename)
+            stdout.write("Error downloading selection %s \n" % filename)
         else:
             if not quiet:
-                sys.stdout.write("Download selection %s completed\n" %
+                stdout.write("Download selection %s completed\n" %
                                  filename)
-                sys.stdout.flush()
+                stdout.flush()
 
 
 class Gaia_data():
@@ -432,14 +434,14 @@ class Gaia_data():
 
         if target_dir is not None:
             if not os.path.isdir(target_dir):
-                sys.stdout.write(
+                stdout.write(
                     "Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..."
                     % target_dir)
                 os.mkdir(target_dir)
             if target_dir[-1].isalnum():
                 target_dir = target_dir + '/'
             else:
-                sys.stdout.write(
+                stdout.write(
                     "Error get_file():\nCheck the param target_dir, special char %s at the end of target_dir is not allowed."
                     % target_dir[-1])
         else:
@@ -448,13 +450,13 @@ class Gaia_data():
             try:
                 urlretrieve(url, "%s%s" % (target_dir, item))
             except:
-                sys.stdout.write("Error downloading %s%s \n" %
+                stdout.write("Error downloading %s%s \n" %
                                  (target_dir, item))
             else:
                 if not quiet:
-                    sys.stdout.write("Download file %s%s completed\n" %
+                    stdout.write("Download file %s%s completed\n" %
                                      (target_dir, item))
-                    sys.stdout.flush()
+                    stdout.flush()
 
 
 def main():

@@ -1,10 +1,13 @@
 #! /usr/bin/env python
 """
-This script has been designed to give python programmers an easy way to interrogate media sitools2 interface.
-You can make a search with the following entries : a date range , a wavelenghth or multiple wavelengths , a cadence.
-You will have as a result a list of Sdo_data objets on which you can apply the method display() that will give you for each 
-the recnum, the sunum, the date_obs, the wavelength, the ias_location, the exptime and t_rec_index 
-For each result you will be able to call metadata_search() method in order to have the metadata information.mediia
+This script has been designed to give python programmers an easy way to 
+interrogate media sitools2 interface. You can make a search with the following 
+entries : a date range , a wavelenghth or multiple wavelengths , a cadence.
+You will have as a result a list of Sdo_data objets on which you can apply the
+method display() that will give you for each the recnum, the sunum, the 
+date_obs, the wavelength, the ias_location, the exptime and t_rec_index 
+For each result you will be able to call metadata_search() method in order to 
+have the metadata information.mediia
 @author: Pablo ALINGERY for IAS 28-08-2012
 """
 __version__ = "1.0"
@@ -35,7 +38,8 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
     Parameters
     ----------
     media_data_list : list of Sdo_data objects
-        The result of media_search can be passed as an argument of that function.
+        The result of media_search can be passed as an argument of that 
+        function.
         The size of the list must be >0
     target_dir : str 
         User can specify the directory of download
@@ -65,7 +69,8 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
     ]
     for k, v in iteritems(kwds):
         if k not in allowed_params:
-            mess_err = "Error in search():\n'%s' entry for the media_get function is not allowed\n" % k
+            mess_err = "Error in search():\n'%s' entry for the media_get "
+            "function is not allowed\n" % k
             raise ValueError(mess_err)
         if k == 'TARGET_DIR':
             target_dir = v
@@ -163,7 +168,8 @@ def media_get_selection(server=None,
             % server)
     if server is not None and server not in allowed_server:
         raise ValueError(
-            "Server %s is not allowed for media_get_selection()\nServers available : %s\n"
+            "Server %s is not allowed for media_get_selection()\nServers "
+            "available : %s\n"
             % (server, allowed_server))
 
     sdo_dataset = Sdo_IAS_SDO_dataset(server + "/webs_IAS_SDO_dataset")
@@ -185,7 +191,8 @@ def media_get_selection(server=None,
 
 def media_search(server=None, dates=None, waves=None, series=None,
                     cadence=None, nb_res_max=-1, **kwds):
-    """Use the generic search() from pySitools2 library for Sitools2 SDO instance located at IAS  
+    """Use the generic search() from pySitools2 library for Sitools2 SDO 
+    instance located at IAS  
 
     Parameters
     ----------
@@ -240,7 +247,8 @@ def media_search(server=None, dates=None, waves=None, series=None,
     ]
     for k, v in iteritems(kwds):
         if k not in allowed_params:
-            mess_err = "Error in search():\n'%s' entry for the search function is not allowed\n" % k
+            mess_err = "Error in search():\n'%s' entry for the search function"
+            " is not allowed\n" % k
             raise ValueError(mess_err)
         else:
             if k == 'SERVER':
@@ -286,12 +294,14 @@ def media_search(server=None, dates=None, waves=None, series=None,
     if server is None and series is None:
         server = 'http://medoc-sdo.ias.u-psud.fr'
         stdout.write(
-            "server parameter not specified, default value is set : server='http://medoc-sdo.ias.u-psud.fr'\n"
+            "server parameter not specified, default value is set : "
+            "server='http://medoc-sdo.ias.u-psud.fr'\n"
         )
     elif server is None and series.startswith('aia'):
         server = 'http://medoc-sdo.ias.u-psud.fr'
         stdout.write(
-            "server parameter not specified, default value is set : server='http://medoc-sdo.ias.u-psud.fr'\n"
+            "server parameter not specified, default value is set : "
+            "server='http://medoc-sdo.ias.u-psud.fr'\n"
         )
     elif server is None and series.startswith('hmi'):
         server = 'http://idoc-medoc-test.ias.u-psud.fr'
@@ -304,27 +314,29 @@ def media_search(server=None, dates=None, waves=None, series=None,
         mess_err = "Error in search():\ndates entry must be specified"
         raise ValueError(mess_err)
     if type(dates).__name__ != 'list':
-        mess_err = "Error in search():\nentry type for dates is : %s\ndates must be a list type" % type(
-            dates).__name__
+        mess_err = "Error in search():\nentry type for dates is : %s\ndates "
+        "must be a list type" % type(dates).__name__
         raise TypeError(mess_err)
     if len(dates) != 2:
-        mess_err = "Error in search() : %d elements specified for dates\ndates param must be specified and a list of 2 elements" % len(
-            dates)
+        mess_err = "Error in search() : %d elements specified for dates\ndates"
+        " param must be specified and a list of 2 elements" % len(dates)
         raise ValueError(mess_err)
     for date in dates:
         if type(date).__name__ != 'datetime':
-            mess_err = "Error in search() : type for dates element is %s \ndates list element must be a datetime type" % type(
-                date).__name__
+            mess_err = "Error in search() : type for dates element is %s \n"
+            "dates list element must be a datetime type" % type(date).__name__
             raise TypeError(mess_err)
         else:
-            #Trick to adapt to date format on solar-portal-test (to be fixed and that trick removed):
+            #Trick to adapt to date format on solar-portal-test 
+            #(to be fixed and that trick removed):
             if server.startswith('http://medoc-sdo'):
                 dates_optim.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
             else:
                 dates_optim.append(
                     str(date.strftime("%Y-%m-%dT%H:%M:%S")) + ".000")
     if dates[1] <= dates[0]:
-        mess_err = "Error in search():\nd1=%s\nd2=%s\nfor dates =[d1,d2] d2 should be > d1" % (
+        mess_err = "Error in search():\nd1=%s\nd2=%s\nfor dates =[d1,d2] d2 "
+        "should be > d1" % (
             dates[1].strftime("%Y-%m-%dT%H:%M:%S"),
             dates[2].strftime("%Y-%m-%dT%H:%M:%S"))
         raise ValueError(mess_err)
@@ -336,14 +348,18 @@ def media_search(server=None, dates=None, waves=None, series=None,
             '94', '131', '171', '193', '211', '304', '335', '1600', '1700'
         ]
         stdout.write(
-            "waves parameter not specified, default value is set : waves = ['94','131','171','193','211','304','335','1600','1700'] \n"
+            "waves parameter not specified, default value is set : "
+            "waves = ['94','131','171','193','211','304','335','1600','1700']"
+            "\n"
         )
     if waves is None and series == 'aia.lev1':
         waves = [
             '94', '131', '171', '193', '211', '304', '335', '1600', '1700'
         ]
         stdout.write(
-            "waves parameter not specified, 'aia.lev1' default value is set : waves = ['94','131','171','193','211','304','335','1600','1700'] \n"
+            "waves parameter not specified, 'aia.lev1' default value is set : "
+            "waves = ['94','131','171','193','211','304','335','1600','1700'] "
+            "\n"
         )
     elif waves is None and series.startswith('hmi'):
         waves = [6173]
@@ -367,18 +383,21 @@ def media_search(server=None, dates=None, waves=None, series=None,
         elif len(counter_waves_type_list) > 1:
             raise ValueError("waves parameter must have same type !!!!\n")
     else:
-        mess_err = "Error in search():\nentry type for waves is : %s\nwaves must be a list or int type " % type(
-            waves).__name__
+        mess_err = "Error in search():\nentry type for waves is : %s\nwaves "
+        "must be a list or int type " % type(waves).__name__
         raise TypeError(mess_err)
 
     for wave in waves:
         if type(wave).__name__ != 'str':
-            mess_err = "Error in search():\nEntry type for waves element is %s\nlist element for waves must be a string type" % type(
-                wave).__name__
+            mess_err = "Error in search():\nEntry type for waves element is "
+            "%s\nlist element for waves must be a "
+            "string type" % type(wave).__name__
             raise TypeError(mess_err)
 
-        if wave not in waves_allowed_aia_list and wave not in waves_allowed_hmi_list:
-            mess_err = "Error in search():\nwaves= %s not allowed\nwaves must be in list %s" % (
+        if wave not in waves_allowed_aia_list \
+        and wave not in waves_allowed_hmi_list:
+            mess_err = "Error in search():\nwaves= %s not allowed\nwaves must "
+            "be in list %s" % (
                 waves, waves_allowed_aia_list + waves_allowed_hmi_list)
             raise ValueError(mess_err)
 
@@ -390,24 +409,26 @@ def media_search(server=None, dates=None, waves=None, series=None,
     if series is None and '6173' not in waves:
         series = 'aia.lev1'
         stdout.write(
-            "series parameter not specified, default value is set : series='aia.lev1'\n"
+            "series parameter not specified, default value is set :"
+            " series='aia.lev1'\n"
         )
     elif series is None and '6173' in waves:
         mess_err = "series parameter must be specified"
         raise ValueError()
     if type(series).__name__ != 'str':
-        mess_err = "Error in search():\nentry type for series is : %s\nseries must be a str type" % type(
+        mess_err = "Error in search():\nentry type for series is : %s\n"
+        "series must be a str type" % type(
             series).__name__
         raise TypeError(mess_err)
     if series not in series_allowed_list:
-        mess_err = "Error in search():\nseries= %s not allowed\nseries must be in list %s" % (
-            series, series_allowed_list)
+        mess_err = "Error in search():\nseries= %s not allowed\nseries must be"
+        " in list %s" % (series, series_allowed_list)
         raise ValueError(mess_err)
     if series.startswith('hmi'):
         if waves != ['6173']:
             raise ValueError(
-                "waves value %s does not correspond to the series specified : %s "
-                % (",".join(waves), series))
+                "waves value %s does not correspond to the series specified :"
+                " %s "% (",".join(waves), series))
         if server.startswith('http://medoc-sdo'):
             raise ValueError("server %s only for aia.lev1 data\n" % server)
         cadence_allowed_list = {
@@ -421,35 +442,38 @@ def media_search(server=None, dates=None, waves=None, series=None,
         if cadence is None:
             cadence = ['12m']
             stdout.write(
-                "cadence not specified, default value for %s is set : cadence=['12m']\n"
-                % series)
+                "cadence not specified, default value for %s is set :"
+                " cadence=['12m']\n"% series)
 
 #cadence
     if cadence is None and series.startswith('aia.lev1'):
         cadence = ['1m']
         stdout.write(
-            "cadence parameter not specified, default value for aia.lev1 is set : cadence=[1m]\n"
+            "cadence parameter not specified, default value for aia.lev1 is "
+            "set : cadence=[1m]\n"
         )
     elif cadence is None and series.startswith('hmi'):
         cadence = ['12m']
         stdout.write(
-            "cadence parameter not specified, default value for %s is set : cadence=[1m]\n"
-            % series)
+            "cadence parameter not specified, default value for %s is set :"
+            " cadence=[1m]\n"% series)
     if type(cadence).__name__ == 'str':
         cadence = [cadence]
     if type(cadence).__name__ != 'list':
-        mess_err = "Entry type for cadence is : %s\ncadence must be a list or a string type" % type(
-            cadence).__name__
+        mess_err = "Entry type for cadence is : %s\ncadence must be a list or"
+        " a string type" % type(cadence).__name__
         raise ValueError(mess_err)
     if len(cadence) != 1:
-        mess_err = "Error in search():\n%d elements specified for cadence\ncadence param must be specified and a list of only one element" % len(
-            cadence)
+        mess_err = "Error in search():\n%d elements specified for cadence"
+        "\ncadence param must be specified and a list of only one" 
+        "element" % len(cadence)
         raise ValueError(mess_err)
 
     for cadence in cadence:
         if (cadence not in cadence_allowed_list.keys()) and (
                 cadence not in cadence_allowed_list.values()):
-            mess_err = "Error in search():\ncadence= %s not allowed\ncadence for %s must be in list :\n%s\n" % (
+            mess_err = "Error in search():\ncadence= %s not allowed\n"
+            "cadence for %s must be in list :\n%s\n" % (
                 cadence, series, cadence_allowed_list)
             raise ValueError(mess_err)
         elif cadence in cadence_allowed_list.values():
@@ -459,11 +483,13 @@ def media_search(server=None, dates=None, waves=None, series=None,
 
 #nb_res_max 
     if type(nb_res_max).__name__ != 'int':
-        mess_err = "Error in search():\nentry type for nb_res_max is : %s\nnb_res_max must be a int type" % type(
+        mess_err = "Error in search():\nentry type for nb_res_max is : "
+        "%s\nnb_res_max must be a int type" % type(
             nb_res_max).__name__
         raise TypeError(mess_err)
     if nb_res_max != -1 and nb_res_max < 0:
-        mess_err = "Error in search():\nnb_res_max= %s not allowed\nnb_res_max must be >0" % nb_res_max
+        mess_err = "Error in search():\nnb_res_max= %s not allowed\n"
+        "nb_res_max must be >0" % nb_res_max
         raise ValueError(mess_err)
 #######################CONTROL_END 
 
@@ -498,7 +524,8 @@ def media_search(server=None, dates=None, waves=None, series=None,
     cadence_param = [[sdo_dataset.fields_dict['mask_cadence']], cadence,
                      'cadence']
 
-    #OUTPUT get,recnum,sunum,series_name,date__obs,wave,ias_location,exptime,t_rec_index,ias_path
+    #OUTPUT get,recnum,sunum,series_name,date__obs,wave,ias_location,exptime,
+    #t_rec_index,ias_path
     if series == 'aia.lev1':
         output_options=[sdo_dataset.fields_dict['get'], 
                         sdo_dataset.fields_dict['recnum'], 
@@ -535,9 +562,12 @@ def media_search(server=None, dates=None, waves=None, series=None,
                         sdo_dataset.fields_dict['ias_path'] 
         ]
 
-#   output_options=[sdo_dataset.fields_dict['recnum'],sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],\
-#                   sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],sdo_dataset.fields_dict['ias_location'],\
-#                   sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'], sdo_dataset.fields_dict['ias_path'] ]
+#   output_options=[sdo_dataset.fields_dict['recnum'],
+#sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],\
+#sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],
+#sdo_dataset.fields_dict['ias_location'],
+#sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'],
+#sdo_dataset.fields_dict['ias_path'] ]
 
 #Sort date_obs ASC, wave ASC
     sort_options = [[sdo_dataset.fields_dict['date__obs'], 'ASC'],
@@ -620,7 +650,8 @@ def media_metadata_search(
                 'MEDIA_DATA_LIST'
         ]:
             raise ValueError(
-                "Error media_metatada_search():\n'%s' parameter for media_search() function is not allowed\n"
+                "Error media_metatada_search():\n'%s' parameter for "
+                "media_search() function is not allowed\n"
                 % k)
         if k == 'KEYWORDS':
             keywords = v
@@ -647,7 +678,8 @@ def media_metadata_search(
     if len(keywords) == 0:
         raise ValueError("KEYWORD must be specified")
     if type(keywords).__name__ != 'list':
-        mess_err = "Error in media_metadata_search():\nentry type for keywords is : %s\nkeywords must be a list type" % type(
+        mess_err = "Error in media_metadata_search():\nentry type for keywords"
+        " is : %s\nkeywords must be a list type" % type(
             keywords).__name__
         raise TypeError(mess_err)
 ##media_data_list
@@ -672,14 +704,16 @@ def media_metadata_search(
 #series
     if series is None and len(media_data_list) == 0:
         raise ValueError(
-            "Error in media_metadata_search():\nseries parameter must be specified\n"
+            "Error in media_metadata_search():\nseries parameter must be "
+            "specified\n"
         )
 
 ##server
     if server is None and series.startswith('aia'):
         server = 'http://medoc-sdo.ias.u-psud.fr'
         stdout.write(
-            "server parameter not specified, default value is set : server='http://medoc-sdo.ias.u-psud.fr'\n"
+            "server parameter not specified, default value is set : "
+            "server='http://medoc-sdo.ias.u-psud.fr'\n"
         )
     elif server is None and series.startswith('hmi'):
         server = 'http://idoc-medoc-test.ias.u-psud.fr'
@@ -689,7 +723,8 @@ def media_metadata_search(
 
 ##recnum_list
     if len(recnum_list) == 0:
-        mess_err = "Error in media_metadata_search():\nNo recnum_list provided\nPlease check your request\n"
+        mess_err = "Error in media_metadata_search():\nNo recnum_list "
+        "provided\nPlease check your request\n"
         raise ValueError(mess_err)
 
 #Define dataset target 
@@ -709,8 +744,8 @@ def media_metadata_search(
         if key in metadata_ds.fields_dict:
             O1_aia.append(metadata_ds.fields_dict[key])
         else:
-            mess_err = "Error metadata_search(): %s keyword does not exist for series : %s \n" % (
-                key, series)
+            mess_err = "Error metadata_search(): %s keyword does not exist for"
+            " series : %s \n" % (key, series)
             raise ValueError(mess_err)
     S1_aia = [[metadata_ds.fields_dict['date__obs'], 'ASC']
               ]  #sort by date_obs ascendant
@@ -767,7 +802,8 @@ def metadata_info(server=None, series='aia.lev1'):
     if server is None:
         server = 'http://medoc-sdo.ias.u-psud.fr'
         stdout.write(
-            "server parameter not specified, default value is set : server='http://medoc-sdo.ias.u-psud.fr'\n"
+            "server parameter not specified, default value is set : "
+            "server='http://medoc-sdo.ias.u-psud.fr'\n"
         )
     elif server is None and series.startswith('hmi'):
         server = 'http://idoc-medoc-test.ias.u-psud.fr'
@@ -829,17 +865,20 @@ class Sdo_ias_sdo_dataset(Dataset):
                          download_type="TAR",
                          quiet=False,
                          **kwds):
-        """Use get_selection to retrieve a tar ball or a zip collection providing a list of sunum  
+        """Use get_selection to retrieve a tar ball or a zip collection 
+           providing a list of sunum  
         """
         if download_type.upper() not in ['TAR', 'ZIP']:
             stdout.write(
-                "Error get_selection(): %s type not allowed\nOnly TAR or ZIP is allowed for parameter download_type"
+                "Error get_selection(): %s type not allowed\nOnly TAR or ZIP "
+                "is allowed for parameter download_type"
                 % download_type)
 
         for k, v in iteritems(kwds):
             if k not in ['FILENAME', 'TARGET_DIR', 'QUIET', 'DOWNLOAD_TYPE']:
                 stdout.write(
-                    "Error get_file():\n'%s' entry for the search function is not allowed"
+                    "Error get_file():\n'%s' entry for the search function is"
+                    " not allowed"
                     % k)
             elif k == 'FILENAME':
                 filename = v
@@ -856,7 +895,8 @@ class Sdo_ias_sdo_dataset(Dataset):
         if target_dir is not None:
             if not path.isdir(target_dir):
                 stdout.write(
-                    "Error get_file():\n'%s' directory did not exist.\nCreation directory in progress ..."
+                    "Error get_file():\n'%s' directory did not exist.\n"
+                    "Creation directory in progress ..."
                     % target_dir)
                 mkdir(target_dir)
             if target_dir[-1].isalnum():
@@ -865,7 +905,8 @@ class Sdo_ias_sdo_dataset(Dataset):
                 filename = target_dir + filename
             else:
                 stdout.write(
-                    "Error get_file():\nCheck the param target_dir, special char %s at the end of target_dir is not allowed."
+                    "Error get_file():\nCheck the param target_dir, "
+                    "special char %s at the end of target_dir is not allowed."
                     % target_dir[-1])
 
         if download_type.upper() == "TAR":
@@ -876,7 +917,8 @@ class Sdo_ias_sdo_dataset(Dataset):
             stdout.write("Download %s file in progress ..." %
                              download_type.lower())
 
-    #   Dataset.execute_plugin(self,plugin_name=plugin_id, pkey_list=sunum_list, filename=filename)
+    #   Dataset.execute_plugin(self,plugin_name=plugin_id, "
+    #pkey_list=sunum_list, filename=filename)
         try:
             Dataset.execute_plugin(
                 self,
@@ -994,13 +1036,17 @@ class Sdo_data():
     def __repr__(self):
         if (self.series_name).startswith('hmi.sharp'):
             return (
-                "url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, harpnum : %d\n"
+                "url : %s,recnum : %d, sunum : %d, series_name : %s, "
+                "date_obs : %s, wave : %d, ias_location : %s, exptime : %s, "
+                "t_rec_index : %d, harpnum : %d\n"
                 % (self.url, self.recnum, self.sunum, self.series_name,
                    self.date_obs, self.wave, self.ias_location,
                    self.exptime, self.t_rec_index, self.harpnum))
         else:
             return (
-                "url : %s,recnum : %d, sunum : %d, series_name : %s, date_obs : %s, wave : %d, ias_location : %s, exptime : %s, t_rec_index : %d, ias_path : %s\n"
+                "url : %s,recnum : %d, sunum : %d, series_name : %s, "
+                "date_obs : %s, wave : %d, ias_location : %s, exptime : %s, "
+                "t_rec_index : %d, ias_path : %s\n"
                 % (self.url, self.recnum, self.sunum, self.series_name,
                    self.date_obs, self.wave, self.ias_location,
                    self.exptime, self.t_rec_index, self.ias_path))
@@ -1123,7 +1169,8 @@ class Sdo_data():
 #Create target location if it does not exist 
         if target_dir is not None:
             if not path.isdir(target_dir):
-                mess_warn = "Warning get_file(): \n'%s' directory " % target_dir
+                mess_warn = "Warning get_file(): \n'%s' directory"
+                "" % target_dir
                 mess_warn += "does not exist.\n"
                 mess_warn += "Creation of directory in progress ... \n"
                 stdout.write( mess_warn)
@@ -1194,7 +1241,8 @@ class Sdo_data():
         for k, v in iteritems(kwds):
             if k not in ['SERVER', 'KEYWORDS']:
                 raise ValueError(
-                    "Error get_file():\n'%s' entry for the search function is not allowed"
+                    "Error get_file():\n'%s' entry for the search function is"
+                    " not allowed"
                     % k)
             elif k == 'KEYWORDS':
                 keywords = v
@@ -1206,8 +1254,8 @@ class Sdo_data():
         if len(keywords) == 0:
             raise ValueError("keywords must be specified")
         if type(keywords).__name__ != 'list':
-            mess_err = "Error in metadata_search():\nentry type for keywords is : %s\nkeywords must be a list type" % type(
-                keywords).__name__
+            mess_err = "Error in metadata_search():\nentry type for keywords "
+            "is : %s\nkeywords must be a list type" % type(keywords).__name__
             raise TypeError(mess_err)
         if server.startswith('http://medoc-sdo'):
             metadata_ds = Sdo_aia_dataset(sitools2_url + "/webs_aia_dataset")
@@ -1230,7 +1278,7 @@ class Sdo_data():
                 O1.append(metadata_ds.fields_dict[key])
             else:
                 raise ValueError(
-                    "Error metadata_search(): %s keyword does not exist for %s "
+                    "Error metadata_search(): %s keyword does not exist for %s"
                     % (key, metadata_ds.name))
         S1 = [[metadata_ds.fields_dict['date__obs'], 'ASC']
               ]  #sort by date_obs ascendant
@@ -1245,7 +1293,8 @@ class Sdo_data():
 def main():
     d1 = datetime(2016, 6, 10, 0, 0, 0)
     d2 = d1 + timedelta(days=1)
-    #sdo_data_list=media_search(dates=[d1,d2],waves=['335'],cadence=['1h'],nb_res_max=10) 
+    #sdo_data_list=media_search(dates=[d1,d2],waves=['335'],cadence=['1h'],
+    #nb_res_max=10) 
     #   print sdo_data_list
     sdo_data_list = media_search(
         dates=[d1, d2],
@@ -1277,7 +1326,8 @@ def main():
 #Unit test metadata_search
 #   print "Test metadata_search"
 #   for item in sdo_data_list:
-#       my_meta_search=item.metadata_search(keywords=['sunum','recnum','quality','cdelt1','cdelt2','crval1'])
+#       my_meta_search=item.metadata_search(keywords=['sunum','recnum',
+#       'quality','cdelt1','cdelt2','crval1'])
 #       print my_meta_search
 if __name__ == "__main__":
     main()
