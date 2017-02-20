@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
 #    SITools2 client for Python
 #    Copyright (C) 2013 - Institut d'astrophysique spatiale
@@ -16,22 +16,28 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Jean-Christophe Malapert"
-__date__ ="$9 juin 2013 11:38:58$"
+__author__="Jean-Christophe Malapert, Pablo ALINGERY"
+__date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
-from sitools2.core.pySitools2 import *
+from sitools2.clients.sdo_client_medoc import *
 
-class TestSitools2Core(unittest.TestCase):        
+class TestMedia(unittest.TestCase):        
     
     def setUp(self):
         pass
-    
-    def testNbProjects(self):
-        sitools2 = Sitools2Instance('http://medoc-sdo.ias.u-psud.fr')
-        projects = sitools2.list_project()
-        self.assertEqual( len(projects), 2)           
-    
 
-if __name__ == '__main__':
+    def testSearchMedia(self):
+        print ("####Test idoc-medoc_search #############################")
+        d1 = datetime(2016,8,10,0,0,0)
+        d2 = d1 + timedelta(days=1)
+        sdo_data_list = media_search( 
+        	server="http://idoc-medoc-test.ias.u-psud.fr", 
+        	dates=[d1,d2], 
+        	series='hmi.sharp_720s_nrt', 
+        	cadence=['12 min'] )
+
+        self.assertEqual( len(sdo_data_list), 861)                            
+
+if __name__ == "__main__":
     unittest.main()

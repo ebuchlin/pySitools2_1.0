@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 #    SITools2 client for Python
 #    Copyright (C) 2013 - Institut d'astrophysique spatiale
 #
@@ -12,6 +14,25 @@
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-__author__ = "Jean-Christophe Malapert"
-__date__ = "$8 mai 2013 02:03:07$"
+#    along with this program.  If not, see <http://www.gnu.org/licenses
+
+__author__="Jean-Christophe Malapert"
+__date__ ="$9 juin 2013 11:38:58$"
+
+import unittest
+from sitools2.core.pySitools2 import *
+
+class TestSitools2Core(unittest.TestCase):        
+    
+    def setUp(self):
+        pass
+    
+    def testNbProjects(self):
+        print ("####Test media nbr projects #################################")
+        sitools2 = Sitools2Instance('http://medoc-sdo.ias.u-psud.fr')
+        projects = sitools2.list_project()
+        self.assertEqual( len(projects), 2)           
+    
+
+if __name__ == '__main__':
+    unittest.main()

@@ -16,22 +16,25 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Jean-Christophe Malapert"
+__author__="Jean-Christophe Malapert, Pablo ALINGERY"
 __date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
-from sitools2.clients.gaia_client_medoc import *
+from sitools2.clients.sdo_client_medoc import *
 
-class TestGaia(unittest.TestCase):        
+class TestMedia(unittest.TestCase):        
     
     def setUp(self):
         pass
-    
-    def testSearchGaia(self):
+
+    def testGetMedia(self):
+        print ("####Test media_get #############################")
         d1 = datetime(2012,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
-        gaia_data_list = gaia_search( DATES=[d1,d2], NB_RES_MAX=10 )        
-        self.assertEqual( len(gaia_data_list), 10)                            
-
+        sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['10 min'], nb_res_max=2 )
+        try :
+            result =media_get(MEDIA_DATA_LIST=sdo_data_list )
+        except :
+            raise ValueError("Failed donwloading media data")
 if __name__ == "__main__":
     unittest.main()

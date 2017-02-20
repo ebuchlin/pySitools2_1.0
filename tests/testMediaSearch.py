@@ -28,16 +28,11 @@ class TestMedia(unittest.TestCase):
         pass
 
     def testSearchMedia(self):
+        print ("####Test media_search #############################")
         d1 = datetime(2012,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
         sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['10 min'] )
         self.assertEqual( len(sdo_data_list), 288)                            
-
-    def testGetMedia(self):
-        d1 = datetime(2012,8,10,0,0,0)
-        d2 = d1 + timedelta(days=1)
-        sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['10 min'], nb_res_max=2 )
-        media_get(MEDIA_DATA_LIST=sdo_data_list )
 
 if __name__ == "__main__":
     unittest.main()
