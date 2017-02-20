@@ -240,15 +240,24 @@ def media_search(server=None, dates=None, waves=None, series=None,
     -----
     ValueError
         parameter not in allowed_parmas list
-        server parameter value is not allowed 
+        server parameter value is not allowed
+        server not specified and hmi data requested ie wave = 6173 
         dates parameter is not specified
         d1 > d2 error date range 
         wave list have not the same type 
         wave arg is not in allowed list 
+        series not in aia or hmi allowed_list
+        series hmi and wave not 6173
+        series hmi and server medoc-sdo (only for aia data)
+        Cadence not a list of one element
+        Cadence not allowed 
+        nbr_res_max different than -1 and <0
+        server not known 
     TypeError
         dates type is not a datetime type 
         waves type is not a list of int
-    
+        series is not a str type
+
     Returns 
     -------
     Sdo_data object list 
@@ -413,7 +422,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
         if type(wave).__name__ != 'str':
             mess_err = "Error in search():\nEntry type for waves element is "
             "%s\nlist element for waves must be a "
-            "string type" % type(wave).__name__
+            "string or a int type" % type(wave).__name__
             raise TypeError(mess_err)
 
         if wave not in waves_allowed_aia_list \
@@ -644,6 +653,18 @@ def media_metadata_search(
         name of the series requested 
         That param is computed in case media_data_list is provided
 
+    Raise 
+    -----
+    ValueError
+        Parameter not in allowed list
+        keyword not specified
+        media_data_list is none and server is not specified
+        server not allowed
+        recnum_list is null 
+        keyword does not exist for series_name 
+    TypeError
+        keyword no a list type
+
     Returns 
     -------
         List of dictionaries of the data requested 
@@ -808,6 +829,11 @@ def metadata_info(server=None, series='aia.lev1'):
     series : str 
     name of the series requested 
     default value aia.lev1 
+    
+    Raise 
+    -----
+    ValueError 
+        server not in allowed list 
 
     Returns 
     -------
@@ -842,7 +868,16 @@ def metadata_info(server=None, series='aia.lev1'):
 
     return metadata_ds.display()
 
-#Define a decorator only one instance 
+
+class Sdo_dataset(Dataset):
+    """Definition de la classe Sdo_dataset that heritates of Dataset
+    Can have several instances
+    """
+
+    def __init__(self, url):
+        Dataset.__init__(self, url)
+
+
 def singleton(class_def):
     """Decorate a class so only one instance exist 
     """
@@ -855,27 +890,26 @@ def singleton(class_def):
 
     return get_instance
 
-
-#This following classes will only have one instance 
 @singleton
 class Sdo_aia_dataset(Dataset):
-    """Definition de la classe Sdo_aia_dataset that heritates of Dataset"""
+    """Definition de la classe Sdo_aia_dataset that heritates of Dataset
+    This following classes will only have one instance 
+    """
 
     def __init__(self, url):
         Dataset.__init__(self, url)
 
-
-class Sdo_dataset(Dataset):
-    """Definition de la classe Sdo_dataset that heritates of Dataset"""
-
-    def __init__(self, url):
-        Dataset.__init__(self, url)
-
-
-#This following classes will only have one instance 
 @singleton
 class Sdo_ias_sdo_dataset(Dataset):
-    """Definition de la classe Sdo_ias_sdo_dataset that heritates of Dataset"""
+    """Definition de la classe Sdo_ias_sdo_dataset that heritates of Dataset
+    This following classes will only have one instance 
+
+    Methods
+    -------
+    __get__selection__()
+        Download Tar or Zip selection
+
+    """
 
     def __init__(self, url):
         Dataset.__init__(self, url)
@@ -1102,7 +1136,11 @@ class Sdo_data():
             Type of the file 
             Can value aia.lev1 or spikes for SDO/AIA-LEV1 
             Can value 'bitmap', 'Bp_err', 'Bt','conf_disambig', ...
-                
+        
+        Raise 
+        -----
+        ValueError
+            parameter not allowed 
         Returns 
         -------
         Files located in the target_dir directory 
