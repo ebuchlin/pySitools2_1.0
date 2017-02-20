@@ -27,7 +27,7 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds) :
     """Donwload the data from MEDOC server 
 
     Parameters
-    ------------
+    ----------
     media_data_list : list of Sdo_data objects
         The result of media_search can be passed as an argument of that function.
         The size of the list must be >0
@@ -42,9 +42,14 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds) :
         Can be 'TAR' or 'ZIP' 
         Ex :
             media_get (MEDIA_DATA_LIST=sdo_data_list,DOWNLOAD_TYPE="tar")
+    
+    Raise 
+    -----
+    ValueError 
+        In case parameter media_data_list is empty 
 
     Returns 
-    --------------
+    -------
     Files located in the target_dir directory 
     """
 
@@ -77,11 +82,10 @@ def media_get_selection(server=None, media_data_list=[], download_type="TAR", **
     """Donwload a selection from MEDOC server tar or zip file  
 
     Parameters
-    ------------
+    ----------
     server : text 
-    Name of the MEDOC SOLAR server 
-    Ex : 'http://idoc-medoc.ias.u-psud.fr' 
-
+        Name of the MEDOC SOLAR server 
+        Ex : 'http://idoc-medoc.ias.u-psud.fr' 
     media_data_list : list of Sdo_data objects
         The result of media_search can be passed as an argument of that function.
         Ex :
@@ -96,8 +100,15 @@ def media_get_selection(server=None, media_data_list=[], download_type="TAR", **
         User can specify the directory of download
         Ex :
             media_get_selection(MEDIA_DATA_LIST=sdo_data_list, target_dir='results',download_type='TAR')
-    Returns 
-    --------------
+
+    Raise
+    -----
+    ValueError 
+        server parameter value is not allowed
+        media_data_list parameter value is empty
+
+    Returns
+    -------
     Files located in the target_dir directory 
     """
     for k,v  in kwds.iteritems():
@@ -139,35 +150,43 @@ def media_search(server=None,dates=None,waves=None,series=None,cadence=None,nb_r
     """Use the generic search() from pySitools2 library for Sitools2 SDO instance located at IAS  
 
     Parameters
-    ------------
+    ----------
     server : text 
-    Name of the MEDOC SOLAR server 
-    Ex : 'http://idoc-medoc.ias.u-psud.fr' 
-
+        Name of the MEDOC SOLAR server 
+        Ex : 'http://idoc-medoc.ias.u-psud.fr' 
     dates : datetime 
-    Interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1
-    
+        Interval of dates within you wish to make a research, it must be specifed and composed of 2 datetime elements d1 d2, with d2 >d1
     waves  : list 
-    Wavelength (in Angstrom)
-    Must be a list of wave integer or text
-    waves must be in the list [94,131,171,193,211,304,335,1600,1700,6173]
-    default value if not specified ['94','131','171','193','211','304','335','1600','1700'] so aia.lev1 data 
-
+        Wavelength (in Angstrom)
+        Must be a list of wave integer or text
+        waves must be in the list [94,131,171,193,211,304,335,1600,1700,6173]
+        default value if not specified ['94','131','171','193','211','304','335','1600','1700'] so aia.lev1 data 
     series : text
-    series name of the data 
-    can be aia.lev1 , hmi.sharp_720s ...
-    default value aia.lev1 if not specified 
-
+        series name of the data 
+        can be aia.lev1 , hmi.sharp_720s ...
+        default value aia.lev1 if not specified 
     cadence : text 
-    Can be a string and in list ['12 sec','1 min', '2 min', '10 min', '30 min', '1 h', '2 h', '6 h', '12 h' , '1 day', '12 min']
-    cadence default values '1 min' or 12 min for hmi data
-
+        Can be a string and in list ['12 sec','1 min', '2 min', '10 min', '30 min', '1 h', '2 h', '6 h', '12 h' , '1 day', '12 min']
+        cadence default values '1 min' or 12 min for hmi data
     nb_res_max : integer
-    Nbr of results you wish to display from the results 
-    Must be an integer and if specified must be >0
+        Nbr of results you wish to display from the results 
+        Must be an integer and if specified must be >0
 
+    Raise 
+    -----
+    ValueError
+        parameter not in allowed_parmas list
+        server parameter value is not allowed 
+        dates parameter is not specified
+        d1 > d2 error date range 
+        wave list have not the same type 
+        wave arg is not in allowed list 
+    TypeError
+        dates type is not a datetime type 
+        waves type is not a list of int
+    
     Returns 
-    --------------
+    -------
     Sdo_data list 
     """
 
