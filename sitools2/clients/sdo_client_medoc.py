@@ -1141,6 +1141,7 @@ class Sdo_data():
         -----
         ValueError
             parameter not allowed 
+            
         Returns 
         -------
         Files located in the target_dir directory 
@@ -1192,8 +1193,7 @@ class Sdo_data():
         if segment is None and filename is None and (
             self.series_name == 'aia.lev1'):
                 segment = ['image_lev1']
-        elif segment is None and filename is None and (
-                self.series_name).startswith('hmi.sharp'):
+        elif filename is None and (self.series_name).startswith('hmi.sharp'):
             segment=[]
             kwargs={}
             kwargs.update({'media': 'json'})
@@ -1211,13 +1211,12 @@ class Sdo_data():
         elif segment is None and filename is None and (
                 self.series_name).startswith('hmi.m'):
             segment = ['magnetogram']
+
         elif filename is not None:
             segment = [filename]
 
         segment_allowed += [
-            'image_lev1', 'bitmap', 'Bp_err', 'Bp', 'Br_err', 'Br', 'Bt_err',
-            'Bt', 'conf_disambig', 'continuum', 'Dopplergram', 'magnetogram',
-            'alpha_err'
+            'image_lev1', 'continuum', 'magnetogram'
         ]
 
         for seg in segment:
@@ -1240,9 +1239,9 @@ class Sdo_data():
             elif target_dir[-1] == '/':
                 filename_pre = target_dir + filename_pre
             else:
-                mess_err = "Error get_file()\nCheck the parma target_dir, "
-                mess_err += "special char %s at the end of"% target_dir[-1]
-                mess_err += " the target_dir is not allowed.\n" 
+                mess_err = "Error get_file()\nCheck the param target_dir,"
+                "special char %s at the end of"% target_dir[-1]
+                " the target_dir is not allowed.\n" 
                 raise ValueError(mess_err)
 
 #Specification for aia.lev1 and COMPRESS param 
@@ -1291,6 +1290,15 @@ class Sdo_data():
             keywords : list of str
                 List of names of metadata that you wish to have in the output.
             
+            Raise 
+            -----
+            ValueError
+                parameter is not allowed
+                keyword not specified
+                keyword is not a list type
+                server is unknown 
+                keyword does not exist for the dataset 
+                no data returned
             Returns 
             -------
                 List of dictionaries of the data requested 
