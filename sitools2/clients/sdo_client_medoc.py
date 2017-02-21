@@ -922,7 +922,28 @@ class Sdo_ias_sdo_dataset(Dataset):
                          quiet=False,
                          **kwds):
         """Use get_selection to retrieve a tar ball or a zip collection 
-           providing a list of sunum  
+        providing a list of sunum 
+
+        Parameters
+        ------------
+        sunum_list : list 
+            List of integer 
+        filename : str
+            Name of file(s) downloaded
+            You can build a patern including sunum to distinguish them
+        target_dir : str
+            Directory of download created if it does not exist yet
+        download_type : str
+            Can value 'TAR' or 'ZIP'
+        quiet : boolean
+            Display info during th download or not 
+
+        Raise  
+        -----
+        ValueError 
+            download type not allowed
+            parameter not allowed
+            special char at the end of target_dir 
         """
         if download_type.upper() not in ['TAR', 'ZIP']:
             stdout.write(

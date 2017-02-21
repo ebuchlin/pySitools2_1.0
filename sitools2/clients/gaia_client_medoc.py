@@ -253,8 +253,8 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
 
 #Define decorator
 def singleton(class_def):
-    """Define decorator that will modify the class so decorated and only return
-    the same instance of a class
+    """Definition de la classe Sdo_aia_dataset that heritates of Dataset
+    This following classes will only have one instance 
     """
 
     instances = {}
@@ -275,7 +275,15 @@ def singleton(class_def):
 #This following classes will only have one instance 
 @singleton
 class Sdo_IAS_gaia_dataset(Dataset):
-    """Define  class Sdo_IAS_gaia_dataset that heritates of Dataset"""
+    """Define  class Sdo_IAS_gaia_dataset that heritates of Dataset
+    This following classes will only have one instance 
+
+    Methods
+    -------
+    __get__selection__()
+        Download Tar or Zip selection
+
+    """
 
     def __init__(self, url):
         Dataset.__init__(self, url)
@@ -287,9 +295,30 @@ class Sdo_IAS_gaia_dataset(Dataset):
                          download_type="TAR",
                          quiet=False,
                          **kwds):
-        """Use getSelection to retrieve a tar ball or a zip collection 
-        providing a list of sunum  
-        """
+    """Use get_selection to retrieve a tar ball or a zip collection 
+        providing a list of sunum 
+
+    Parameters
+    ------------
+    sunum_list : list 
+        List of integer 
+    filename : str
+        Name of file(s) downloaded
+        You can build a patern including sunum to distinguish them
+    target_dir : str
+        Directory of download created if it does not exist yet
+    download_type : str
+        Can value 'TAR' or 'ZIP'
+    quiet : boolean
+        Display info during th download or not 
+
+    Raise  
+    -----
+    ValueError 
+        download type not allowed
+        parameter not allowed
+        special char at the end of target_dir 
+    """
         if download_type.upper() not in ['TAR']:
             raise ValueError(
                 "Error get_selection(): %s type not allowed\nOnly TAR is "
@@ -348,13 +377,35 @@ class Sdo_IAS_gaia_dataset(Dataset):
             stdout.write("Error downloading selection %s \n" % filename)
         else:
             if not quiet:
-                stdout.write("Download selection %s completed\n" %
-                                 filename)
+                stdout.write("Download selection %s completed\n" % filename)
                 stdout.flush()
 
 
 class Gaia_data():
-    """Definition de la classe Gaia_data """
+    """Definition de la classe Gaia_data 
+
+    Attributes
+    ---------
+    download : str
+        The url of the data on MEDOC server 
+    sunum_193 : int
+       id of the sunum used to build the current record 
+    date_obs : str
+        Observation date (UTC) without time zone of the record computed by IAS
+    filename : str 
+        Name of file containg DEM_aia_#date_obs
+    temp_fits_rice_uri : str
+        uri of the temperture image preview
+    em_fits_rice_uri : str 
+        uri of the emision image preview
+    chi2_fits_rice_uri : str
+        uri of the Chi2 image preview
+    
+    Methods
+    -------
+    get_file()
+        Donwload the record 
+    """
 
     def __init__(self, data):
         self.download = ''
@@ -407,7 +458,6 @@ class Gaia_data():
         quiet : boolean
             Do not print info concerning the data downloaded if that is set to 
             'True'
-
         filetype : str
         Can be 'temp', 'em', 'width' or 'chi2'
         Type of file downloaded
