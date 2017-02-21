@@ -1281,28 +1281,29 @@ class Sdo_data():
                     stdout.flush()
 
     def metadata_search(self, server=None, keywords=[], **kwds):
-        """Provide metadata information from MEDOC server  
+        """Provide metadata information from MEDOC server
+        
+        Parameters
+        ----------
+        server : str 
+            Name of the MEDOC SOLAR server 
+        keywords : list of str
+            List of names of metadata that you wish to have in the output.
+        
+        Raise 
+        -----
+        ValueError
+            parameter is not allowed
+            keyword not specified
+            keyword is not a list type
+            server is unknown 
+            keyword does not exist for the dataset 
+            no data returned
 
-            Parameters
-            ----------
-            server : str 
-                Name of the MEDOC SOLAR server 
-            keywords : list of str
-                List of names of metadata that you wish to have in the output.
-            
-            Raise 
-            -----
-            ValueError
-                parameter is not allowed
-                keyword not specified
-                keyword is not a list type
-                server is unknown 
-                keyword does not exist for the dataset 
-                no data returned
-            Returns 
-            -------
-                List of dictionaries of the data requested 
-                Returns the exact data from db  
+        Returns 
+        -------
+            List of dictionaries of the data requested 
+            Returns the exact data from db  
         """
 
         #Allow lower case entries
