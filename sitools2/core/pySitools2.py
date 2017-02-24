@@ -62,7 +62,7 @@ class Sitools2Instance():
 
  
     def __init__(self, url):
-    """Initialize class Sitools2Instance"""
+        """Initialize class Sitools2Instance"""
         self.instanceUrl = url
         try:
             simplejson.load(urlopen(url + "/sitools/portal"))
@@ -75,22 +75,22 @@ class Sitools2Instance():
 
 
     def list_project(self, **kwargs):
-    """List all projects available for that SitoolsInstance
-    
-    parameters
-    ----------
-    kwargs : object 
-        Any param that can be usefull for the function urlencode()
+        """List all projects available for that SitoolsInstance
+        
+        parameters
+        ----------
+        kwargs : object 
+            Any param that can be usefull for the function urlencode()
 
-    Raise 
-    -----
-    Exception 
-        Cannot create project a Project instance
+        Raise 
+        -----
+        Exception 
+            Cannot create project a Project instance
 
-    Return
-    ------
-    list of objects project instance of Project
-    """
+        Return
+        ------
+        list of objects project instance of Project
+        """
         sitools_url = self.instanceUrl
         data = []
         kwargs.update({'media': 'json'})
@@ -174,8 +174,8 @@ class Field():
     def __repr__(self):
         return (
             "Field object display() :\n\t%s\n\t\tftype : %s\n\t\tffilter : "
-                ""%s"\n\t\tsort : %s\n\t\tbehavior : %s"
-            % (self.name, self.ftype, self.ffilter, self.sort, self.behavior))
+            "%s\n\t\tsort : %s\n\t\tbehavior : %s" % (self.name, 
+                    self.ftype, self.ffilter, self.sort, self.behavior))
 
 
 class Query():
@@ -734,9 +734,9 @@ class Project():
         Name, description, uri, url
         """
         phrase = ""
-        phrase += "\n\nProject object display() :\n\t%s\n\t\tdescription : "
-        "%s\n\t\turi : %s\n\t\turl : %s" % (self.name, self.description,
-        self.uri, self.url)
+        phrase += "\n\nProject object display() :\n\t"
+        "%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s" % (self.name, 
+            self.description, self.uri, self.url)
         phrase += "\n\t\tresources list :"
         if len(self.resources_target) != 0:
             for i, res in enumerate(self.resources_target):
