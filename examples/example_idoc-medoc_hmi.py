@@ -4,7 +4,8 @@
 @author: Pablo ALINGERY 
 """
 
-from sitools2.clients.sdo_client_medoc import media_search, media_metadata_search
+from sitools2.clients.sdo_client_medoc import media_search, \
+	media_metadata_search
 from datetime import datetime
 
 d1 = datetime(2016, 1, 1, 0, 0, 0)
