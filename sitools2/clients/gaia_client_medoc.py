@@ -295,7 +295,7 @@ class Sdo_IAS_gaia_dataset(Dataset):
                          download_type="TAR",
                          quiet=False,
                          **kwds):
-        """totoUse get_selection to retrieve a tar ball or a zip collection 
+        """Use get_selection to retrieve a tar ball or a zip collection 
             providing a list of sunum 
 
         Parameters
