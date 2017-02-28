@@ -1261,8 +1261,8 @@ class Sdo_data():
 #Create target location if it does not exist 
         if target_dir is not None:
             if not path.isdir(target_dir):
-                mess_warn = "Warning get_file(): \n'%s' directory"
-                "" % target_dir
+                mess_warn = ("Warning get_file(): \n'%s' directory"
+                    "") % target_dir
                 mess_warn += "does not exist.\n"
                 mess_warn += "Creation of directory in progress ... \n"
                 stdout.write( mess_warn)
