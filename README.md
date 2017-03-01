@@ -41,19 +41,19 @@ The retrieved module structure is the following (not all files are shown):
 
 ### Testing the module
 
-    $ cd pySitools2_1.0
+    cd pySitools2_1.0
     python setup.py test -q
 
 ## Installing the module
 
 ### Installing the module for the user ( highly recommended )
 
-    $ cd pySitools2_1.0
+    cd pySitools2_1.0
     python setup.py install --user
 
 ### Installing the module for the system
 
-    $ cd pySitools2_1.0
+    cd pySitools2_1.0
     sudo python setup.py install
 
 ## Features
@@ -72,15 +72,17 @@ This python module will allow you to :
 
 - Make a request using the media_search() function.
 
-    $ d1 = datetime(2012, 11, 21, 0, 0, 0)
-    d2 = d1 + timedelta(days=1)
-    sdo_data_list = media_search(dates=[d1, d2], waves=['335'], cadence=['6 h'] )
+        from sitools2.clients.gaia_client_medoc import *
+        d1 = datetime(2012, 11, 21, 0, 0, 0)
+        d2 = d1 + timedelta(days=1)
+        sdo_data_list = media_search(dates=[d1, d2], waves=['335'], cadence=['6 h'])
 
 - Simply download the result of your previous search() calling the media_get()function.
 
-    $ media_get (media_data_list=sdo_data_list, target_dir='results')
+        media_get (media_data_list=sdo_data_list, target_dir='results')
 
-- Have additional metadata information about each previous answer using the media_metadata_search() method.
+<!-- To be updated to work with current version -->
+<!--- Have additional metadata information about each previous answer using the media_metadata_search() method.
 
     $ for item in sdo_data_list:
         my_meta_search = item.media_metadata_search ( KEYWORDS=['quality','cdelt1','cdelt2'] )
@@ -91,9 +93,9 @@ This python module will allow you to :
     $ for item in sdo_data_list:
         my_meta_search = item.media_metadata_search ( KEYWORDS=['date__obs','quality','cdelt1','crval1'] )
         if (my_meta_search['quality'] == 0) :
-            item.get_file( TARGET_DIR='results/' )
+            item.get_file( TARGET_DIR='results/' )-->
 
-NB : For more information see the [README](http://sdo.ias.u-psud.fr/python/media/README_MEDIA.txt) file.
+For more information see the `README_MEDIA.txt` file.
 
 ### gaia_client_medoc.py
 
@@ -101,33 +103,33 @@ This python module will allow you to :
 
 - Make a request using the gaia_search() function.
 
-    $ d1=datetime( 2012,11,21,0,0,0 )
-    d2=d1+timedelta( days=1 )
-    gaia_data_list = gaia_search( DATES=[d1,d2] )
+        d1 = datetime(2012, 11, 21, 0, 0, 0)
+        d2 = d1 + timedelta(days=1)
+        gaia_data_list = gaia_search(dates=[d1, d2])
 
 - Simply download the result of your previous media_search() calling the media_get() function.
 
-    $ gaia_get( GAIA_LIST=gaia_data_list,TARGET_DIR='results' )
+        gaia_get(gaia_list=gaia_data_list, target_dir='results')
 
-- Specify the TYPE you want to retrieve , it should be a list among : 'temp','em','width','chi2'
+- Specify the type of data you want to retrieve, it should be a list containg elements among: 'temp', 'em', 'width', 'chi2':
 
-    $ gaia_get( GAIA_LIST=gaia_data_list, TARGET_DIR="results", TYPE=['temp','em'] )
+        gaia_get (gaia_list=gaia_data_list, target_dir="results", type=['temp', 'em'])
 
-For more information see the [README](http://sdo.ias.u-psud.fr/python/gaia-dem/README_GAIA.txt) file.
+For more information see the `README_GAIA.txt` file.
 
 ## Update the module 
 
-    $ cd pySitools2_1.0
+    cd pySitools2_1.0
     git pull origin master 
     sudo -H pip## install . --upgrade
 
-where ## is your pip version.
+where ## is your pip/python version.
 
 ## Remove the module 
 
 ### For the system
 
-    $ cd pySitools2_1.0
+    cd pySitools2_1.0
     sudo pip## uninstall pySitools2_1.0
     sudo rm -Rf /usr/local/lib/python##/dist-packages/pySitools2_1.0*.egg 
 
@@ -135,7 +137,7 @@ where ## is your pip/python version.
 
 ### For the user
 
-    $ cd pySitools2_1.0
+    cd pySitools2_1.0
     sudo pip## uninstall pySitools2_1.0
     sudo rm -Rf ~/.local/lib/python##/site-packages/pySitools2_1.0*.egg 
 
