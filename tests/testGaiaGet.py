@@ -32,7 +32,7 @@ class TestGaia(unittest.TestCase):
         d2 = d1 + timedelta(days=1)
         gaia_data_list = gaia_search( DATES=[d1,d2], NB_RES_MAX=10 )
         try :
-            gaia_get(gaia_list=gaia_data_list)
+            gaia_get(gaia_list=gaia_data_list, target_dir='results')
         except :
     	    raise ValueError("Error Test gaia_get()")
 
