@@ -76,7 +76,7 @@ class Sitools2Instance():
 
     def list_project(self, **kwargs):
         """List all projects available for that SitoolsInstance
-    
+
         parameters
         ----------
         kwargs : object 
@@ -174,7 +174,7 @@ class Field():
     def __repr__(self):
         return (
             "Field object display() :\n\t%s\n\t\tftype : %s\n\t\tffilter : "
-                "%s\n\t\tsort : %s\n\t\tbehavior : %s " % (self.name, 
+               "%s\n\t\tsort : %s\n\t\tbehavior : %s" % (self.name, 
                     self.ftype, self.ffilter, self.sort, self.behavior))
 
 
@@ -676,14 +676,30 @@ class Dataset():
 class Project():
     """Define a Project class.
        A Project instance gives details about a project of Sitools2. 
-       It has the following attributes : name, description, uri, url, 
-       resources_target.
-       The method dataset_list() will return information about the number of 
-       datasets available, their name and uri.
+
+    attributes
+    ----------
+    name : str
+        name of the Project
+    description : str
+        desciption of the project 
+    uri ; str 
+        uniform resource location 
+    url : str 
+        uniform resource identifier
+    resource_target : list 
+        list of resources target 
+
+    methods
+    -------
+    dataset_list() 
+        returns information about the number of datasets available, 
+        their name and uri.    
     """
 
-    #Initialize Project
+
     def __init__(self, url):
+        """Initialize Project"""
         self.name = ""
         self.description = ""
         self.uri = "/" + url.split("/")[-1]
@@ -702,7 +718,6 @@ class Project():
         self.description = result['project']['description']
 
 
-
     def resources_list(self):
         """Explore Project resources (method=options should be allowed)
         """
@@ -713,13 +728,13 @@ class Project():
         except:
             out_mess = "Project %s : project.resources_list() not allowed, "
             "please contact admin for more info\n" % self.name
-            stdout.write(out_mess)
+            raise ValueError(out_mess)
         else:
             resources = domWadl.getElementsByTagName('resource')
             for i in range(len(resources)):
                 self.resources_target.append(self.url + "/" + resources[i]
                                              .getAttribute('path'))
-       
+
 
     def display(self):
         """Ouptut Project attributes"""

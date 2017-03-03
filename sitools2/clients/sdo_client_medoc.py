@@ -1214,7 +1214,8 @@ class Sdo_data():
         if segment is None and filename is None and (
             self.series_name == 'aia.lev1'):
                 segment = ['image_lev1']
-        elif filename is None and (self.series_name).startswith('hmi.sharp'):
+        elif segment is None and filename is None and (
+            self.series_name).startswith('hmi.sharp'):
             segment=[]
             kwargs={}
             kwargs.update({'media': 'json'})
@@ -1226,6 +1227,18 @@ class Sdo_data():
                     segment_allowed.append(item['name'].split(".fits")[0])
             else :
                 print ("No key 'items' found for %s " % url )
+        elif segment is not None and filename is None and (
+            self.series_name).startswith('hmi.sharp'):
+            kwargs={}
+            kwargs.update({'media': 'json'})
+            url = self.url + '?' + urlencode(kwargs)
+            result = simplejson.load(urlopen(url))
+            if result['items']:
+                for item in result['items'] :
+                    segment_allowed.append(item['name'].split(".fits")[0])
+            else :
+                print ("No key 'items' found for %s " % url )
+
         elif segment is None and filename is None and (
                 self.series_name).startswith('hmi.ic'):
             segment = ['continuum']
@@ -1236,10 +1249,9 @@ class Sdo_data():
         elif filename is not None:
             segment = [filename]
 
-        segment_allowed += [
-            'image_lev1', 'continuum', 'magnetogram'
-        ]
-
+        segment_allowed += [ 'image_lev1']
+#        print ("segment : %s" % segment)
+#        print (segment_allowed)
         for seg in segment:
             if seg not in segment_allowed and filename is None:
                 raise ValueError(
