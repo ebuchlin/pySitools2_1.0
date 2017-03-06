@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+
 """
 This is a generic python Sitools2 tool
 pySitools2 tool has been designed to perform all operations available within
@@ -63,6 +65,7 @@ class Sitools2Instance():
  
     def __init__(self, url):
         """Initialize class Sitools2Instance"""
+
         self.instanceUrl = url
         try:
             simplejson.load(urlopen(url + "/sitools/portal"))
@@ -157,15 +160,15 @@ class Field():
         """Compute attribute from web service dataset description"""
         keys_list_ = []
         if 'columnAlias' in dictionary:
-            self.name = dictionary['columnAlias']
+            self.name = dictionary['columnAlias'].encode('utf-8')
         if 'sqlColumnType' in dictionary:
-            self.ftype = dictionary['sqlColumnType']
+            self.ftype = dictionary['sqlColumnType'].encode('utf-8')
         if 'filter' in dictionary:
             self.ffilter = dictionary['filter']
         if 'sortable' in dictionary:
             self.sort = dictionary['sortable']
         if 'columnRenderer' in dictionary:
-            self.behavior = dictionary['columnRenderer']['behavior']
+            self.behavior = (dictionary['columnRenderer']['behavior']).encode('utf-8')
 
     def display(self) :
         """Display a representation of the data"""
@@ -472,6 +475,9 @@ class Dataset():
                 })
                 i += 1  #increment p counter
             elif operation in ['DATE_BETWEEN', 'NUMERIC_BETWEEN', 'CADENCE']:
+                print (operation)
+                print (query.name_list)
+                print (query.value_list)
                 kwargs.update({
                     'p[' + str(i) + ']': operation + "|" + "|".join(
                         query.name_list) + "|" + "|".join(query.value_list)
@@ -503,7 +509,7 @@ class Dataset():
                 raise ValueError(err_mess)
             sort_dictionary = {}
             sort_dictionary.update({
-                #            "field" : (field[0].name).encode('utf-8') ,
+#                 "field" : (field[0].name).encode('utf-8') ,
                 "field": (field[0].name),
                 "direction": field[1]
             })
@@ -516,10 +522,10 @@ class Dataset():
         #        stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
         url_count = self.url + "/count" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url just for count
-        #        stdout.write( "url_count : "+url_count+"\n")
+        #²stdout.write( "url_count : "+url_count+"\n")
         url = self.url + "/records" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url for the request
-        #        stdout.write( "url : "+url+"\n")
+        #stdout.write( "url : "+url+"\n")
         result_count = simplejson.load(urlopen(url_count))
         nbr_results = result_count['total']
         result = []
