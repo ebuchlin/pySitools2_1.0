@@ -16,7 +16,7 @@ __email__ = "pablo.alingery.ias.u-psud.fr"
 
 from sitools2.core.pySitools2 import *
 from sys import stdout,stderr
-from os import path,mkdir
+from os import path, mkdir
 from future.utils import iteritems
 from future.moves.urllib.request import urlretrieve
 
@@ -66,8 +66,8 @@ def gaia_get(gaia_list=[],
     ]
     for k, v in iteritems(kwds):
         if k not in allowed_params:
-            mess_err = "Error in search():\n'%s' entry for the media_get "
-            "function is not allowed\n" % k
+            mess_err = ("Error in search():\n'%s' entry for the media_get " 
+            "function is not allowed\n" % k)
             raise ValueError(mess_err)
         if k == 'TARGET_DIR':
             target_dir = v
@@ -166,8 +166,7 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
         if k not in ['DATES', 'NB_RES_MAX']:
             raise ValueError(
                 "Error in search():\n'%s' entry for the search function is not"
-                " allowed"
-                % k)
+                " allowed" % k)
         elif k == 'DATES':
             dates = v
         elif k == 'NB_RES_MAX':
@@ -187,17 +186,17 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
     if dates is None:
         raise ValueError("Error in search():\ndates entry must be specified")
     if type(dates).__name__ != 'list':
-        mess_err = "Error in search():\nentry type for dates is : %s\ndates "
-        "must be a list type" % type(dates).__name__
+        mess_err = ("Error in search():\nentry type for dates is : %s\ndates "
+        "must be a list type" % type(dates).__name__ )
         raise ValueError(mess_err)
     if len(dates) != 2:
-        mess_err = "Error in search() : %d elements specified for dates\ndates"
-        " param must be specified and a list of 2 elements" % len(dates)
+        mess_err = ("Error in search() : %d elements specified for dates\n"
+        "dates param must be specified and a list of 2 elements" % len(dates) )
         raise ValueError(mess_err)
     for date in dates:
         if type(date).__name__ != 'datetime':
-            mess_err = "Error in search() : type for dates element is %s \n"
-            "dates list element must be a datetime type" % type(date).__name__
+            mess_err = ("Error in search() : type for dates element is %s \n"
+            "dates list element must be a datetime type" % type(date).__name__)
             raise TypeError(mess_err)
         elif sitools2_url.startswith('http://medoc-sdo'):
             dates_optim.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
@@ -205,20 +204,20 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
             dates_optim.append(
                 str(date.strftime("%Y-%m-%dT%H:%M:%S")) + ".000")
     if dates[1] <= dates[0]:
-        mess_err = "Error in search():\nd1=%s\nd2=%s\nfor dates =[d1,d2] d2 "
+        mess_err = ("Error in search():\nd1=%s\nd2=%s\nfor dates =[d1,d2] d2 "
         "should be > d1" % (
             dates[1].strftime("%Y-%m-%dT%H:%M:%S"),
-            dates[2].strftime("%Y-%m-%dT%H:%M:%S"))
+            dates[2].strftime("%Y-%m-%dT%H:%M:%S")))
         raise ValueError(mess_err)
     dates_param = [[gaia_dataset.fields_dict['date_obs']], dates_optim,
                    'DATE_BETWEEN']
     if type(nb_res_max).__name__ != 'int':
-        mess_err = "Error in search():\nentry type for nb_res_max is : %s\n"
-        "NB_RES_MAX must be a int type" % type(nb_res_max).__name__
+        mess_err = ("Error in search():\nentry type for nb_res_max is : %s\n"
+        "NB_RES_MAX must be a int type" % type(nb_res_max).__name__)
         raise ValueError(mess_err)
     if nb_res_max != -1 and nb_res_max < 0:
-        mess_err = "Error in search():\nNB_RES_MAX= %s not allowed\n"
-        "NB_RES_MAX must be >0" % nb_res_max
+        mess_err = ("Error in search():\nNB_RES_MAX= %s not allowed\n"
+        "NB_RES_MAX must be >0" % nb_res_max)
         raise ValueError(mess_err)
 #Ask for download,date_obs,sunum_193,filename,temp_fits_rice,em_fits_rice,
 #   width_fits_rice,chi2_fits_riceoutput_options=[gaia_dataset.fields_list[0],
@@ -301,7 +300,7 @@ class Sdo_IAS_gaia_dataset(Dataset):
             providing a list of sunum 
 
         Parameters
-        ------------
+        ----------
         sunum_list : list 
             List of integer 
         filename : str
@@ -387,7 +386,7 @@ class Gaia_data():
     """Definition de la classe Gaia_data 
 
     Attributes
-    ---------
+    ----------
     download : str
         The url of the data on MEDOC server 
     sunum_193 : int
@@ -397,7 +396,7 @@ class Gaia_data():
     filename : str 
         Name of file containg DEM_aia_#date_obs
     temp_fits_rice_uri : str
-        uri of the temperture image preview
+        uri of the temperature image preview
     em_fits_rice_uri : str 
         uri of the emision image preview
     chi2_fits_rice_uri : str

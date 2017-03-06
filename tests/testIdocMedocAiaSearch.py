@@ -20,7 +20,8 @@ __author__="Jean-Christophe Malapert, Pablo ALINGERY"
 __date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
-from sitools2.clients.sdo_client_medoc import *
+from sitools2.clients.sdo_client_medoc import media_search
+from datetime import datetime, timedelta
 
 class TestMedia(unittest.TestCase):        
     

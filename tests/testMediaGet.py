@@ -20,7 +20,8 @@ __author__="Jean-Christophe Malapert, Pablo ALINGERY"
 __date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
-from sitools2.clients.sdo_client_medoc import *
+from sitools2.clients.sdo_client_medoc import media_search, media_get
+from datetime import datetime, timedelta
 
 class TestMedia(unittest.TestCase):        
     
@@ -33,7 +34,7 @@ class TestMedia(unittest.TestCase):
         d2 = d1 + timedelta(days=1)
         sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','304'], CADENCE=['10 min'], nb_res_max=2 )
         try :
-            result =media_get(MEDIA_DATA_LIST=sdo_data_list )
+            result =media_get(MEDIA_DATA_LIST=sdo_data_list , TARGET_DIR='results')
         except :
             raise ValueError("Failed donwloading media data")
 if __name__ == "__main__":
