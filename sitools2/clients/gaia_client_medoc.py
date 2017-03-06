@@ -14,7 +14,7 @@ __email__ = "pablo.alingery.ias.u-psud.fr"
 
 from sitools2.core.pySitools2 import *
 from sys import stdout,stderr
-import os
+from os import path, mkdir
 from future.utils import iteritems
 from future.moves.urllib.request import urlretrieve
 
