@@ -21,6 +21,7 @@ __date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
 from sitools2.clients.sdo_client_medoc import media_search, media_get
+from datetime import datetime, timedelta
 
 class TestMedia(unittest.TestCase):        
     
