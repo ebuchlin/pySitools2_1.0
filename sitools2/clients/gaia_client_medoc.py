@@ -1,4 +1,6 @@
 #! /usr/bin/python
+#-*- coding: utf-8 -*-
+
 """
 This script has been designed to give python programmers an easy way to 
 interrogate medoc gaia-dem sitools2 interface. You can make a search providing 
@@ -343,10 +345,10 @@ class Sdo_IAS_gaia_dataset(Dataset):
                 "%Y-%m-%dT%H:%M:%S") + "." + download_type.lower(
                 )  #if not specified this is the default name
         if target_dir is not None:
-            if not os.path.isdir(target_dir):
+            if not path.isdir(target_dir):
                 #raise ValueError("Error get_file():\nCheck the parameter 
                 #target_dir, '%s' directory does not exist." % target_dir)
-                os.mkdir(target_dir)
+                mkdir(target_dir)
             if target_dir[-1].isalnum():
                 filename = target_dir + '/' + filename
             elif target_dir[-1] == '/':
@@ -537,11 +539,11 @@ class Gaia_data():
                     filename_dict[key] = value
 
         if target_dir is not None:
-            if not os.path.isdir(target_dir):
+            if not path.isdir(target_dir):
                 stdout.write(
                     "Error get_file():\n'%s' directory did not exist.\n"
                     "Creation directory in progress ..." % target_dir)
-                os.mkdir(target_dir)
+                mkdir(target_dir)
             if target_dir[-1].isalnum():
                 target_dir = target_dir + '/'
             else:
