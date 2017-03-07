@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Jean-Christophe Malapert"
+__author__="Jean-Christophe Malapert & Pablo ALINGERY"
 __date__ ="$9 juin 2013 12:17:18$"
 
 import unittest

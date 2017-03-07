@@ -1,4 +1,6 @@
 #! /usr/bin/python
+#-*- coding: utf-8 -*-
+
 """
 This script has been designed to give python programmers an easy way to 
 interrogate medoc gaia-dem sitools2 interface. You can make a search providing 
