@@ -29,7 +29,7 @@ from future.moves.urllib.request import urlopen, urlretrieve
 from future.moves.urllib.error import HTTPError
 
 try:
-    import simplejson
+    from simplejson import load
 except:
     stderr.write(
         "Import failed in module sdo_client_medoc :\n\tsimplejson module is"
@@ -68,7 +68,7 @@ class Sitools2Instance():
 
         self.instanceUrl = url
         try:
-            simplejson.load(urlopen(url + "/sitools/portal"))
+            load(urlopen(url + "/sitools/portal"))
         except:
             err_mess = "Error in Sitools2Instance.__init__() :\nSitools2 "
             "instance %s not available please contact admin for more info\n"
@@ -100,7 +100,7 @@ class Sitools2Instance():
         url = sitools_url + '/sitools/portal/projects' + '?' + urlencode(
             kwargs)
  #       print("url portal : %s" % url)
-        result = simplejson.load(urlopen(url))
+        result = load(urlopen(url))
         out_mess = "%s projects detected\n" % result['total']
         stdout.write(out_mess)
         stdout.flush()
@@ -160,15 +160,17 @@ class Field():
         """Compute attribute from web service dataset description"""
         keys_list_ = []
         if 'columnAlias' in dictionary:
-            self.name = dictionary['columnAlias'].encode('utf-8')
+            #print ("type : %s" % type(dictionary['columnAlias']).__name__)
+            #print (dictionary['columnAlias'])
+            self.name = dictionary['columnAlias']
         if 'sqlColumnType' in dictionary:
-            self.ftype = dictionary['sqlColumnType'].encode('utf-8')
+            self.ftype = dictionary['sqlColumnType']
         if 'filter' in dictionary:
             self.ffilter = dictionary['filter']
         if 'sortable' in dictionary:
             self.sort = dictionary['sortable']
         if 'columnRenderer' in dictionary:
-            self.behavior = (dictionary['columnRenderer']['behavior']).encode('utf-8')
+            self.behavior = dictionary['columnRenderer']['behavior']
 
     def display(self) :
         """Display a representation of the data"""
@@ -230,7 +232,7 @@ class Query():
             stderr.write(mess_err)
             raise TypeError(mess_err) 
         for field in param_list[0]:
-            self.name_list.append(field.name)
+            self.name_list.append(str(field.name))
         self.fields_list = param_list[0]
         self.value_list = param_list[1]
         self.operation = param_list[2]
@@ -304,7 +306,7 @@ class Dataset():
         #        print("url to load :",url)
         #        dataset_url_txt=urlopen(url)
         try:
-            simplejson.load(urlopen(url))
+            load(urlopen(url))
         except:
             err_mess = "Error in Dataset.__init__() :\nDataset %s not "
             "available, please send an email to medoc-contact@ias.u-psud.fr "
@@ -338,12 +340,15 @@ class Dataset():
         """
         kwargs.update({'media': 'json'})
         url = self.url + '?' + urlencode(kwargs)
+        #print ("url : %s " % url)
         try:
-            result = simplejson.load(urlopen(url))
+            result = load(urlopen(url))
+            #print ("result : \n %s " % result)
             self.name = result['dataset']['name']
             self.description = result['dataset']['description']
             columns = result['dataset']['columnModel']
             for column in columns:
+                #print(type(column).__name__)
                 self.fields_list.append(Field(column))
                 self.fields_dict.update({column['columnAlias']: Field(column)})
                 if ('filter' in column and column['filter']):
@@ -357,8 +362,8 @@ class Dataset():
                         "noClientAccess"):
                     self.noClientAccess_list.append(column['columnAlias'])
         except:
-            err_mess = "Error in Dataset.compute_attributes(), "
-            "please contact medoc-contact@ias.u-psud.fr for more info\n"
+            err_mess = ("Error in Dataset.compute_attributes(), "
+            "please contact medoc-contact@ias.u-psud.fr for more info\n")
             stderr.write(err_mess)
             raise Exception
         for field in self.filter_list:
@@ -379,8 +384,8 @@ class Dataset():
                 self.resources_target.append(self.url + "/" + resources[i]
                                              .getAttribute('path'))
         except:
-            out_mess = "\t\t\tError in Dataset.ressources_list() not "
-            "accessible, please contact admin for more info\n"
+            out_mess = ("\t\t\tError in Dataset.ressources_list() not "
+            "accessible, please contact admin for more info\n")
             raise ValueError(out_mess)
 
  
@@ -475,9 +480,9 @@ class Dataset():
                 })
                 i += 1  #increment p counter
             elif operation in ['DATE_BETWEEN', 'NUMERIC_BETWEEN', 'CADENCE']:
-                print (operation)
-                print (query.name_list)
-                print (query.value_list)
+                #print (operation)
+                #print (query.name_list)
+                #print (query.value_list)
                 kwargs.update({
                     'p[' + str(i) + ']': operation + "|" + "|".join(
                         query.name_list) + "|" + "|".join(query.value_list)
@@ -495,8 +500,8 @@ class Dataset():
         for i, field in enumerate(
                 output_list
         ):  #build output object list and output object dict with name as a key  
-            output_name_list.append(field.name)
-            output_name_dict.update({field.name: field})
+            output_name_list.append(str(field.name))
+            output_name_dict.update({str(field.name): field})
         kwargs.update({#build colModel url options
             'colModel' : '"'+", ".join(output_name_list)+'"'
         })
@@ -510,7 +515,7 @@ class Dataset():
             sort_dictionary = {}
             sort_dictionary.update({
 #                 "field" : (field[0].name).encode('utf-8') ,
-                "field": (field[0].name),
+                "field": (str(field[0].name)),
                 "direction": field[1]
             })
             sort_dic_list.append(sort_dictionary)
@@ -522,11 +527,11 @@ class Dataset():
         #        stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
         url_count = self.url + "/count" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url just for count
-        #²stdout.write( "url_count : "+url_count+"\n")
+        #stdout.write( "url_count : "+url_count+"\n")
         url = self.url + "/records" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url for the request
         #stdout.write( "url : "+url+"\n")
-        result_count = simplejson.load(urlopen(url_count))
+        result_count = load(urlopen(url_count))
         nbr_results = result_count['total']
         result = []
         #Check if the request does not exceed 350 000 items
@@ -538,7 +543,7 @@ class Dataset():
                 nbr_results = limit_to_nb_res_max
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs) + "&" + temp_url
-#                stdout.write( "if url : "+url+"\n")
+        #        stdout.write( "if url : "+url+"\n")
             elif limit_to_nb_res_max > 0 and limit_to_nb_res_max >= kwargs[
                     'limit']:  #if nbr to display is specified and >= 300
                 if limit_to_nb_res_max < nbr_results:
@@ -546,11 +551,11 @@ class Dataset():
                 kwargs['nocount'] = 'true'
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs) + "&" + temp_url
-#                stdout.write( "elif url : "+url+"\n")
+        #        stdout.write( "elif url : "+url+"\n")
             while (nbr_results - kwargs['start']
                    ) > 0:  #Do the job per 300 items till nbr_result is reached
                 #Check that request is done each 300 items
-                result_temp = simplejson.load(urlopen(url))
+                result_temp = load(urlopen(url))
                 for data in result_temp['data']:
                     result_dict = {}
                     for k, v in data.items():
@@ -598,22 +603,22 @@ class Dataset():
         All info available for a dataset
         """
         phrase = ""
-        phrase += "\n\nDataset object display() :\n\t%s\n\t\tdescription : "
+        phrase += ("\n\nDataset object display() :\n\t%s\n\t\tdescription : "
         "%s\n\t\turi : %s\n\t\turl : %s\n\t\tprimary_key : %s" % (
             self.name, self.description, self.uri, self.url,
-            self.primary_key.name)
+            self.primary_key.name))
         phrase += "\n\t\tresources_list :"
         for i, res in enumerate(self.resources_target):
             phrase += "\n\t\t\t%d) %s" % (i, res)
         phrase += "\n\t\tfields list :"
         for i, field in enumerate(self.fields_list):
-            phrase += "\n\t\t\t%d) %s" % (i, field.name)
+            phrase += "\n\t\t\t%d) %s" % (i, str(field.name))
         phrase += "\n\t\tfilter list :"
         for i, field in enumerate(self.filter_list):
-            phrase += "\n\t\t\t%d) %s" % (i, field.name)
+            phrase += "\n\t\t\t%d) %s" % (i, str(field.name))
         phrase += "\n\t\tsort list :"
         for i, field in enumerate(self.sort_list):
-            phrase += "\n\t\t\t%d) %s" % (i, field.name)
+            phrase += "\n\t\t\t%d) %s" % (i, str(field.name))
         return phrase
 
     def execute_plugin(self,
@@ -719,7 +724,7 @@ class Project():
         """
         kwargs.update({'media': 'json'})
         url = self.url + '?' + urlencode(kwargs)
-        result = simplejson.load(urlopen(url))
+        result = load(urlopen(url))
         self.name = result['project']['name']
         self.description = result['project']['description']
 
@@ -781,7 +786,7 @@ class Project():
         url = self.url + '/datasets' + '?' + urlencode(kwargs)
         data = []
         try:
-            result = simplejson.load(urlopen(url))
+            result = load(urlopen(url))
             if len(result['data']) != 0:
                 for i, dataset in enumerate(result['data']):
                     ds_url = sitools_url + dataset['url']
