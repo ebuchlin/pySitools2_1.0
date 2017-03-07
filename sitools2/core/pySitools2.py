@@ -67,9 +67,9 @@ class Sitools2Instance():
         try:
             simplejson.load(urlopen(url + "/sitools/portal"))
         except:
-            err_mess = "Error in Sitools2Instance.__init__() :\nSitools2 "
+            err_mess = ("Error in Sitools2Instance.__init__() :\nSitools2 "
             "instance %s not available please contact admin for more info\n"
-            "" % url
+            "" % url)
             stderr.write(err_mess)
             raise Exception
 
@@ -109,9 +109,9 @@ class Sitools2Instance():
             try:
                 data.append(Project(p_url))
             except:
-                out_mess = "Error in Sitools2Instance.list_project() :"
+                out_mess = ("Error in Sitools2Instance.list_project() :"
                 "\nCannot create object project %s, %s protected \n"
-                "Contact admin for more info\n" % (project['name'], p_url)
+                "Contact admin for more info\n" % (project['name'], p_url))
                 stdout.write(out_mess)
                 stdout.flush()
                 raise Exception
@@ -215,15 +215,15 @@ class Query():
         """Compute attribute from client request
         """
         if type(param_list[0]).__name__ != 'list':
-            mess_err = "Error in Query.compute_attributes() :\n"
+            mess_err = ("Error in Query.compute_attributes() :\n"
             "Query first argument type is : %s\nQuery first argument type "
-            "should be : list\n" % type(param_list[0]).__name__
+            "should be : list\n" % type(param_list[0]).__name__)
             stderr.write(mess_err)
             raise TypeError(mess_err)
         if type(param_list[1]).__name__ != 'list':
-            mess_err = "Error in Query.compute_attributes() :\n"
+            mess_err = ("Error in Query.compute_attributes() :\n"
             "Query second argument type is : %s\nQuery second argument type "
-            "should be : list\n\n\n" % type(param_list[1]).__name__
+            "should be : list\n\n\n" % type(param_list[1]).__name__)
             stderr.write(mess_err)
             raise TypeError(mess_err) 
         for field in param_list[0]:
@@ -303,9 +303,9 @@ class Dataset():
         try:
             simplejson.load(urlopen(url))
         except:
-            err_mess = "Error in Dataset.__init__() :\nDataset %s not "
+            err_mess = ("Error in Dataset.__init__() :\nDataset %s not "
             "available, please send an email to medoc-contact@ias.u-psud.fr "
-            "to get some help\n" % url
+            "to get some help\n" % url)
             stderr.write(err_mess)
             raise Exception
         self.name = ""
@@ -354,8 +354,8 @@ class Dataset():
                         "noClientAccess"):
                     self.noClientAccess_list.append(column['columnAlias'])
         except:
-            err_mess = "Error in Dataset.compute_attributes(), "
-            "please contact medoc-contact@ias.u-psud.fr for more info\n"
+            err_mess = ("Error in Dataset.compute_attributes(), "
+            "please contact medoc-contact@ias.u-psud.fr for more info\n")
             stderr.write(err_mess)
             raise Exception
         for field in self.filter_list:
@@ -376,8 +376,8 @@ class Dataset():
                 self.resources_target.append(self.url + "/" + resources[i]
                                              .getAttribute('path'))
         except:
-            out_mess = "\t\t\tError in Dataset.ressources_list() not "
-            "accessible, please contact admin for more info\n"
+            out_mess = ("\t\t\tError in Dataset.ressources_list() not "
+            "accessible, please contact admin for more info\n")
             raise ValueError(out_mess)
 
  
@@ -448,8 +448,8 @@ class Dataset():
             if operation in ['LT', 'EQ', 'GT', 'LTE', 'GTE']:
                 for field in query.fields_list:
                     if field.name not in self.allowed_filter_list:
-                        err_mess = "Error in Dataset.search() :\nfilter on %s "
-                        "is not allowed\n" % field.name
+                        err_mess = ("Error in Dataset.search() :\nfilter on %s"
+                        "is not allowed\n" % field.name)
                         stdout.write(err_mess)
                         raise ValueError(err_mess)
                 kwargs.update({
@@ -480,8 +480,8 @@ class Dataset():
             else:
                 allowed_operations = "ge, le, gte, lte, lt, eq, gt, lte, like,"
                 "  in, numeric_between, date_between"
-                err_mess = "Operation not available : %s \nAllowed operations "
-                "are : %s\n" % (operation, allowed_operations)
+                err_mess = ("Operation not available : %s \nAllowed operations"
+                "are : %s\n" % (operation, allowed_operations))
                 stderr.write(err_mess)
                 raise ValueError(err_mess)
         output_name_list = []
@@ -497,8 +497,8 @@ class Dataset():
         sort_dic_list = []
         for field in sort_list:  #build sort output options 
             if field[0].name not in self.allowed_sort_list:
-                err_mess = "Error in Dataset.search():\nsort on %s is not "
-                "allowed\n" % field.name
+                err_mess = ("Error in Dataset.search():\nsort on %s is not "
+                "allowed\n" % field.name)
                 stderr.write(err_mess)
                 raise ValueError(err_mess)
             sort_dictionary = {}
@@ -574,8 +574,8 @@ class Dataset():
 #                stdout.write( "url : "+url+"\n")
             return result
         else:
-            out_mess = "Not allowed\nNbr results (%d) exceeds limit_request"
-            " param: %d\n" % ( result_count['total'], limit_request)
+            out_mess = ("Not allowed\nNbr results (%d) exceeds limit_request"
+            " param: %d\n" % ( result_count['total'], limit_request))
             raise ValueError(out_mess)
 
 
@@ -592,10 +592,10 @@ class Dataset():
         All info available for a dataset
         """
         phrase = ""
-        phrase += "\n\nDataset object display() :\n\t%s\n\t\tdescription : "
+        phrase += ("\n\nDataset object display() :\n\t%s\n\t\tdescription : "
         "%s\n\t\turi : %s\n\t\turl : %s\n\t\tprimary_key : %s" % (
             self.name, self.description, self.uri, self.url,
-            self.primary_key.name)
+            self.primary_key.name))
         phrase += "\n\t\tresources_list :"
         for i, res in enumerate(self.resources_target):
             phrase += "\n\t\t\t%d) %s" % (i, res)
@@ -645,8 +645,8 @@ class Dataset():
         for resource in self.resources_target:
             resources_list.append(resource.split("/")[-1])
         if plugin_name not in resources_list:
-            err_mess = "Error execute_plugin():\nThis plugin_name %s does not"
-            "exist in %s dataset\n" % (plugin_name, self.name)
+            err_mess = ("Error execute_plugin():\nThis plugin_name %s does not"
+            "exist in %s dataset\n" % (plugin_name, self.name))
             raise ValueError (err_mess)
         if len(pkey_list) == 0:
             err_mess = "Error execute_plugin():\n"
@@ -726,8 +726,8 @@ class Project():
         try:
             domWadl = parseString(wadl)
         except:
-            out_mess = "Project %s : project.resources_list() not allowed, "
-            "please contact admin for more info\n" % self.name
+            out_mess = ("Project %s : project.resources_list() not allowed, "
+            "please contact admin for more info\n" % self.name)
             raise ValueError(out_mess)
         else:
             resources = domWadl.getElementsByTagName('resource')
@@ -749,9 +749,9 @@ class Project():
         Name, description, uri, url
         """
         phrase = ""
-        phrase += "\n\nProject object display() :\n\t"
+        phrase += ("\n\nProject object display() :\n\t"
         "%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s" % (self.name, 
-            self.description, self.uri, self.url)
+            self.description, self.uri, self.url))
         phrase += "\n\t\tresources list :"
         if len(self.resources_target) != 0:
             for i, res in enumerate(self.resources_target):
@@ -781,7 +781,7 @@ class Project():
                     ds_url = sitools_url + dataset['url']
                     data.append(Dataset(ds_url))
         except:
-            out_mess = "Error in Project.dataset_list() :\nCannot access "
-            "dataset %s is protected\nContact admin for more info\n" % url
+            out_mess = ("Error in Project.dataset_list() :\nCannot access "
+            "dataset %s is protected\nContact admin for more info\n" % url)
             raise Exception(out_mess)
         return data
