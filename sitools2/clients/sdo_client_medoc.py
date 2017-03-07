@@ -539,7 +539,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
     elif server.startswith('http://localhost') and series.startswith('hmi'):
         sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_HMI_dataset")
     else:
-        mess_err = server + " is not knwon"
+        mess_err = server + " is not known"
         raise ValueError(mess_err)
 
 #   sdo_dataset=Sdo_IAS_SDO_dataset(server+"/webs_IAS_SDO_HMI_dataset")
