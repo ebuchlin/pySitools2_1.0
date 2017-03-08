@@ -21,6 +21,7 @@ __date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
 from sitools2.clients.gaia_client_medoc import *
+from datetime import datetime, timedelta
 
 class TestGaia(unittest.TestCase):        
     

@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+
 """
 This is a generic python Sitools2 tool
 pySitools2 tool has been designed to perform all operations available within
@@ -27,7 +29,7 @@ from future.moves.urllib.request import urlopen, urlretrieve
 from future.moves.urllib.error import HTTPError
 
 try:
-    import simplejson
+    from simplejson import load
 except:
     stderr.write(
         "Import failed in module sdo_client_medoc :\n\tsimplejson module is"
@@ -63,13 +65,14 @@ class Sitools2Instance():
  
     def __init__(self, url):
         """Initialize class Sitools2Instance"""
+
         self.instanceUrl = url
         try:
-            simplejson.load(urlopen(url + "/sitools/portal"))
+            load(urlopen(url + "/sitools/portal"))
         except:
-            err_mess = "Error in Sitools2Instance.__init__() :\nSitools2 "
+            err_mess = ("Error in Sitools2Instance.__init__() :\nSitools2 "
             "instance %s not available please contact admin for more info\n"
-            "" % url
+            "" % url)
             stderr.write(err_mess)
             raise Exception
 
@@ -97,7 +100,7 @@ class Sitools2Instance():
         url = sitools_url + '/sitools/portal/projects' + '?' + urlencode(
             kwargs)
  #       print("url portal : %s" % url)
-        result = simplejson.load(urlopen(url))
+        result = load(urlopen(url))
         out_mess = "%s projects detected\n" % result['total']
         stdout.write(out_mess)
         stdout.flush()
@@ -109,9 +112,9 @@ class Sitools2Instance():
             try:
                 data.append(Project(p_url))
             except:
-                out_mess = "Error in Sitools2Instance.list_project() :"
+                out_mess = ("Error in Sitools2Instance.list_project() :"
                 "\nCannot create object project %s, %s protected \n"
-                "Contact admin for more info\n" % (project['name'], p_url)
+                "Contact admin for more info\n" % (project['name'], p_url))
                 stdout.write(out_mess)
                 stdout.flush()
                 raise Exception
@@ -157,6 +160,8 @@ class Field():
         """Compute attribute from web service dataset description"""
         keys_list_ = []
         if 'columnAlias' in dictionary:
+            #print ("type : %s" % type(dictionary['columnAlias']).__name__)
+            #print (dictionary['columnAlias'])
             self.name = dictionary['columnAlias']
         if 'sqlColumnType' in dictionary:
             self.ftype = dictionary['sqlColumnType']
@@ -215,19 +220,19 @@ class Query():
         """Compute attribute from client request
         """
         if type(param_list[0]).__name__ != 'list':
-            mess_err = "Error in Query.compute_attributes() :\n"
+            mess_err = ("Error in Query.compute_attributes() :\n"
             "Query first argument type is : %s\nQuery first argument type "
-            "should be : list\n" % type(param_list[0]).__name__
+            "should be : list\n" % type(param_list[0]).__name__)
             stderr.write(mess_err)
             raise TypeError(mess_err)
         if type(param_list[1]).__name__ != 'list':
-            mess_err = "Error in Query.compute_attributes() :\n"
+            mess_err = ("Error in Query.compute_attributes() :\n"
             "Query second argument type is : %s\nQuery second argument type "
-            "should be : list\n\n\n" % type(param_list[1]).__name__
+            "should be : list\n\n\n" % type(param_list[1]).__name__)
             stderr.write(mess_err)
             raise TypeError(mess_err) 
         for field in param_list[0]:
-            self.name_list.append(field.name)
+            self.name_list.append(str(field.name))
         self.fields_list = param_list[0]
         self.value_list = param_list[1]
         self.operation = param_list[2]
@@ -301,11 +306,11 @@ class Dataset():
         #        print("url to load :",url)
         #        dataset_url_txt=urlopen(url)
         try:
-            simplejson.load(urlopen(url))
+            load(urlopen(url))
         except:
-            err_mess = "Error in Dataset.__init__() :\nDataset %s not "
+            err_mess = ("Error in Dataset.__init__() :\nDataset %s not "
             "available, please send an email to medoc-contact@ias.u-psud.fr "
-            "to get some help\n" % url
+            "to get some help\n" % url)
             stderr.write(err_mess)
             raise Exception
         self.name = ""
@@ -335,12 +340,15 @@ class Dataset():
         """
         kwargs.update({'media': 'json'})
         url = self.url + '?' + urlencode(kwargs)
+        #print ("url : %s " % url)
         try:
-            result = simplejson.load(urlopen(url))
+            result = load(urlopen(url))
+            #print ("result : \n %s " % result)
             self.name = result['dataset']['name']
             self.description = result['dataset']['description']
             columns = result['dataset']['columnModel']
             for column in columns:
+                #print(type(column).__name__)
                 self.fields_list.append(Field(column))
                 self.fields_dict.update({column['columnAlias']: Field(column)})
                 if ('filter' in column and column['filter']):
@@ -354,8 +362,8 @@ class Dataset():
                         "noClientAccess"):
                     self.noClientAccess_list.append(column['columnAlias'])
         except:
-            err_mess = "Error in Dataset.compute_attributes(), "
-            "please contact medoc-contact@ias.u-psud.fr for more info\n"
+            err_mess = ("Error in Dataset.compute_attributes(), "
+            "please contact medoc-contact@ias.u-psud.fr for more info\n")
             stderr.write(err_mess)
             raise Exception
         for field in self.filter_list:
@@ -376,8 +384,8 @@ class Dataset():
                 self.resources_target.append(self.url + "/" + resources[i]
                                              .getAttribute('path'))
         except:
-            out_mess = "\t\t\tError in Dataset.ressources_list() not "
-            "accessible, please contact admin for more info\n"
+            out_mess = ("\t\t\tError in Dataset.ressources_list() not "
+            "accessible, please contact admin for more info\n")
             raise ValueError(out_mess)
 
  
@@ -448,8 +456,8 @@ class Dataset():
             if operation in ['LT', 'EQ', 'GT', 'LTE', 'GTE']:
                 for field in query.fields_list:
                     if field.name not in self.allowed_filter_list:
-                        err_mess = "Error in Dataset.search() :\nfilter on %s "
-                        "is not allowed\n" % field.name
+                        err_mess = ("Error in Dataset.search() :\nfilter on %s"
+                        "is not allowed\n" % field.name)
                         stdout.write(err_mess)
                         raise ValueError(err_mess)
                 kwargs.update({
@@ -472,6 +480,9 @@ class Dataset():
                 })
                 i += 1  #increment p counter
             elif operation in ['DATE_BETWEEN', 'NUMERIC_BETWEEN', 'CADENCE']:
+                #print (operation)
+                #print (query.name_list)
+                #print (query.value_list)
                 kwargs.update({
                     'p[' + str(i) + ']': operation + "|" + "|".join(
                         query.name_list) + "|" + "|".join(query.value_list)
@@ -480,8 +491,8 @@ class Dataset():
             else:
                 allowed_operations = "ge, le, gte, lte, lt, eq, gt, lte, like,"
                 "  in, numeric_between, date_between"
-                err_mess = "Operation not available : %s \nAllowed operations "
-                "are : %s\n" % (operation, allowed_operations)
+                err_mess = ("Operation not available : %s \nAllowed operations"
+                "are : %s\n" % (operation, allowed_operations))
                 stderr.write(err_mess)
                 raise ValueError(err_mess)
         output_name_list = []
@@ -489,22 +500,22 @@ class Dataset():
         for i, field in enumerate(
                 output_list
         ):  #build output object list and output object dict with name as a key  
-            output_name_list.append(field.name)
-            output_name_dict.update({field.name: field})
+            output_name_list.append(str(field.name))
+            output_name_dict.update({str(field.name): field})
         kwargs.update({#build colModel url options
             'colModel' : '"'+", ".join(output_name_list)+'"'
         })
         sort_dic_list = []
         for field in sort_list:  #build sort output options 
             if field[0].name not in self.allowed_sort_list:
-                err_mess = "Error in Dataset.search():\nsort on %s is not "
-                "allowed\n" % field.name
+                err_mess = ("Error in Dataset.search():\nsort on %s is not "
+                "allowed\n" % field.name)
                 stderr.write(err_mess)
                 raise ValueError(err_mess)
             sort_dictionary = {}
             sort_dictionary.update({
-                #            "field" : (field[0].name).encode('utf-8') ,
-                "field": (field[0].name),
+#                 "field" : (field[0].name).encode('utf-8') ,
+                "field": (str(field[0].name)),
                 "direction": field[1]
             })
             sort_dic_list.append(sort_dictionary)
@@ -516,11 +527,11 @@ class Dataset():
         #        stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
         url_count = self.url + "/count" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url just for count
-        #        stdout.write( "url_count : "+url_count+"\n")
+        #stdout.write( "url_count : "+url_count+"\n")
         url = self.url + "/records" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url for the request
-        #        stdout.write( "url : "+url+"\n")
-        result_count = simplejson.load(urlopen(url_count))
+        #stdout.write( "url : "+url+"\n")
+        result_count = load(urlopen(url_count))
         nbr_results = result_count['total']
         result = []
         #Check if the request does not exceed 350 000 items
@@ -532,7 +543,7 @@ class Dataset():
                 nbr_results = limit_to_nb_res_max
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs) + "&" + temp_url
-#                stdout.write( "if url : "+url+"\n")
+        #        stdout.write( "if url : "+url+"\n")
             elif limit_to_nb_res_max > 0 and limit_to_nb_res_max >= kwargs[
                     'limit']:  #if nbr to display is specified and >= 300
                 if limit_to_nb_res_max < nbr_results:
@@ -540,11 +551,11 @@ class Dataset():
                 kwargs['nocount'] = 'true'
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs) + "&" + temp_url
-#                stdout.write( "elif url : "+url+"\n")
+        #        stdout.write( "elif url : "+url+"\n")
             while (nbr_results - kwargs['start']
                    ) > 0:  #Do the job per 300 items till nbr_result is reached
                 #Check that request is done each 300 items
-                result_temp = simplejson.load(urlopen(url))
+                result_temp = load(urlopen(url))
                 for data in result_temp['data']:
                     result_dict = {}
                     for k, v in data.items():
@@ -574,8 +585,8 @@ class Dataset():
 #                stdout.write( "url : "+url+"\n")
             return result
         else:
-            out_mess = "Not allowed\nNbr results (%d) exceeds limit_request"
-            " param: %d\n" % ( result_count['total'], limit_request)
+            out_mess = ("Not allowed\nNbr results (%d) exceeds limit_request"
+            " param: %d\n" % ( result_count['total'], limit_request))
             raise ValueError(out_mess)
 
 
@@ -592,22 +603,22 @@ class Dataset():
         All info available for a dataset
         """
         phrase = ""
-        phrase += "\n\nDataset object display() :\n\t%s\n\t\tdescription : "
+        phrase += ("\n\nDataset object display() :\n\t%s\n\t\tdescription : "
         "%s\n\t\turi : %s\n\t\turl : %s\n\t\tprimary_key : %s" % (
             self.name, self.description, self.uri, self.url,
-            self.primary_key.name)
+            self.primary_key.name))
         phrase += "\n\t\tresources_list :"
         for i, res in enumerate(self.resources_target):
             phrase += "\n\t\t\t%d) %s" % (i, res)
         phrase += "\n\t\tfields list :"
         for i, field in enumerate(self.fields_list):
-            phrase += "\n\t\t\t%d) %s" % (i, field.name)
+            phrase += "\n\t\t\t%d) %s" % (i, str(field.name))
         phrase += "\n\t\tfilter list :"
         for i, field in enumerate(self.filter_list):
-            phrase += "\n\t\t\t%d) %s" % (i, field.name)
+            phrase += "\n\t\t\t%d) %s" % (i, str(field.name))
         phrase += "\n\t\tsort list :"
         for i, field in enumerate(self.sort_list):
-            phrase += "\n\t\t\t%d) %s" % (i, field.name)
+            phrase += "\n\t\t\t%d) %s" % (i, str(field.name))
         return phrase
 
     def execute_plugin(self,
@@ -645,8 +656,8 @@ class Dataset():
         for resource in self.resources_target:
             resources_list.append(resource.split("/")[-1])
         if plugin_name not in resources_list:
-            err_mess = "Error execute_plugin():\nThis plugin_name %s does not"
-            "exist in %s dataset\n" % (plugin_name, self.name)
+            err_mess = ("Error execute_plugin():\nThis plugin_name %s does not"
+            "exist in %s dataset\n" % (plugin_name, self.name))
             raise ValueError (err_mess)
         if len(pkey_list) == 0:
             err_mess = "Error execute_plugin():\n"
@@ -713,7 +724,7 @@ class Project():
         """
         kwargs.update({'media': 'json'})
         url = self.url + '?' + urlencode(kwargs)
-        result = simplejson.load(urlopen(url))
+        result = load(urlopen(url))
         self.name = result['project']['name']
         self.description = result['project']['description']
 
@@ -726,8 +737,8 @@ class Project():
         try:
             domWadl = parseString(wadl)
         except:
-            out_mess = "Project %s : project.resources_list() not allowed, "
-            "please contact admin for more info\n" % self.name
+            out_mess = ("Project %s : project.resources_list() not allowed, "
+            "please contact admin for more info\n" % self.name)
             raise ValueError(out_mess)
         else:
             resources = domWadl.getElementsByTagName('resource')
@@ -749,9 +760,9 @@ class Project():
         Name, description, uri, url
         """
         phrase = ""
-        phrase += "\n\nProject object display() :\n\t"
+        phrase += ("\n\nProject object display() :\n\t"
         "%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s" % (self.name, 
-            self.description, self.uri, self.url)
+            self.description, self.uri, self.url))
         phrase += "\n\t\tresources list :"
         if len(self.resources_target) != 0:
             for i, res in enumerate(self.resources_target):
@@ -775,13 +786,13 @@ class Project():
         url = self.url + '/datasets' + '?' + urlencode(kwargs)
         data = []
         try:
-            result = simplejson.load(urlopen(url))
+            result = load(urlopen(url))
             if len(result['data']) != 0:
                 for i, dataset in enumerate(result['data']):
                     ds_url = sitools_url + dataset['url']
                     data.append(Dataset(ds_url))
         except:
-            out_mess = "Error in Project.dataset_list() :\nCannot access "
-            "dataset %s is protected\nContact admin for more info\n" % url
+            out_mess = ("Error in Project.dataset_list() :\nCannot access "
+            "dataset %s is protected\nContact admin for more info\n" % url)
             raise Exception(out_mess)
         return data

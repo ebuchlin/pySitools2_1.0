@@ -16,11 +16,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Jean-Christophe Malapert"
+__author__="Jean-Christophe Malapert & Pablo ALINGERY"
 __date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
 from sitools2.clients.gaia_client_medoc import *
+from datetime import datetime, timedelta
 
 class TestGaia(unittest.TestCase):
     def setUp(self):
@@ -32,7 +33,7 @@ class TestGaia(unittest.TestCase):
         d2 = d1 + timedelta(days=1)
         gaia_data_list = gaia_search( DATES=[d1,d2], NB_RES_MAX=10 )
         try :
-            gaia_get(gaia_list=gaia_data_list)
+            gaia_get(gaia_list=gaia_data_list, target_dir='results')
         except :
     	    raise ValueError("Error Test gaia_get()")
 
