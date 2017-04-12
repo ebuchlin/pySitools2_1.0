@@ -4,10 +4,10 @@
 """
 This is a generic python Sitools2 tool
 pySitools2 tool has been designed to perform all operations available within
-Sitools2. The code defines several classes SitoolsInstance, Field, Query, 
-Dataset and Project. 
-Example of application : 
-A Solar tool to request and retrieve SDO data from IAS (Institut 
+Sitools2. The code defines several classes SitoolsInstance, Field, Query,
+Dataset and Project.
+Example of application :
+A Solar tool to request and retrieve SDO data from IAS (Institut
 d'Astrophysique Spatiale)
 see http://sdo.ias.u-psud.fr/python/sdo_client_idoc.html
 
@@ -23,7 +23,7 @@ __maintainer__ = "Pablo ALINGERY"
 __email__ = "pablo.alingery.ias.u-psud.fr"
 
 from sys import stdout, stderr
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from future.moves.urllib.parse import urlencode
 from future.moves.urllib.request import urlopen, urlretrieve
 from future.moves.urllib.error import HTTPError
@@ -50,19 +50,19 @@ except:
 class Sitools2Instance():
     """Define an server instance of Sitools2.
     An instance of Sitools2Instance is defined using its url.
-    
+
     Attributes
     ----------
     instanceUrl : str
-        The url of the MEDOC server 
-        
+        The url of the MEDOC server
+
     Methods
     -------
     list_project()
-        Return a list of the projects available for the instance 
+        Return a list of the projects available for the instance
     """
 
- 
+
     def __init__(self, url):
         """Initialize class Sitools2Instance"""
 
@@ -82,12 +82,12 @@ class Sitools2Instance():
 
         parameters
         ----------
-        kwargs : object 
+        kwargs : object
             Any param that can be usefull for the function urlencode()
 
-        Raise 
+        Raise
         -----
-        Exception 
+        Exception
             Cannot create project a Project instance
 
         Return
@@ -123,7 +123,7 @@ class Sitools2Instance():
 
 class Field():
     """Definition of a Field class.
-    A field is a item from a dataset. 
+    A field is a item from a dataset.
     It has several attributes : name, ftype, ffilter(boolean), sort(boolean),
     behavior.
 
@@ -132,21 +132,21 @@ class Field():
     name : str
         name of the field
     ftype : str
-        type of the field  
+        type of the field
     ffilter : boolean
         Stand of the field is filtered or not
     sort : boolean
         Stand if the field if sorted or not
     behavior : str
         Apply special behavior on field like datasetlink
-    
+
     Methods
     -------
     list_project()
-        Return a list of the projects available for the instance 
+        Return a list of the projects available for the instance
     """
 
-         
+
     def __init__(self, dictionary):
         """Initialize class Field"""
         self.name = ""
@@ -179,35 +179,35 @@ class Field():
     def __repr__(self):
         return (
             "Field object display() :\n\t%s\n\t\tftype : %s\n\t\tffilter : "
-               "%s\n\t\tsort : %s\n\t\tbehavior : %s" % (self.name, 
+               "%s\n\t\tsort : %s\n\t\tbehavior : %s" % (self.name,
                     self.ftype, self.ffilter, self.sort, self.behavior))
 
 
 class Query():
     """Definition of a Query class.
-       A Query defines the request passed to the server. 
+       A Query defines the request passed to the server.
 
-    
+
     Attributes
     ----------
     fields_list : list
         list of objects field
     name_list : list
-        list of field.name attribute   
+        list of field.name attribute
     value_list : list
         List the value of the objetc(s) field above
     operation : str
-        Name of operation ge, le, gte, lte, lt, eq, gt, 
+        Name of operation ge, le, gte, lte, lt, eq, gt,
        lte, like, in, numeric_between, date_between, cadence
 
-    Raise 
+    Raise
     -----
-    TypeError 
+    TypeError
         Query first argument is not a list
         Query second argument is not a list
     """
 
-    
+
     def __init__(self, param_list) :
         """Initialize class Query"""
         self.fields_list = []
@@ -230,7 +230,7 @@ class Query():
             "Query second argument type is : %s\nQuery second argument type "
             "should be : list\n\n\n" % type(param_list[1]).__name__)
             stderr.write(mess_err)
-            raise TypeError(mess_err) 
+            raise TypeError(mess_err)
         for field in param_list[0]:
             self.name_list.append(str(field.name))
         self.fields_list = param_list[0]
@@ -242,7 +242,7 @@ class Query():
     def display(self):
         print(self.__repr__())
 
-#Define a repr of this Class 
+#Define a repr of this Class
 
     def __repr__(self):
         return ("name : % s\nvalue : %s\nOperation : %s" %
@@ -261,7 +261,7 @@ class Dataset():
     name : str
         name of the dataset
     description : str
-        description of the dataset   
+        description of the dataset
     uri : str
         uniform resource id of the dataset
     url : str
@@ -270,7 +270,7 @@ class Dataset():
         list of field objects instance of Field
     fields_dict : dict
         dictionary of fields with key equals the name of the field
-    filter_list : list 
+    filter_list : list
         list of field object that can be filtered
     allowed_filter_list : list
         list of the filtered field.name attributes of field
@@ -290,13 +290,13 @@ class Dataset():
     -------
     search()
        The generic powerfull search method that allows a python client to
-       make a request on a Sitools2 server 
+       make a request on a Sitools2 server
     resources_list()
         List all the resources available for the current dataset
 
-    Raise 
+    Raise
     -----
-    Exception 
+    Exception
         Dataset not accessible
     """
 
@@ -332,11 +332,11 @@ class Dataset():
 
     def compute_attributes(self, **kwargs):
         """Compute attribute from web service answer dataset description
-        
-        Raise 
+
+        Raise
         -----
-        Exception 
-            Compute attributes failed 
+        Exception
+            Compute attributes failed
         """
         kwargs.update({'media': 'json'})
         url = self.url + '?' + urlencode(kwargs)
@@ -373,7 +373,7 @@ class Dataset():
 
 
     def resources_list(self):
-        """Explore and list dataset resources, method=options has to be allowed 
+        """Explore and list dataset resources, method=options has to be allowed
         """
         try:
             url = urlopen(self.url + '?method=OPTIONS')
@@ -388,7 +388,7 @@ class Dataset():
             "accessible, please contact admin for more info\n")
             raise ValueError(out_mess)
 
- 
+
 
     def search(self,
                query_list,
@@ -398,42 +398,42 @@ class Dataset():
                limit_to_nb_res_max=-1,
                **kwargs):
         """This is the generic search() method of a Sitools2 instance.
-        Throw a research request on Sitools2 server, inside limit 350000 
+        Throw a research request on Sitools2 server, inside limit 350000
         so > 1 month full cadence for SDO project
-        
+
         parameters
         ----------
         query_list : list
             List of query objects
         output_list :
             list of field objects
-        sort_list : 
+        sort_list :
             list of field object sorted
-        limit_request : 
+        limit_request :
             limit answers from server set by design to 350000
         limit_to_nb_res_max :
-            From the results sent by the server limit to that value 
+            From the results sent by the server limit to that value
 
-        Raise 
+        Raise
         -----
-        ValueError 
+        ValueError
             field provided for filter is not allowed
-            operation not allowed 
+            operation not allowed
             field provided for sort is not allowed
-        
+
         Return
         ------
             List of dictionaries
-        
+
         Example
-        ------- 
-        >>>result=ds1.search([Q1,Q2,Q3,Q4],O1,S1,limit_to_nb_res_max=10) 
+        -------
+        >>>result=ds1.search([Q1,Q2,Q3,Q4],O1,S1,limit_to_nb_res_max=10)
         Where Q1, Q2, Q3 & Q4 can be :
         >>>Q1=Query(param_query1)
         >>>Q2=Query(param_query2)
         >>>Q3=Query(param_query3)
         >>>Q4=Query(param_query4)
-        Where param _query1, param_query2, param_query3, param_query4 can 
+        Where param _query1, param_query2, param_query3, param_query4 can
         value :
         >>>param_query1=[[ds1.fields_list[4]],['2012-08-10T00:00',
                         '2012-08-10T01:00'],'DATE_BETWEEN']
@@ -499,14 +499,14 @@ class Dataset():
         output_name_dict = {}
         for i, field in enumerate(
                 output_list
-        ):  #build output object list and output object dict with name as a key  
+        ):  #build output object list and output object dict with name as a key
             output_name_list.append(str(field.name))
             output_name_dict.update({str(field.name): field})
         kwargs.update({#build colModel url options
             'colModel' : '"'+", ".join(output_name_list)+'"'
         })
         sort_dic_list = []
-        for field in sort_list:  #build sort output options 
+        for field in sort_list:  #build sort output options
             if field[0].name not in self.allowed_sort_list:
                 err_mess = ("Error in Dataset.search():\nsort on %s is not "
                 "allowed\n" % field.name)
@@ -535,7 +535,7 @@ class Dataset():
         nbr_results = result_count['total']
         result = []
         #Check if the request does not exceed 350 000 items
-        if nbr_results < limit_request:   
+        if nbr_results < limit_request:
             if limit_to_nb_res_max > 0 and limit_to_nb_res_max < kwargs[
                     'limit']:  #if nbr to display is specified and < 300
                 kwargs['limit'] = limit_to_nb_res_max
@@ -576,11 +576,11 @@ class Dataset():
                                 result_dict.update({k: v})
                     result.append(result_dict)
                 kwargs['start'] += kwargs[
-                    'limit']  #increment the job by the kwargs limit given 
-                    #(by design)  
+                    'limit']  #increment the job by the kwargs limit given
+                    #(by design)
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs
-                ) + "&" + temp_url  #encode new kwargs and build new url 
+                ) + "&" + temp_url  #encode new kwargs and build new url
                 #for request
 #                stdout.write( "url : "+url+"\n")
             return result
@@ -627,7 +627,7 @@ class Dataset():
                        FILENAME=None,
                        **kwargs):
         """Donwload a selection of data
-        
+
         parameter
         ---------
         plugin_name
@@ -636,8 +636,8 @@ class Dataset():
             list of ids primary_key for the currecnt dataset
         FILENAME
             name of the file donwloaded
-        
-        raise 
+
+        raise
         -----
         ValueError
             No plugin name provided
@@ -646,8 +646,8 @@ class Dataset():
 
         Return
         ------
-            result execution of the plugin 
-            can be a tar zip etc...   
+            result execution of the plugin
+            can be a tar zip etc...
         """
         resources_list = []
         if plugin_name is None:
@@ -686,26 +686,26 @@ class Dataset():
 
 class Project():
     """Define a Project class.
-       A Project instance gives details about a project of Sitools2. 
+       A Project instance gives details about a project of Sitools2.
 
     attributes
     ----------
     name : str
         name of the Project
     description : str
-        desciption of the project 
-    uri ; str 
-        uniform resource location 
-    url : str 
+        desciption of the project
+    uri ; str
+        uniform resource location
+    url : str
         uniform resource identifier
-    resource_target : list 
-        list of resources target 
+    resource_target : list
+        list of resources target
 
     methods
     -------
-    dataset_list() 
-        returns information about the number of datasets available, 
-        their name and uri.    
+    dataset_list()
+        returns information about the number of datasets available,
+        their name and uri.
     """
 
 
@@ -751,17 +751,17 @@ class Project():
         """Ouptut Project attributes"""
         print(self.__repr__())
 
-    
+
     def __repr__(self):
-        """Represention of Project instance 
-        
+        """Represention of Project instance
+
         return
         ------
         Name, description, uri, url
         """
         phrase = ""
         phrase += ("\n\nProject object display() :\n\t"
-        "%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s" % (self.name, 
+        "%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s" % (self.name,
             self.description, self.uri, self.url))
         phrase += "\n\t\tresources list :"
         if len(self.resources_target) != 0:
@@ -777,7 +777,7 @@ class Project():
 
         raise
         -----
-        Exception 
+        Exception
             Dataset not accessible
         """
         sitools_url = self.url.split("/")[0] + "//" + self.url.split(

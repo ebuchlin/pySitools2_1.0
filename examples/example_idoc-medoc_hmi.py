@@ -17,7 +17,7 @@ sdo_hmi_data_list = media_search(
     CADENCE=['1d'],
     nb_res_max=10)
 
-
+print sdo_hmi_data_list
 #Metadata info 
 meta = media_metadata_search(
     KEYWORDS=['date__obs', 'quality', 'cdelt1', 'cdelt2', 'crval1'],
@@ -27,4 +27,5 @@ print(meta)
 
 #Download data 
 for data in sdo_hmi_data_list:
-    data.get_file(target_dir='results', SEGMENT=['continuum'])
+    #data.get_file(target_dir='results', SEGMENT=['continuum'])
+    data.get_file(target_dir='results')
