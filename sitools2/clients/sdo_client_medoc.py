@@ -1352,8 +1352,8 @@ class Sdo_data():
             elif k == 'SERVER':
                 server = v
         if server is None:
-            server = self.url.split('ias.u-psud.fr')[-1] + "ias.u-psud.fr"
-#           print server
+            server = self.url.split('ias.u-psud.fr')[0] + "ias.u-psud.fr"
+#            print (" server : %s" % server)
         if len(keywords) == 0:
             raise ValueError("keywords must be specified")
         if type(keywords).__name__ != 'list':
@@ -1365,6 +1365,8 @@ class Sdo_data():
         elif server.startswith('http://idoc-medoc'):
             metadata_ds = Sdo_dataset(sitools2_url + "/webs_" +
                                       self.series_name + "_dataset")
+        elif server.startswith('http://sdo'):
+            metadata_ds = Sdo_aia_dataset(sitools2_url + "/webs_aia_dataset")
         else:
             raise ValueError(
                 "metadata_ds is not valued please check your server param\n")
