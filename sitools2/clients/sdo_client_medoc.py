@@ -1387,7 +1387,7 @@ class Sdo_data():
                     % (key, metadata_ds.name))
         S1 = [[metadata_ds.fields_dict['date__obs'], 'ASC']
               ]  #sort by date_obs ascendant
-        print(metadata_ds.search([Q1], O1, S1))
+        #print(metadata_ds.search([Q1], O1, S1))
         if len(metadata_ds.search([Q1], O1, S1)) != 0:
             return metadata_ds.search([Q1], O1, S1)[0]
         else:
