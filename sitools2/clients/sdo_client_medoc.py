@@ -1210,7 +1210,7 @@ class Sdo_data():
                     '%Y-%m-%dT%H-%M-%S.')
         elif filename is not None:
             stdout.write("filename defined by user : %s\n" % filename)
-            filename_pre = filename
+            filename_pre = path.splitext(filename)[0]
 
 #Define segment if it does not exist
         if segment is None and filename is None and (
@@ -1287,7 +1287,7 @@ class Sdo_data():
             if filename is None:
                 filename_path = filename_pre + file_suff + '.fits'
             else:
-                filename_path = filename
+                filename_path = filename_pre + '.fits'
                 file_url = self.url
 
             if (self.series_name).startswith('hmi'):
@@ -1297,11 +1297,12 @@ class Sdo_data():
             #   file_url=self.url+"/"+file_suff+'.fits'
             #   print "filename_url :", file_url
             elif self.series_name == ('aia.lev1'):
-                #   filename_path=filename_pre+file_suff+'.fits'
+                # filename_path=filename_pre+file_suff+'.fits'
                 file_url = self.url
 
-#           print "filename_url :", file_url
-#           print "filename_path :", filename_path
+            # print("filename_url :", file_url)
+            # print("filename_pre :", filename_pre)
+            # print("filename_path :", filename_path)
 
 #Retrieve data
             try:
@@ -1387,7 +1388,7 @@ class Sdo_data():
                     % (key, metadata_ds.name))
         S1 = [[metadata_ds.fields_dict['date__obs'], 'ASC']
               ]  #sort by date_obs ascendant
-        print(metadata_ds.search([Q1], O1, S1))
+        #print(metadata_ds.search([Q1], O1, S1))
         if len(metadata_ds.search([Q1], O1, S1)) != 0:
             return metadata_ds.search([Q1], O1, S1)[0]
         else:
