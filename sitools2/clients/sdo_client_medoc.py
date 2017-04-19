@@ -26,7 +26,7 @@ from collections import Counter
 from future.utils import iteritems
 from builtins import map
 from future.moves.urllib.request import urlretrieve
-import simplejson
+from simplejson import load
 
 #sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 #sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
@@ -1222,7 +1222,7 @@ class Sdo_data():
             kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-            result = simplejson.load(urlopen(url))
+            result = load(urlopen(url))
             if result['items']:
                 for item in result['items'] :
                     segment.append(item['name'].split(".fits")[0])
@@ -1234,7 +1234,7 @@ class Sdo_data():
             kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-            result = simplejson.load(urlopen(url))
+            result = load(urlopen(url))
             if result['items']:
                 for item in result['items'] :
                     segment_allowed.append(item['name'].split(".fits")[0])

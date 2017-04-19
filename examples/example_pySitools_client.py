@@ -41,7 +41,7 @@ def main():
 #        ds_lst = p1.dataset_list()
 #       for ds in ds_lst :
 #               print ds.name
-    ds1 = ds_list[70]
+    ds1 = ds_list[69]
     ds1.display()
     #display() or print works as well
     #       print ds1
