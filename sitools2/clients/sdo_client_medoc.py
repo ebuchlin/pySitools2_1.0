@@ -1181,11 +1181,11 @@ class Sdo_data():
                 raise ValueError(mess_err)
             elif k == 'DECOMPRESS':
                 decompress = v
-            elif k == 'filename':
+            elif k == 'FILENAME':
                 filename = v
             elif k == 'TARGET_DIR':
                 target_dir = v
-            elif k == 'quiet':
+            elif k == 'QUIET':
                 quiet = v
             elif k == 'SEGMENT':
                 segment = v
@@ -1302,9 +1302,9 @@ class Sdo_data():
                 # filename_path=filename_pre+file_suff+'.fits'
                 file_url = self.url
 
-            # print("filename_url :", file_url)
-            # print("filename_pre :", filename_pre)
-            # print("filename_path :", filename_path)
+            #print("filename_url :", file_url)
+            #print("filename_pre :", filename_pre)
+            #print("filename_path :", filename_path)
 
 #Retrieve data
             try:
