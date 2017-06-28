@@ -9,7 +9,7 @@ You will have as a result a list of Sdo_data objets on which you can apply the
 method display() that will give you for each the recnum, the sunum, the
 date_obs, the wavelength, the ias_location, the exptime and t_rec_index
 For each result you will be able to call metadata_search() method in order to
-have the metadata information.mediia
+have the metadata information.
 @author: Pablo ALINGERY for IAS 28-08-2012
 """
 __version__ = "1.0"
@@ -1048,7 +1048,7 @@ class Sdo_data():
     -------
     get_file()
         Donwload the record
-    metadata_serch()
+    metadata_search()
         Print meta information
 
     """
@@ -1137,7 +1137,7 @@ class Sdo_data():
                  quiet=False,
                  segment=None,
                  **kwds):
-        """Donwload hmi and aia data from MEDOC server
+        """Download hmi and aia data from MEDOC server
 
         Parameters
         ----------
@@ -1244,16 +1244,18 @@ class Sdo_data():
         elif segment is None and filename is None and (
                 self.series_name).startswith('hmi.ic'):
             segment = ['continuum']
+            segment_allowed.append('continuum')
         elif segment is None and filename is None and (
                 self.series_name).startswith('hmi.m'):
             segment = ['magnetogram']
+            segment_allowed.append('magnetogram')
 
         elif filename is not None:
             segment = [filename]
 
         segment_allowed += [ 'image_lev1']
 #        print ("segment : %s" % segment)
-#        print (segment_allowed)
+#       print (segment_allowed)
         for seg in segment:
             if seg not in segment_allowed and filename is None:
                 raise ValueError(
