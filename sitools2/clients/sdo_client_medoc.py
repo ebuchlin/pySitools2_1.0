@@ -845,7 +845,9 @@ def metadata_info(server=None, series='aia.lev1'):
     allowed_server = [
         'http://medoc-sdo.ias.u-psud.fr',
         'http://medoc-sdo-test.ias.u-psud.fr',
-        'http://idoc-medoc-test.ias.u-psud.fr'
+        'http://idoc-medoc-test.ias.u-psud.fr',
+        'http://idoc-medoc.ias.u-psud.fr'
+
     ]
     #Controls
     ##server
@@ -1354,22 +1356,48 @@ class Sdo_data():
                 keywords = v
             elif k == 'SERVER':
                 server = v
-        if server is None:
-            server = self.url.split('ias.u-psud.fr')[0] + "ias.u-psud.fr"
-#            print (" server : %s" % server)
+
+        allowed_server = [
+        'http://medoc-sdo.ias.u-psud.fr',
+        'http://medoc-sdo-test.ias.u-psud.fr',
+        'http://idoc-medoc-test.ias.u-psud.fr',
+        'http://idoc-medoc.ias.u-psud.fr',
+        'http://localhost:8184'
+        ]
+
+        server_url=sitools2_url
+#server
+        if server_url.startswith("http://localhost"):
+            pass
+        elif server is None and self.series_name.startswith('aia'):
+            server_url = 'http://medoc-sdo.ias.u-psud.fr'
+        elif server is None and self.series_name.startswith('hmi'):
+            server_url = 'http://idoc-medoc-test.ias.u-psud.fr'
+
+        if server is not None and server not in allowed_server:
+            raise ValueError(
+                "Server %s is not allowed \nServers available : %s\n" %
+                         (server, allowed_server)
+            )
+
+ #       print ("server : %s" % server_url)
+
         if len(keywords) == 0:
             raise ValueError("keywords must be specified")
         if type(keywords).__name__ != 'list':
             mess_err = "Error in metadata_search():\nentry type for keywords "
             "is : %s\nkeywords must be a list type" % type(keywords).__name__
             raise TypeError(mess_err)
-        if server.startswith('http://medoc-sdo'):
-            metadata_ds = Sdo_aia_dataset(sitools2_url + "/webs_aia_dataset")
-        elif server.startswith('http://idoc-medoc'):
-            metadata_ds = Sdo_dataset(sitools2_url + "/webs_" +
+
+        if server_url.startswith('http://medoc-sdo'):
+            metadata_ds = Sdo_aia_dataset(server_url + "/webs_aia_dataset")
+        elif server_url.startswith('http://idoc-medoc'):
+            metadata_ds = Sdo_dataset(server_url + "/webs_" +
                                       self.series_name + "_dataset")
-        elif server.startswith('http://sdo'):
-            metadata_ds = Sdo_aia_dataset(sitools2_url + "/webs_aia_dataset")
+        elif server_url.startswith('http://localhost'):
+            metadata_ds = Sdo_dataset(server_url + "/webs_" +
+                                      self.series_name + "_dataset")
+
         else:
             raise ValueError(
                 "metadata_ds is not valued please check your server param\n")
