@@ -35,7 +35,7 @@ class TestMediaGetFileName(unittest.TestCase):
         sdo_data_list = media_search( DATES=[d1,d2], series='hmi.m_720s', CADENCE=['1d'], nb_res_max=2 )
         print sdo_data_list[0]
         try :
-            result  = sdo_data_list[0].get_file(TARGET_DIR='result' , filename='test_hmi.m_720s.fits')
+            result  = sdo_data_list[0].get_file(TARGET_DIR='results' , filename='test_hmi.m_720s.fits')
         except :
             raise ValueError("Failed downloading get_file")
 if __name__ == "__main__":
