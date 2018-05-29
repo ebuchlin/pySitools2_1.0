@@ -12,3 +12,4 @@
 reinstall_pySitools2.sh~
 *.md~
 *.egg
+*.tar
