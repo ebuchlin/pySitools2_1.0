@@ -5,6 +5,7 @@
 /examples/results/
 /tests/results/
 /results/
+/.idea/
 *.pyc
 *.swp
 *.py~
