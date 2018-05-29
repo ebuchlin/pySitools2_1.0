@@ -1,4 +1,4 @@
-#! /usr/bin/python
+ #! /usr/bin/python
 """
 
 @author: Pablo ALINGERY for IAS 06-05-2016
@@ -62,11 +62,11 @@ def main():
     #        print ds1
 
     #date__ob
-    #Format must be somthing like 2015-11-01T00:00:00.000 in version Sitools2 3.0 that will change 
+    #Format must be somthing like 2015-11-01T00:00:00.000 in version Sitools2 3.0 that will change
     param_query1 = [[ds1.fields_dict['date__obs']],
                     ['2015-11-01T00:00:00.000', '2015-11-02T00:00:00.000'],
                     'DATE_BETWEEN']
-    #series_name 
+    #series_name
     param_query2 = [[ds1.fields_dict['series_name']],
                     ['hmi.sharp_cea_720s_nrt'], 'IN']
     #       param_query2=[[ds1.fields_dict['series_name']],['aia.lev1'],'IN']
@@ -116,7 +116,7 @@ def main():
     param_query_hmi = [[ds_hmi.fields_list[0]], recnum_list, 'IN']
     Q_hmi = Query(param_query_hmi)
     #        Q_hmi.display()
-    #output 
+    #output
     O1_hmi = [
         ds_hmi.fields_dict['recnum'], ds_hmi.fields_dict['sunum'],
         ds_hmi.fields_dict['lat_max']
@@ -129,7 +129,7 @@ def main():
         print(data)
 
 
-#       print "Download just one recnum\nIn progress please wait ..." 
+#       print "Download just one recnum\nIn progress please wait ..."
 #       ds1.execute_plugin(plugin_name='pluginDownloadTar', pkey_list=["1878160,hmi.sharp_cea_720s_nrt"], FILENAME='first_download_hmi.tar')
 #       print "Download completed"
 
