@@ -699,11 +699,14 @@ class Dataset():
                 )
                 raise ValueError (err_mess)
             if len(pkey_values_list) == 0:
-                err_mess = "Error execute_plugin():\n"
-                "No identifiers pkey provided\n"
+                err_mess = (
+                    "Error execute_plugin():\nNo identifiers pkey provided\n"
+                )
                 raise ValueError (err_mess)
             if FILENAME is None:
-                err_mess = "Error execute_plugin():\nNo FILENAME provided\n"
+                err_mess = (
+                    "Error execute_plugin():\nNo FILENAME provided\n"
+                )
                 raise ValueError (err_mess)
             operation = 'LISTBOXMULTIPLE'
             kwargs.update({
@@ -712,13 +715,16 @@ class Dataset():
             })
 
         url = self.url + "/" + plugin_name + "?" + urlencode(kwargs)
-        print ("url plugin : %s\n" % url)
-        # try :
-        # except HTTPError as e :
-        #     print (e.code)
-        #     print (e.reason)
-        # else :
-        #     return urlretrieve('%s' % url, FILENAME)
+        print ("url exec_plugin : %s\n" % url)
+        try :
+            urlopen(url)
+        except HTTPError as e :
+            print (e.code)
+            print (e.reason)
+        except Exception as e :
+            print (e.args)
+        else :
+            return urlretrieve('%s' % url, FILENAME)
 
 
 class Project():
