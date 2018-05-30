@@ -17,9 +17,9 @@ def main():
     ds1.display()
 
     #date__ob
-    #Format must be somthing like 2015-11-01T00:00:00.000 in version Sitools2 3.0 that will change 
+    #Format must be something like 2015-11-01T00:00:00.000 in version Sitools2 3.0 that will change
     param_query1 = [
-                     [ds1.fields_dict['date_obs']], 
+                     [ds1.fields_dict['date_obs']],
                      ['2015-01-01T00:00:00.000', '2015-01-01T01:00:00.000'],
                      'DATE_BETWEEN'
     ]
@@ -63,12 +63,23 @@ def main():
     print ("Download just one SOHO data\nIn progress please wait ...") 
     print("item : \n%s" % result[1])
     print("id : %s" % result[1]['id_sitools_view'])
-    # try :
-    ds1.execute_plugin(plugin_name='pluginSOHOtar', pkey_list=[result[1]['id_sitools_view']], FILENAME='first_download_SOHO.tar')
-    # except :
-    #     print ("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
-    # else :
-    #     print ("Download id_sitools_view : %s completed" % result[1]['id_sitools_view'] )
+    try :
+        ds1.execute_plugin(
+            plugin_name='pluginSOHOtar',
+            pkey_values_list=[result[1]['id_sitools_view']],
+            FILENAME='first_download_SOHO.tar'
+        )
+    except ValueError as e:
+        print ("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
+        print ("type is: %s" % e.__class__.__name__)
+        print ("Message : %s" % e.message)
+    except Exception, e:
+        print ("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
+        print ("type is: %s" % e.__class__.__name__)
+        print ("Message : %s" % e.message)
+
+    else :
+        print ("Download id_sitools_view : %s completed" % result[1]['id_sitools_view'] )
 
 if __name__ == "__main__":
     main()
