@@ -15,3 +15,4 @@ reinstall_pySitools2.sh~
 *.egg
 *.tar
 credits.txt
+*.fits
