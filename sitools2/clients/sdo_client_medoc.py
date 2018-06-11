@@ -30,7 +30,8 @@ from simplejson import load
 
 #sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 #sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
-sitools2_url = 'http://idoc-medoc-test.ias.u-psud.fr'
+#sitools2_url = 'http://idoc-medoc-test.ias.u-psud.fr'
+sitools2_url = 'http://idoc-medoc.ias.u-psud.fr'
 
 #sitools2_url='http://localhost:8182'
 
@@ -1224,6 +1225,7 @@ class Sdo_data():
             kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
+            print ("url : %s" % url)
             result = load(urlopen(url))
             if result['items']:
                 for item in result['items'] :
@@ -1443,7 +1445,7 @@ def main():
     recnum_list = []
     for item in sdo_data_list:
         recnum_list.append(str(item.recnum))
-    print(recnum_list)
+    print("recnum list : %s" % recnum_list)
     meta = media_metadata_search(
         keywords=[
             'recnum', 'sunum', 'date__obs', 'quality', 'cdelt1', 'cdelt2',
