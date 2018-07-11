@@ -339,6 +339,10 @@ def media_search(server=None, dates=None, waves=None, series=None,
         )
     elif server is None and series.startswith('hmi'):
         server = 'http://idoc-medoc-test.ias.u-psud.fr'
+        stdout.write(
+            "server parameter not specified, default value is set : "
+            "server='http://idoc-medoc-test.ias.u-psud.fr'\n"
+        )
     if server is not None and server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" %
                          (server, allowed_server))
@@ -717,7 +721,6 @@ def media_metadata_search(
         'http://idoc-medoc.ias.u-psud.fr',
         'http://idoc-medoc-test.ias.u-psud.fr'
     ]
-
     #Controls
     ##Keywords
     if len(keywords) == 0:
@@ -762,6 +765,10 @@ def media_metadata_search(
         )
     elif server is None and series.startswith('hmi'):
         server = 'http://idoc-medoc-test.ias.u-psud.fr'
+        stdout.write(
+            "server parameter not specified, default value is set : "
+            "server='http://idoc-medoc-test.ias.u-psud.fr'\n"
+        )
     if server is not None and server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" %
                          (server, allowed_server))
@@ -773,17 +780,19 @@ def media_metadata_search(
         raise ValueError(mess_err)
 
 #Define dataset target
+    metadata_ds=""
     if server.startswith('http://medoc-sdo'):
         metadata_ds = Sdo_aia_dataset(server + "/webs_aia_dataset")
-
+        #print("metadata_ds definition : %s" % metadata_ds.uri)
     elif server.startswith(
             'http://idoc-medoc') and series == 'aia.lev1':
         metadata_ds = Sdo_aia_dataset(server + "/webs_" + "aia_dataset")
-
+        #print("aia is targetted on idoc-medoc.ias.u-psud.fr")
+        #print("metadata _ds :%s" %metadata_ds)
     elif server.startswith('http://idoc-medoc') and series.startswith(
             'hmi'):
-        metadata_ds = Sdo_aia_dataset(server + "/webs_" + series + "_dataset")
-
+        metadata_ds = Sdo_dataset(server + "/webs_" + series + "_dataset")
+        #print("hmi series %s is targetted on idoc-medoc.ias.u-psud.fr" % series)
     O1_aia = []
     for key in keywords:
         if key in metadata_ds.fields_dict:
@@ -793,14 +802,16 @@ def media_metadata_search(
             " series : %s \n" % (key, series))
             raise ValueError(mess_err)
     S1_aia = [[metadata_ds.fields_dict['date__obs'], 'ASC']
-              ]  #sort by date_obs ascendant
+            ]  #sort by date_obs ascendant
 
-    #initialize recnumlist
+#Initialize recnumlist
+    #print("metadata_ds before request: %s" % metadata_ds.uri)
     recnumlist = []
     result = []
     i = 0
     # Make a request for each 500 recnum
     if len(recnum_list) > 500:
+        #print("recnum_list >500")
         while i < len(recnum_list):
             #               print i
             recnumlist = recnum_list[i:i + 499]
@@ -814,11 +825,14 @@ def media_metadata_search(
 #               print "taille result : ",len(result)
     else:
         recnumlist = list(map(str, recnum_list))
-        #        print(recnumlist)
         param_query_aia = [[metadata_ds.fields_dict['recnum']], recnumlist,
                            'IN']
+ #       print("param_query_aia : ", param_query_aia)
         Q_aia = Query(param_query_aia)
+ #       print("Q_aia : %s", Q_aia)
+        #print("metadata _ds :%s" %metadata_ds)
         result += metadata_ds.search([Q_aia], O1_aia, S1_aia)
+        #print("result : %s" %result)
     return result
 
 
@@ -1225,7 +1239,7 @@ class Sdo_data():
             kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-            print ("url : %s" % url)
+#            print ("url : %s" % url)
             result = load(urlopen(url))
             if result['items']:
                 for item in result['items'] :
