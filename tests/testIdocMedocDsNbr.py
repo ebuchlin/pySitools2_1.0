@@ -27,6 +27,6 @@ class TestIdocMedocDsNbr(unittest.TestCase):
         print(p1)
         ds_list = p1.dataset_list()
         print ("Nbr datasets : %s" % len(ds_list))
-        self.assertEqual( len(ds_list), 75)
+        self.assertEqual( len(ds_list), 74)
 if __name__ == "__main__":
     unittest.main()
