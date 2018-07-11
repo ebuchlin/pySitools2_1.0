@@ -530,14 +530,14 @@ class Dataset():
         temp_kwargs.update({'sort': {"ordersList": sort_dic_list}})
         temp_url = urlencode(temp_kwargs).replace('+', '').replace('%27',
                                                                    '%22')
-        stdout.write( "temp_url : "+temp_url+"\n")
-        stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
+        #stdout.write( "temp_url : "+temp_url+"\n")
+        #stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
         url_count = self.url + "/count" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url just for count
-        stdout.write( "url_count : "+url_count+"\n")
+        #stdout.write( "url_count : "+url_count+"\n")
         url = self.url + "/records" + '?' + urlencode(
             kwargs) + "&" + temp_url  #Build url for the request
-        stdout.write( "url : "+url+"\n")
+        #stdout.write( "url : "+url+"\n")
         result_count = load(urlopen(url_count))
         nbr_results = result_count['total']
         result = []
@@ -589,7 +589,7 @@ class Dataset():
                     kwargs
                 ) + "&" + temp_url  #encode new kwargs and build new url
                 #for request
-#                stdout.write( "url : "+url+"\n")
+                #stdout.write( "url : "+url+"\n")
             return result
         else:
             out_mess = ("Not allowed\nNbr results (%d) exceeds limit_request"
