@@ -30,6 +30,7 @@ class TestMedia(unittest.TestCase):
 
     def testSearchHmi_sharp_cea_720s_nrt(self):
         print ("####Test idoc-medoc_search #############################")
+        print ("####hmi.sharp_cea_720s_nrt #############################")
         d1 = datetime(2016,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
         sdo_data_list = media_search( 

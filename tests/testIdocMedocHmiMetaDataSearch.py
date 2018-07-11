@@ -30,6 +30,7 @@ class Testidocmedoc(unittest.TestCase):
 
     def testMetadaSearch(self):
         print ("####Test idoc-medoc_meta-data-search #######################")
+        print ("####hmi.sharp_cea_720s_nrt #################################")
         print("Test media_metadata_search")
         recnum_list = ['2075898', '2075899', '2075900', '2075902', '2075903',
             '2075904', '2075905', '2075940', '2075938', '2075939']
