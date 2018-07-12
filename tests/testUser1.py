@@ -21,7 +21,6 @@ __date__ ="$8 mars 2017 10:22:22$"
 
 import unittest
 import sitools2.clients.sdo_client_medoc as md
-from datetime import datetime
 
 class TestUser1(unittest.TestCase):
     
@@ -30,8 +29,8 @@ class TestUser1(unittest.TestCase):
 
     def testUser1(self):
         print ("####User Test media_search & metadata_search #############################")
-        l = md.media_search(dates=[datetime(2016,1,1,0,0,0),
-        	datetime(2016,1,1,1,0,0)], waves=['193'])
+        l = md.media_search(dates=[md.datetime(2016,1,1,0,0,0),
+        	md.datetime(2016,1,1,1,0,0)], waves=['193'])
         rnlist = [str (a.recnum) for a in l]
         print(l[0:3])
         m=md.media_metadata_search(keywords=['date__obs', 'quality'],

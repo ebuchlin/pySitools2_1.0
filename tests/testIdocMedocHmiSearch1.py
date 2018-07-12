@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
 __author__="Jean-Christophe Malapert, Pablo ALINGERY"
-__date__ ="10 juin 2018 12:17:18$"
+__date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
 from sitools2.clients.sdo_client_medoc import media_search
@@ -30,16 +30,16 @@ class TestMedia(unittest.TestCase):
 
     def testSearchMedia(self):
         print ("####Test idoc-medoc_search #############################")
-        print ("####hmi.m_720s #########################################")
+        print ("#### hmi.sharp_720s_nrt ################################")
         d1 = datetime(2016,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
         sdo_data_list = media_search( 
         	server="http://idoc-medoc-test.ias.u-psud.fr", 
         	dates=[d1,d2], 
-        	series='hmi.m_720s', 
+        	series='hmi.sharp_720s_nrt', 
         	cadence=['12 min'] )
         print sdo_data_list[0:3]
-        self.assertEqual( len(sdo_data_list), 94)                            
+        self.assertEqual( len(sdo_data_list), 861)                            
 
 if __name__ == "__main__":
     unittest.main()

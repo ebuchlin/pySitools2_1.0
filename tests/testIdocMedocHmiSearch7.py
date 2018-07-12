@@ -16,26 +16,30 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Eric Buchlin, Pablo ALINGERY"
-__date__ ="$8 mars 2017 10:22:22$"
+__author__="Jean-Christophe Malapert, Pablo ALINGERY"
+__date__ ="10 juin 2018"
 
 import unittest
-import sitools2.clients.sdo_client_medoc as md 
+from sitools2.clients.sdo_client_medoc import media_search
+from datetime import datetime, timedelta
 
-class UserTest_Media_Search_1(unittest.TestCase):        
+class TestMedia(unittest.TestCase):        
     
     def setUp(self):
         pass
 
-    def testUserMediaSearch(self):
-        print ("####User Test media_search & metadata_search #############################")
-        l = md.media_search(dates=[md.datetime(2016,1,1,0,0,0), 
-        	md.datetime(2016,1,1,1,0,0)], waves=['193'])
-        rnlist = [str (a.recnum) for a in l]
-        m=md.media_metadata_search(keywords=['date__obs', 'quality'], 
-        	recnum_list=rnlist, series='aia.lev1')
-        print (m[0:3])
-        self.assertEqual( len(m), 60)                            
+    def testSearchHmi_sharp_cea_720s(self):
+        print ("####Test idoc-medoc_search #############################")
+        print ("####hmi.m_720s_nrt #########################")
+        d1 = datetime(2018,6,1,0,0,0)
+        d2 = d1 + timedelta(days=1)
+        sdo_data_list = media_search( 
+        	server="http://idoc-medoc-test.ias.u-psud.fr", 
+        	dates=[d1,d2], 
+        	series='hmi.m_720s_nrt',
+        	cadence=['12 min'] )
+        print sdo_data_list[0:3]
+        self.assertEqual( len(sdo_data_list), 120)                            
 
 if __name__ == "__main__":
     unittest.main()
