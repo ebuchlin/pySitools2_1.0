@@ -20,7 +20,7 @@ sdo_data_list = media_search(
 recnum_list = []
 for result in sdo_data_list:
     #for result in sdo_hmi_data_list :
-    print(result.sunum, result.recnum, result.date_obs)
+    print(result.sunum, result.recnum, result.date_obs, result.wave)
     recnum_list.append(result.recnum)
 
 #Test media_metada_search
@@ -45,9 +45,10 @@ for result in my_meta_search:
 
     #The fastest way to retrieve data
     #PS : The directory 'results' will be created if it does not exist
-    for data in sdo_data_list :
+
+for data in sdo_data_list :
     #	data.get_file(target_dir='results', IAS_PATH=True)
-        data.get_file(target_dir='results')
+    data.get_file(target_dir = 'results')
 
 #Need to get a tar ball or zip file :
 #A bit slower than the previous one
