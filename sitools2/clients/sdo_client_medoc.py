@@ -30,8 +30,8 @@ from simplejson import load
 
 #sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 #sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
-#sitools2_url = 'http://idoc-medoc-test.ias.u-psud.fr'
-sitools2_url = 'http://idoc-medoc.ias.u-psud.fr'
+sitools2_url = 'http://idoc-medoc-test.ias.u-psud.fr'
+#sitools2_url = 'http://idoc-medoc.ias.u-psud.fr'
 
 #sitools2_url='http://localhost:8182'
 
@@ -442,7 +442,8 @@ def media_search(server=None, dates=None, waves=None, series=None,
 #series
     series_allowed_list = [
         'aia.lev1', 'hmi.sharp_720s', 'hmi.sharp_720s_nrt', 'hmi.m_720s',
-        'hmi.sharp_cea_720s_nrt', 'hmi.ic_720s', 'hmi.ic_nolimbdark_720s_nrt'
+        'hmi.sharp_cea_720s_nrt', 'hmi.ic_720s', 'hmi.ic_nolimbdark_720s_nrt',
+        'hmi.sharp_cea_720s', 'hmi.ic_nolimbdark_720s', 'hmi.m_720s_nrt'
     ]
     if series is None and '6173' not in waves:
         series = 'aia.lev1'
@@ -576,7 +577,8 @@ def media_search(server=None, dates=None, waves=None, series=None,
                         sdo_dataset.fields_dict['ias_path']
         ]
     elif series.startswith('hmi.sharp'):
-        output_options=[sdo_dataset.fields_dict['recnum'],
+        output_options=[sdo_dataset.fields_dict['get'],
+                        sdo_dataset.fields_dict['recnum'],
                         sdo_dataset.fields_dict['sunum'],
                         sdo_dataset.fields_dict['series_name'],
                         sdo_dataset.fields_dict['date__obs'],
@@ -588,7 +590,8 @@ def media_search(server=None, dates=None, waves=None, series=None,
                         sdo_dataset.fields_dict['harpnum']
         ]
     elif series.startswith('hmi'):
-        output_options=[sdo_dataset.fields_dict['recnum'],
+        output_options=[sdo_dataset.fields_dict['get'],
+                        sdo_dataset.fields_dict['recnum'],
                         sdo_dataset.fields_dict['sunum'],
                         sdo_dataset.fields_dict['series_name'],
                         sdo_dataset.fields_dict['date__obs'],
@@ -1084,10 +1087,13 @@ class Sdo_data():
         self.compute_attributes(data)
 
     def compute_attributes(self, data):
+        print ("data : %s" % data)
         if 'get' in data:
+            print ("field get used : %s" % data['get'])
             self.url = data['get']
         #ias_path added for hmi (to be removed)
         elif 'ias_path' in data:
+            print ("field ias_path used : %s" % data['ias_path'])
             self.url = data['ias_path']
         else:
             self.url = ''
@@ -1213,7 +1219,7 @@ class Sdo_data():
         if filename is None and self.series_name == 'aia.lev1':
             filename_pre = self.series_name + "_" + str(
                 self.wave) + "A_" + self.date_obs.strftime(
-                    '%Y-%m-%dT%H-%M-%S.'
+                    '%Y-%m-%dT%H-%M-%S_'+str(self.recnum)+"."
                 )  #if not specified this is the default name
 
         elif filename is None and (self.series_name).startswith('hmi.sharp'):
@@ -1232,6 +1238,7 @@ class Sdo_data():
 #Define segment if it does not exist
         if segment is None and filename is None and (
             self.series_name == 'aia.lev1'):
+#                segment = ['image_lev1', 'spikes']
                 segment = ['image_lev1']
         elif segment is None and filename is None and (
             self.series_name).startswith('hmi.sharp'):
@@ -1239,7 +1246,9 @@ class Sdo_data():
             kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-#            print ("url : %s" % url)
+            print ("url 1: %s" % url)
+            toto = urlopen(url)
+            print("toto 1: %s" % toto)
             result = load(urlopen(url))
             if result['items']:
                 for item in result['items'] :
@@ -1251,13 +1260,22 @@ class Sdo_data():
             self.series_name).startswith('hmi.sharp'):
             kwargs={}
             kwargs.update({'media': 'json'})
-            url = self.url + '?' + urlencode(kwargs)
+            #url = self.url + '?' + urlencode(kwargs)
+            print ("ias_path : %s" % self.ias_path)
+            url = self.ias_path + '?' + urlencode(kwargs)
+            #url = self.url
+            print ("url 2: %s" % url)
+
+
+            #toto = load(urlopen(url))
+            #print("toto 2: %s" % toto)
             result = load(urlopen(url))
+            print result
             if result['items']:
-                for item in result['items'] :
-                    segment_allowed.append(item['name'].split(".fits")[0])
-            else :
-                print ("No key 'items' found for %s " % url )
+            #    for item in result['items'] :
+            #        segment_allowed.append(item['name'].split(".fits")[0])
+            #else :
+            #    print ("No key 'items' found for %s " % url )
 
         elif segment is None and filename is None and (
                 self.series_name).startswith('hmi.ic'):
@@ -1271,6 +1289,7 @@ class Sdo_data():
         elif filename is not None:
             segment = [filename]
 
+#        segment_allowed += [ 'image_lev1', 'spikes']
         segment_allowed += [ 'image_lev1']
 #        print ("segment : %s" % segment)
 #       print (segment_allowed)
