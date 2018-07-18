@@ -18,7 +18,7 @@ sdo_hmi_data_list = media_search(
     nb_res_max=10,
     server="http://idoc-medoc-test.ias.u-psud.fr")
 
-print sdo_hmi_data_list[0:3]
+print (sdo_hmi_data_list[0:3])
 
 #Metadata info 
 meta = media_metadata_search(
