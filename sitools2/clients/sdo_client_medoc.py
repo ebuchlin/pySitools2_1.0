@@ -27,6 +27,8 @@ from future.utils import iteritems
 from builtins import map
 from future.moves.urllib.request import urlretrieve
 from simplejson import load
+import requests
+
 
 #sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 #sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
@@ -1087,7 +1089,6 @@ class Sdo_data():
         self.compute_attributes(data)
 
     def compute_attributes(self, data):
-        print ("data : %s" % data)
         if 'get' in data:
             print ("field get used : %s" % data['get'])
             self.url = data['get']
@@ -1246,9 +1247,6 @@ class Sdo_data():
             kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-            print ("url 1: %s" % url)
-            toto = urlopen(url)
-            print("toto 1: %s" % toto)
             result = load(urlopen(url))
             if result['items']:
                 for item in result['items'] :
@@ -1260,23 +1258,15 @@ class Sdo_data():
             self.series_name).startswith('hmi.sharp'):
             kwargs={}
             kwargs.update({'media': 'json'})
-            #url = self.url + '?' + urlencode(kwargs)
-            print ("ias_path : %s" % self.ias_path)
-            url = self.ias_path + '?' + urlencode(kwargs)
-            #url = self.url
-            print ("url 2: %s" % url)
+            url = self.ias_path + '/?' + urlencode(kwargs)
 
-
-            #toto = load(urlopen(url))
-            #print("toto 2: %s" % toto)
             result = load(urlopen(url))
-            print result
+ #           print (result)
             if result['items']:
-            #    for item in result['items'] :
-            #        segment_allowed.append(item['name'].split(".fits")[0])
-            #else :
-            #    print ("No key 'items' found for %s " % url )
-
+                for item in result['items'] :
+                    segment_allowed.append(item['name'].split(".fits")[0])
+            else :
+                print ("No key 'items' found for %s " % url )
         elif segment is None and filename is None and (
                 self.series_name).startswith('hmi.ic'):
             segment = ['continuum']
