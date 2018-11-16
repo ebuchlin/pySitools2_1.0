@@ -33,7 +33,7 @@ class TestMediaGetFile(unittest.TestCase):
         d1 = datetime(2010,5,1,0,0,0)
         d2 = d1 + timedelta(days=7*365)
         sdo_data_list = media_search( DATES=[d1,d2], series='hmi.m_720s', CADENCE=['1d'], nb_res_max=2 )
-        print sdo_data_list[0]
+        print(sdo_data_list[0])
         try :
             result  = sdo_data_list[0].get_file()
         except :
