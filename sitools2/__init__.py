@@ -13,5 +13,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-__author__="Jean-Christophe Malapert"
+__author__="Pablo ALINGERY, Elie Soubrie, Jean-Christophe Malapert"
 __date__ ="$8 mai 2013 02:02:35$"
+__version__="0.0.1"
