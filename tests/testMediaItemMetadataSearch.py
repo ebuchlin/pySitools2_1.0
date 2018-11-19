@@ -33,10 +33,10 @@ class TestMediaItemMetadataSearch(unittest.TestCase):
         d1 = datetime(2010,1,1,0,0,0)
         d2 = d1 + timedelta(days=365)
         sdo_data_list = media_search( DATES=[d1,d2], waves=['304'], CADENCE=['1d'], nb_res_max=2 )
-        print sdo_data_list[0]
+        print(sdo_data_list[0])
         try :
             result  = sdo_data_list[0].metadata_search(keywords=['datamedn', 'exptime', 'quality'])
-            print result
+            print(result)
         except :
             raise ValueError("Failed metadata_search()")
 if __name__ == "__main__":
