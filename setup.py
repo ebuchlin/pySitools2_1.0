@@ -31,7 +31,7 @@ else:
     setup(
         name='pySitools2',
         packages=find_packages(),
-
+        version="0.0.1",
         # Declare your packages' dependencies here, for eg:
         install_requires=['simplejson', 'future', 'pip'],
 
@@ -48,8 +48,8 @@ else:
         # see https://pypi.python.org/pypi?%3Aaction=list_classifiers
         classifiers=[
             'Development Status :: 2 - Pre-Alpha',
-            'Programming Language :: Python :: 2 :: 3',
-            'Operating System ::  OS Independent',
+            'Programming Language :: Python',
+            'Operating System :: OS Independent',
             'Environment :: Web Environment', 
             'Intended Audience :: Developers',
             'Intended Audience :: Science/Research',
