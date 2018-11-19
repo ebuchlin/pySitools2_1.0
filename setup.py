@@ -48,7 +48,8 @@ else:
         # see https://pypi.python.org/pypi?%3Aaction=list_classifiers
         classifiers=[
             'Development Status :: 2 - Pre-Alpha',
-            'Environment :: Web Environment', 'Framework :: pySitools2',
+            'Programming Language :: Python :: 2 :: 3',
+            'Environment :: Web Environment', 
             'Intended Audience :: Developers',
             'Intended Audience :: Science/Research',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
