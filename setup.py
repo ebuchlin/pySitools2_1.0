@@ -49,6 +49,7 @@ else:
         classifiers=[
             'Development Status :: 2 - Pre-Alpha',
             'Programming Language :: Python :: 2 :: 3',
+            'Operating System ::  OS Independent',
             'Environment :: Web Environment', 
             'Intended Audience :: Developers',
             'Intended Audience :: Science/Research',
