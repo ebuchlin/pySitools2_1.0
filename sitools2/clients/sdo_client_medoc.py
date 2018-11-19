@@ -12,7 +12,6 @@ For each result you will be able to call metadata_search() method in order to
 have the metadata information.
 @author: Pablo ALINGERY for IAS 28-08-2012
 """
-__version__ = "1.0"
 __license__ = "GPLV3"
 __author__ = "Pablo ALINGERY"
 __credit__ = ["Pablo ALINGERY", "Elie SOUBRIE"]
@@ -114,7 +113,9 @@ def media_get_selection(server=None,
                         media_data_list=[],
                         download_type="TAR",
                         **kwds):
+
     """Download a selection from MEDOC server tar or zip file
+
 
     Parameters
     ----------
@@ -724,6 +725,7 @@ def media_metadata_search(
         'http://idoc-medoc.ias.u-psud.fr',
         'http://idoc-medoc-test.ias.u-psud.fr'
     ]
+
     #Controls
     ##Keywords
     if len(keywords) == 0:
@@ -783,7 +785,6 @@ def media_metadata_search(
         raise ValueError(mess_err)
 
 #Define dataset target
-    metadata_ds=""
     if server.startswith('http://medoc-sdo'):
         metadata_ds = Sdo_aia_dataset(server + "/webs_aia_dataset")
         #print("metadata_ds definition : %s" % metadata_ds.uri)
@@ -1246,9 +1247,6 @@ class Sdo_data():
             kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-            print ("url 1: %s" % url)
-            toto = urlopen(url)
-            print("toto 1: %s" % toto)
             result = load(urlopen(url))
             if result['items']:
                 for item in result['items'] :
@@ -1260,17 +1258,24 @@ class Sdo_data():
             self.series_name).startswith('hmi.sharp'):
             kwargs={}
             kwargs.update({'media': 'json'})
+
+#<<<<<<< HEAD
             #url = self.url + '?' + urlencode(kwargs)
-            print ("ias_path : %s" % self.ias_path)
-            url = self.ias_path + '?' + urlencode(kwargs)
+#            print ("ias_path : %s" % self.ias_path)
+#            url = self.ias_path + '?' + urlencode(kwargs)
             #url = self.url
-            print ("url 2: %s" % url)
+#            print ("url 2: %s" % url)
 
 
             #toto = load(urlopen(url))
             #print("toto 2: %s" % toto)
+#            result = load(urlopen(url))
+#            print result
+#=======
+
+            url = self.url + '?' + urlencode(kwargs)
             result = load(urlopen(url))
-            print result
+#>>>>>>> master
             if result['items']:
             #    for item in result['items'] :
             #        segment_allowed.append(item['name'].split(".fits")[0])

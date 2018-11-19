@@ -46,15 +46,12 @@ The retrieved module structure is the following (not all files are shown):
 
 ## Installing the module
 
-### Installing the module for the user ( highly recommended )
-
-    cd pySitools2_1.0
-    python setup.py install --user
-
 ### Installing the module for the system
 
     cd pySitools2_1.0
-    sudo python setup.py install
+    sudo pip## install .
+
+    where ## is your pip/python version.
 
 ## Features
 
@@ -72,7 +69,9 @@ This python module will allow you to :
 
 - Make a request using the media_search() function.
 
-        from sitools2.clients.gaia_client_medoc import *
+        $ from sitools2.clients.sdo_client_medoc import media_search, media_get
+        from datetime import datetime, timedelta
+
         d1 = datetime(2012, 11, 21, 0, 0, 0)
         d2 = d1 + timedelta(days=1)
         sdo_data_list = media_search(dates=[d1, d2], waves=['335'], cadence=['6 h'])
@@ -102,7 +101,9 @@ For more information see the `README_MEDIA.txt` file.
 This python module will allow you to :
 
 - Make a request using the gaia_search() function.
-
+        
+        $ from sitools2.clients.gaia_client_medoc import gaia_search, gaia_get
+        from datetime import datetime, timedelta
         d1 = datetime(2012, 11, 21, 0, 0, 0)
         d2 = d1 + timedelta(days=1)
         gaia_data_list = gaia_search(dates=[d1, d2])
@@ -131,14 +132,5 @@ where ## is your pip/python version.
 
     cd pySitools2_1.0
     sudo pip## uninstall pySitools2_1.0
-    sudo rm -Rf /usr/local/lib/python##/dist-packages/pySitools2_1.0*.egg 
-
-where ## is your pip/python version.
-
-### For the user
-
-    cd pySitools2_1.0
-    sudo pip## uninstall pySitools2_1.0
-    sudo rm -Rf ~/.local/lib/python##/site-packages/pySitools2_1.0*.egg 
 
 where ## is your pip/python version.

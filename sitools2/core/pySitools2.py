@@ -15,7 +15,6 @@ see http://sdo.ias.u-psud.fr/python/sdo_client_idoc.html
 
 @author: Pablo ALINGERY for IAS 28-08-2012
 """
-__version__ = "1.0"
 __license__ = "GPLV3"
 __author__ = "Pablo ALINGERY"
 __credit__ = ["Pablo ALINGERY", "Elie SOUBRIE"]
@@ -184,10 +183,8 @@ class Field():
     def __repr__(self):
         return (
             "Field object display() :\n\t%s\n\t\tftype : %s\n\t\tffilter : "
-               "%s\n\t\tsort : %s\n\t\tbehavior : %s\n\t\tcomponent : %s\n"
-               % (self.name, self.ftype, self.ffilter, self.sort,
-                self.behavior, self.component)
-        )
+               "%s\n\t\tsort : %s\n\t\tbehavior : %s" % (self.name,
+                    self.ftype, self.ffilter, self.sort, self.behavior))
 
 
 class Query():

@@ -18,9 +18,9 @@ sdo_hmi_data_list = media_search(
     nb_res_max=10,
     server="http://idoc-medoc-test.ias.u-psud.fr")
 
-print sdo_hmi_data_list[0:3]
+print(sdo_hmi_data_list[0:3])
 
-#Metadata info 
+#Metadata info
 meta = media_metadata_search(
     KEYWORDS=['date__obs', 'quality', 'cdelt1', 'cdelt2', 'crval1'],
     SERIES='hmi.sharp_cea_720s_nrt',
@@ -32,3 +32,4 @@ for data in meta :
 #Download data 
 for data in sdo_hmi_data_list:
     data.get_file(target_dir='results',segment=["continuum"])
+#    data.get_file(target_dir='results')

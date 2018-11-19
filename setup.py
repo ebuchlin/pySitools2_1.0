@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 #    SITools2 client for Python
 #    Copyright (C) 2013 - Institut d'astrophysique spatiale
 #
@@ -13,21 +16,22 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-__author__ = "Jean-Christophe Malapert"
+__author__ = "Pablo ALINGERY,Jean-Christophe Malapert, Elie Soubrie"
 __date__ = "$8 mai 2013 04:03:39$"
 
 try:
     from setuptools import setup, find_packages
 except:
-    messageError = "Import failed, module 'setuptools' is required.\nTo install it on Ubuntu linux distribution type in terminal:\n'sudo apt-get install python-setuptools'"
+    messageError = "Import failed, module 'setuptools' is required.\n" \
+    "To install it on Ubuntu linux distribution type in terminal:\n" \
+    "'sudo apt-get install python-setuptools'"
     print(messageError)
 
 else:
     setup(
-        name='pySitools2_1.0',
-        version='0.1',
+        name='pySitools2',
         packages=find_packages(),
-
+        version="0.0.1",
         # Declare your packages' dependencies here, for eg:
         install_requires=['simplejson', 'future', 'pip'],
 
@@ -44,10 +48,12 @@ else:
         # see https://pypi.python.org/pypi?%3Aaction=list_classifiers
         classifiers=[
             'Development Status :: 2 - Pre-Alpha',
-            'Environment :: Web Environment', 'Framework :: SITools2 :: 1.0',
+            'Programming Language :: Python',
+            'Operating System :: OS Independent',
+            'Environment :: Web Environment', 
             'Intended Audience :: Developers',
             'Intended Audience :: Science/Research',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
         ],
-        download_url='https://github.com/SITools2/pySitools2_1.0/archive/master.zip',
+        download_url='https://github.com/MedocIAS/pySitools2_1.0/archive/master.zip',
         test_suite="tests")
