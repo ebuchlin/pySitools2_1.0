@@ -29,7 +29,7 @@ except:
 
 else:
     setup(
-        name='pySitools2_1.0',
+        name='pySitools2',
         packages=find_packages(),
 
         # Declare your packages' dependencies here, for eg:
@@ -53,5 +53,5 @@ else:
             'Intended Audience :: Science/Research',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
         ],
-        download_url='https://github.com/SITools2/pySitools2_1.0/archive/master.zip',
+        download_url='https://github.com/MedocIAS/pySitools2_1.0/archive/master.zip',
         test_suite="tests")
