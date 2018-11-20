@@ -1277,17 +1277,15 @@ class Sdo_data():
             result = load(urlopen(url))
 #>>>>>>> master
             if result['items']:
-            #    for item in result['items'] :
-            #        segment_allowed.append(item['name'].split(".fits")[0])
-            #else :
-            #    print ("No key 'items' found for %s " % url )
+                for item in result['items'] :
+                    segment_allowed.append(item['name'].split(".fits")[0])
+            else :
+                print ("No key 'items' found for %s " % url )
 
-        elif segment is None and filename is None and (
-                self.series_name).startswith('hmi.ic'):
+        elif segment is None and filename is None and (self.series_name).startswith('hmi.ic'):
             segment = ['continuum']
             segment_allowed.append('continuum')
-        elif segment is None and filename is None and (
-                self.series_name).startswith('hmi.m'):
+        elif segment is None and filename is None and (self.series_name).startswith('hmi.m'):
             segment = ['magnetogram']
             segment_allowed.append('magnetogram')
 
