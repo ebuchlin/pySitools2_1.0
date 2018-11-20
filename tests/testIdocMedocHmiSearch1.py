@@ -38,7 +38,7 @@ class TestMedia(unittest.TestCase):
         	dates=[d1,d2], 
         	series='hmi.sharp_720s_nrt', 
         	cadence=['12 min'] )
-        print sdo_data_list[0:3]
+        print(sdo_data_list[0:3])
         self.assertEqual( len(sdo_data_list), 861)                            
 
 if __name__ == "__main__":

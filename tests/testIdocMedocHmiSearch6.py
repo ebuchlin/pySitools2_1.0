@@ -38,8 +38,8 @@ class TestMedia(unittest.TestCase):
         	dates=[d1,d2], 
         	series='hmi.sharp_cea_720s',
         	cadence=['12 min'] )
-        print sdo_data_list[0:3]
-        self.assertEqual( len(sdo_data_list), 118)
+        print(sdo_data_list[0:3])
+        self.assertEqual( len(sdo_data_list), 119)
 
 if __name__ == "__main__":
     unittest.main()

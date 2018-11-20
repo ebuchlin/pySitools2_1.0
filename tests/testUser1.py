@@ -22,8 +22,9 @@ __date__ ="$8 mars 2017 10:22:22$"
 import unittest
 import sitools2.clients.sdo_client_medoc as md
 
+
 class TestUser1(unittest.TestCase):
-    
+
     def setUp(self):
         pass
 
