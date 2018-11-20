@@ -26,6 +26,8 @@ from future.utils import iteritems
 from builtins import map
 from future.moves.urllib.request import urlretrieve
 from simplejson import load
+import requests
+
 
 #sitools2_url='http://medoc-sdo.ias.u-psud.fr'
 #sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
@@ -1088,7 +1090,6 @@ class Sdo_data():
         self.compute_attributes(data)
 
     def compute_attributes(self, data):
-        print ("data : %s" % data)
         if 'get' in data:
             print ("field get used : %s" % data['get'])
             self.url = data['get']
@@ -1258,24 +1259,24 @@ class Sdo_data():
             self.series_name).startswith('hmi.sharp'):
             kwargs={}
             kwargs.update({'media': 'json'})
-
-#<<<<<<< HEAD
-            #url = self.url + '?' + urlencode(kwargs)
-#            print ("ias_path : %s" % self.ias_path)
-#            url = self.ias_path + '?' + urlencode(kwargs)
-            #url = self.url
+            
+#           url = self.url + '?' + urlencode(kwargs)
+#           print ("ias_path : %s" % self.ias_path)
+#           url = self.ias_path + '?' + urlencode(kwargs)
+#           url = self.url
 #            print ("url 2: %s" % url)
 
 
-            #toto = load(urlopen(url))
-            #print("toto 2: %s" % toto)
-#            result = load(urlopen(url))
-#            print result
-#=======
-
+#           toto = load(urlopen(url))
+#           print("toto 2: %s" % toto)
+#           result = load(urlopen(url))
+#           print result
             url = self.url + '?' + urlencode(kwargs)
             result = load(urlopen(url))
-#>>>>>>> master
+#           url = self.ias_path + '/?' + urlencode(kwargs)
+
+#           result = load(urlopen(url))
+#           print (result)
             if result['items']:
                 for item in result['items'] :
                     segment_allowed.append(item['name'].split(".fits")[0])
