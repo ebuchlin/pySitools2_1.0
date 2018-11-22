@@ -24,6 +24,7 @@ from sitools2.clients.sdo_client_medoc import media_search, \
 	media_metadata_search, media_get
 from datetime import datetime, timedelta
 
+@unittest.skip("Functional Test medoc-sdo interface")
 class TestMedia(unittest.TestCase):        
     
     def setUp(self):

@@ -23,6 +23,7 @@ import unittest
 from sitools2.clients.gaia_client_medoc import *
 from datetime import datetime, timedelta
 
+@unittest.skip("Functional Test gaia-dem interface ")
 class TestGaia(unittest.TestCase):
     def setUp(self):
         pass

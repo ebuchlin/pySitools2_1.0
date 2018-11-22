@@ -16,13 +16,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Jean-Christophe Malapert, Pablo ALINGERY"
+__author__="Pablo ALINGERY"
 __date__ ="$9 juin 2013 12:17:18$"
 
 import unittest
 from sitools2.clients.sdo_client_medoc import media_search
 from datetime import datetime, timedelta
 
+@unittest.skip("Functional Test idoc-medoc-test interface ")
 class TestMedia(unittest.TestCase):        
     
     def setUp(self):

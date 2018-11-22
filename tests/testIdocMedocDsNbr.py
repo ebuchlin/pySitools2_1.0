@@ -1,15 +1,17 @@
 #! /usr/bin/python
 """
 
-@author: Pablo ALINGERY for IAS 06-05-2016
 """
 
 from sitools2.core.pySitools2 import *
 
+__author__="Pablo ALINGERY"
+__date__ ="$6 mai 2016 12:17:18$"
 
 import unittest
 from sitools2.clients.sdo_client_medoc import *
 
+@unittest.skip("Functional Test idoc-medoc-test interface ")
 class TestIdocMedocDsNbr(unittest.TestCase):        
     
     def setUp(self):

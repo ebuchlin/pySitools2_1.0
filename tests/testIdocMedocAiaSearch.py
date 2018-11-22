@@ -23,6 +23,7 @@ import unittest
 from sitools2.clients.sdo_client_medoc import media_search
 from datetime import datetime, timedelta
 
+@unittest.skip("Functional Test idoc-medoc-test interface ")
 class TestMedia(unittest.TestCase):        
     
     def setUp(self):

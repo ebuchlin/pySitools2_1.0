@@ -51,7 +51,8 @@ for data in sdo_hmi_data_list:
 #	print item.date_obs, item.wave , item.recnum, item.sunum, item.ias_location
 #	file_date_obs = item.date_obs.strftime('%Y-%m-%dT%H-%M-%S')
 #	file_wave = item.wave
-#	item.get_file( DECOMPRESS=False, FILENAME="toto_%s_%s.fits" %(file_date_obs,file_wave) , TARGET_DIR='results', QUIET=False )
+#	item.get_file(DECOMPRESS=False, FILENAME="toto_%s_%s.fits" %(file_date_obs,file_wave) ,
+#  TARGET_DIR='results', QUIET=False )
 
 #Search meta data info
 #for item in sdo_data_list:
