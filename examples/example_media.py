@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 """
 
-@author: Pablo ALINGERY
 """
 
 from sitools2.clients.sdo_client_medoc import media_search, media_metadata_search, media_get
@@ -69,11 +68,11 @@ for result in my_meta_search:
 #The fastest way to retrieve data
 #PS : The directory 'results' will be created if it does not exist
 
-# media_get(
-#     MEDIA_DATA_LIST=sdo_data_list,
-#     TARGET_DIR='results',
-#     DECOMPRESS=False
-# )
+#media_get(
+#    MEDIA_DATA_LIST=sdo_data_list,
+#    TARGET_DIR='results',
+#    DECOMPRESS=False
+#)
 
 #Need to get a tar ball or zip file :
 #A bit slower than the previous one
@@ -95,11 +94,10 @@ for result in my_meta_search:
 #   )
 
 #Search meta data info
-for item in sdo_data_list:
-	print item
-	my_meta_search = item.metadata_search(
-       KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1'])
-    #print my_meta_search
+#for item in sdo_data_list:
+#	print item
+#	my_meta_search = item.metadata_search(KEYWORDS=['date__obs','quality','cdelt1','cdelt2','crval1'])
+#    print(my_meta_search)
      #if (my_meta_search['quality'] == 0) :
 	 #   item.display()
       #  item.get_file(TARGET_DIR='results')
