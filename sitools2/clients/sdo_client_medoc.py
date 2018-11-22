@@ -1473,7 +1473,7 @@ def main():
     #   print sdo_data_list
     sdo_data_list = media_search(
         dates=[d1, d2],
-        series='hmi.sharp_cea_720s_nrt',
+        series='aia.lev1',
         cadence=['1h'],
         nb_res_max=10)
     print(sdo_data_list)
@@ -1488,7 +1488,7 @@ def main():
             'recnum', 'sunum', 'date__obs', 'quality', 'cdelt1', 'cdelt2',
             'crval1'
         ],
-        series="hmi.sharp_cea_720s_nrt",
+        series="aia.lev1",
         recnum_list=recnum_list)
     print(meta)
 
