@@ -21,16 +21,20 @@ __date__ ="$8 janvier 2015 19:38:58$"
 
 import unittest
 from sitools2.core.pySitools2 import *
+from sitools2.clients import constants
 
-@unittest.skip("Functional Test idoc-medoc-test interface ")
+sitools2_url = constants.SITOOLS2_URL
+functional_test = constants.FUNCTIONAL_TEST
+
+@unittest.skipUnless(functional_test, 'Functional test skipped')
 class TestSitools2Core(unittest.TestCase):        
     
     def setUp(self):
         pass
     
     def testNbProjects(self):
-        print ("####Test idoc-solar-portal-test nbr projects ###############")
-        sitools2 = Sitools2Instance('http://idoc-medoc-test.ias.u-psud.fr')
+        print ("####Test "+sitools2_url +" nbr projects ###############")
+        sitools2 = Sitools2Instance(sitools2_url)
         projects = sitools2.list_project()
         print(projects)
         self.assertEqual( len(projects), 1)           
