@@ -10,16 +10,21 @@ __date__ ="$6 mai 2016 12:17:18$"
 
 import unittest
 from sitools2.clients.sdo_client_medoc import *
+from sitools2.clients import constants
 
-@unittest.skip("Functional Test idoc-medoc-test interface ")
+sitools2_url = constants.SITOOLS2_URL
+functional_test = constants.FUNCTIONAL_TEST
+
+
+@unittest.skipUnless(functional_test,"Functional Test "+ sitools2_url +" interface ")
 class TestIdocMedocDsNbr(unittest.TestCase):        
     
     def setUp(self):
         pass
 
     def testNbrDsIdocMedoc(self):
-        print ("####Test idoc-medoc NbrDatasets #############################")
-        sitools_url = 'http://idoc-medoc-test.ias.u-psud.fr'
+        print ("\n####Test "+sitools2_url +" NbrDatasets #############################")
+        sitools_url = sitools2_url
 
         SItools1 = Sitools2Instance(sitools_url)
         prj_list = SItools1.list_project()
