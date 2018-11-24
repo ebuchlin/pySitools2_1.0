@@ -23,7 +23,7 @@ class TestIdocMedocDsNbr(unittest.TestCase):
         pass
 
     def testNbrDsIdocMedoc(self):
-        print ("\n####Test "+sitools2_url +" NbrDatasets #############################")
+        print ("\n####Test "+ sitools2_url +" NbrDatasets #############################")
         sitools_url = sitools2_url
 
         SItools1 = Sitools2Instance(sitools_url)
