@@ -27,7 +27,7 @@ from builtins import map
 from future.moves.urllib.request import urlretrieve
 from simplejson import load
 import requests
-import constants
+from sitools2.clients import constants
 
 
 sitools2_url = constants.SITOOLS2_URL
@@ -552,7 +552,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
 #   sdo_dataset=Sdo_IAS_SDO_dataset(server+"/webs_IAS_SDO_HMI_dataset")
 #   sdo_dataset=Sdo_IAS_SDO_dataset(server+"/webs_hmi_dataset")
 #   print sdo_dataset
-    stdout.write("Loading MEDIA Sitools2 client : %s \n" % server)
+    stdout.write("Loading client : %s \n" % server)
 
     #Param
     dates_param = [[sdo_dataset.fields_dict['date__obs']], dates_optim,
@@ -1093,7 +1093,7 @@ class Sdo_data():
 
     def compute_attributes(self, data):
         if 'get' in data:
-            print ("field get used : %s" % data['get'])
+#            print ("field get used : %s" % data['get'])
             self.url = data['get']
         #ias_path added for hmi (to be removed)
         elif 'ias_path' in data:
