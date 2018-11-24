@@ -27,14 +27,11 @@ from builtins import map
 from future.moves.urllib.request import urlretrieve
 from simplejson import load
 import requests
+import constants
 
 
-#sitools2_url='http://medoc-sdo.ias.u-psud.fr'
-#sitools2_url='http://medoc-sdo-test.ias.u-psud.fr'
-sitools2_url = 'http://idoc-medoc-test.ias.u-psud.fr'
-#sitools2_url = 'http://idoc-medoc.ias.u-psud.fr'
+sitools2_url = constants.SITOOLS2_URL
 
-#sitools2_url='http://localhost:8182'
 
 
 def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
@@ -837,9 +834,14 @@ def media_metadata_search(
         Q_aia = Query(param_query_aia)
  #       print("Q_aia : %s", Q_aia)
         #print("metadata _ds :%s" %metadata_ds)
-        result += metadata_ds.search([Q_aia], O1_aia, S1_aia)
-        #print("result : %s" %result)
-    return result
+        try :
+            result += metadata_ds.search([Q_aia], O1_aia, S1_aia)
+        except HTTPError :
+            print("Http Error\nmetadata_ds.search() failed please send an email to medoc-contact@ias.u-psud.fr")
+            raise
+        else :
+#           print("result : %s" %result)
+            return result
 
 
 def metadata_info(server=None, series='aia.lev1'):
