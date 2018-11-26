@@ -16,3 +16,6 @@ reinstall_pySitools2.sh~
 *.tar
 credits.txt
 *.fits
+/pySitools2.egg-info/
+/cache
+/eggs
