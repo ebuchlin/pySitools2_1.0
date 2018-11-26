@@ -33,7 +33,7 @@ class TestGaia(unittest.TestCase):
         pass
     
     def testSearchGaia(self):
-        print ("####Test gaia_get#############################")
+        print ("\n####Test "+ sitools2_url +" gaia_search() #############################")
         d1 = datetime(2012,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
         gaia_data_list = gaia_search(DATES=[d1,d2], NB_RES_MAX=10, )

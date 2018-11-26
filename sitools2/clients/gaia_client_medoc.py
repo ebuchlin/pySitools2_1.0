@@ -157,7 +157,9 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
 
     Returns 
     -------
-    gaia_data list 
+    gaia_data list
+
+        ..todo:: Add var server for gaia_search()
     """
 
     #Allow lower case entries

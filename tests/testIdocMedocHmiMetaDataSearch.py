@@ -22,16 +22,21 @@ __date__ ="$9 juin 2013 12:17:18$"
 import unittest
 from sitools2.clients.sdo_client_medoc import media_metadata_search
 from datetime import datetime, timedelta
+from sitools2.clients import constants
 
-@unittest.skip("Functional Test idoc-medoc-test interface ")
+sitools2_url = constants.SITOOLS2_URL
+functional_test = constants.FUNCTIONAL_TEST
+
+
+@unittest.skipUnless(functional_test,"Functional Test "+ sitools2_url +" interface ")
 class Testidocmedoc(unittest.TestCase):        
     
     def setUp(self):
         pass
 
     def testMetadaSearch(self):
-        print ("####Test idoc-medoc_meta-data-search #######################")
-        print ("####hmi.sharp_cea_720s_nrt #################################")
+        print ("\n####Test "+ sitools2_url +" meta-data-search #######################")
+        print ("\n####hmi.sharp_cea_720s_nrt #################################")
         print("Test media_metadata_search")
         recnum_list = ['2075898', '2075899', '2075900', '2075902', '2075903',
             '2075904', '2075905', '2075940', '2075938', '2075939']
@@ -42,7 +47,8 @@ class Testidocmedoc(unittest.TestCase):
                 'crval1'
             ],
             series="hmi.sharp_cea_720s_nrt",
-            recnum_list=recnum_list)
+            recnum_list=recnum_list,
+            server = sitools2_url)
         print(meta)
 
         self.assertEqual( len(meta), 10) 

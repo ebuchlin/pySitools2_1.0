@@ -3,7 +3,7 @@
 
 """
 This script has been designed to give python programmers an easy way to
-interrogate media sitools2 interface. You can make a search with the following
+interogate media sitools2 interface. You can make a search with the following
 entries : a date range , a wavelenghth or multiple wavelengths , a cadence.
 You will have as a result a list of Sdo_data objets on which you can apply the
 method display() that will give you for each the recnum, the sunum, the
@@ -27,14 +27,15 @@ from builtins import map
 from future.moves.urllib.request import urlretrieve
 from simplejson import load
 import requests
-from sitools2.clients import constants
 
+import constants
 
 sitools2_url = constants.SITOOLS2_URL
 
 
 
-def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
+
+def idoc_medoc_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
     """Donwload hmi and aia data from MEDOC server
 
     Parameters
@@ -108,7 +109,7 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
             **kwds)
 
 
-def media_get_selection(server=None,
+def idoc_medoc_get_selection(server=None,
                         media_data_list=[],
                         download_type="TAR",
                         **kwds):
@@ -202,7 +203,7 @@ def media_get_selection(server=None,
         sunum_list=media_data_sunum_list, download_type=download_type, **kwds)
 
 
-def media_search(server=None, dates=None, waves=None, series=None,
+def idoc_medoc_search(server=None, dates=None, waves=None, series=None,
                     cadence=None, nb_res_max=-1, **kwds):
     """Use the generic search() from pySitools2 library for Sitools2 SDO
     instance located at IAS
@@ -552,7 +553,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
 #   sdo_dataset=Sdo_IAS_SDO_dataset(server+"/webs_IAS_SDO_HMI_dataset")
 #   sdo_dataset=Sdo_IAS_SDO_dataset(server+"/webs_hmi_dataset")
 #   print sdo_dataset
-    stdout.write("Loading client : %s \n" % server)
+    stdout.write("Loading MEDIA Sitools2 client : %s \n" % server)
 
     #Param
     dates_param = [[sdo_dataset.fields_dict['date__obs']], dates_optim,
@@ -637,7 +638,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
     return sdo_data_list
 
 
-def media_metadata_search(
+def idoc_medoc_metadata_search(
                             server=None,
                             media_data_list=[],
                             keywords=[],
@@ -834,14 +835,9 @@ def media_metadata_search(
         Q_aia = Query(param_query_aia)
  #       print("Q_aia : %s", Q_aia)
         #print("metadata _ds :%s" %metadata_ds)
-        try :
-            result += metadata_ds.search([Q_aia], O1_aia, S1_aia)
-        except HTTPError :
-            print("Http Error\nmetadata_ds.search() failed please send an email to medoc-contact@ias.u-psud.fr")
-            raise
-        else :
-#           print("result : %s" %result)
-            return result
+        result += metadata_ds.search([Q_aia], O1_aia, S1_aia)
+        #print("result : %s" %result)
+    return result
 
 
 def metadata_info(server=None, series='aia.lev1'):
@@ -1093,7 +1089,7 @@ class Sdo_data():
 
     def compute_attributes(self, data):
         if 'get' in data:
-#            print ("field get used : %s" % data['get'])
+            print ("field get used : %s" % data['get'])
             self.url = data['get']
         #ias_path added for hmi (to be removed)
         elif 'ias_path' in data:
