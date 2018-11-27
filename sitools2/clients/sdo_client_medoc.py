@@ -10,7 +10,6 @@ method display() that will give you for each the recnum, the sunum, the
 date_obs, the wavelength, the ias_location, the exptime and t_rec_index
 For each result you will be able to call metadata_search() method in order to
 have the metadata information.
-@author: Pablo ALINGERY for IAS 28-08-2012
 """
 __license__ = "GPLV3"
 __author__ = "Pablo ALINGERY"
