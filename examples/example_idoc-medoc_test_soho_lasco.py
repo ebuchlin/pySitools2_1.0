@@ -1,15 +1,15 @@
 #! /usr/bin/python
 """
 
-@author: Pablo ALINGERY for IAS 06-02-2017
 """
 
 from sitools2.core.pySitools2 import *
+from sitools2.clients import constants
+from future.moves.urllib.request import urlretrieve
 
+sitools_url = constants.SITOOLS2_URL
 
 def main():
-
-    sitools_url = 'http://idoc-medoc-test.ias.u-psud.fr'
 
     print("Loading SitoolsClient for", sitools_url)
     SItools1 = Sitools2Instance(sitools_url)
@@ -79,7 +79,23 @@ def main():
         print ("Message : %s" % e.message)
 
     else :
-        print ("Download id_sitools_view : %s completed" % result[1]['id_sitools_view'] )
+        print ("Download id_sitools_view : %s ,file %s completed" % (result[1]['id_sitools_view'],
+               'first_download_SOHO.tar') )
+
+
+    print("Try to download with urlretrieve")
+    print("item : \n%s" % result[2])
+    filename_item = (result[2]['filename'].split("/"))[-1]
+    try :
+        urlretrieve(result[2]['download_path'],filename_item)
+    except Exception as e:
+        print ("Issue downloading id_sitools_view : %s " % result[2]['id_sitools_view'])
+        print ("type is: %s" % e.__class__.__name__)
+        print ("Message : %s" % e.message)
+    else :
+        print("Download id_sitools_view : %s , file %s completed" % (result[2]['id_sitools_view'],filename_item))
+
+
 
 if __name__ == "__main__":
     main()
