@@ -832,11 +832,13 @@ def media_metadata_search(
  #       print("param_query_aia : ", param_query_aia)
         Q_aia = Query(param_query_aia)
  #       print("Q_aia : %s", Q_aia)
-        #print("metadata _ds :%s" %metadata_ds)
+ #        print("metadata _ds :%s" %metadata_ds)
         try :
             result += metadata_ds.search([Q_aia], O1_aia, S1_aia)
-        except HTTPError :
-            print("Http Error\nmetadata_ds.search() failed please send an email to medoc-contact@ias.u-psud.fr")
+        except HTTPError as e:
+            print ("code error : %s" % e.code)
+            print ("error mess : %s" % e.msg)
+            print("\nmetadata_ds.search() failed please send an email to medoc-contact@ias.u-psud.fr")
             raise
         else :
 #           print("result : %s" %result)
