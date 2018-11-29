@@ -1,5 +1,5 @@
-#! /usr/bin/env python
-#-*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 Test medoc-sdo
@@ -9,6 +9,7 @@ SDO aia.lev1 web interface to access solar data
 __author__ = "Pablo ALINGERY"
 
 from datetime import datetime
+
 
 from sitools2.clients.sdo_client_medoc import media_search, media_metadata_search
 
