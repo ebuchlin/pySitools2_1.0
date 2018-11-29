@@ -1,9 +1,12 @@
 #! /usr/bin/env python
+#-*- coding: utf-8 -*-
+
 """
-Test gaia-dem
-Chloe Guennou web interface
-Temp inversion
+Test medoc-sdo
+SDO aia.lev1 web interface to access solar data
 """
+
+__author__ = "Pablo ALINGERY"
 
 from datetime import datetime
 
