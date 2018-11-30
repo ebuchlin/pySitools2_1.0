@@ -76,7 +76,7 @@ def main():
         print ("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
         print ("type is: %s" % e.__class__.__name__)
         print ("Message : %s" % e.message)
-    except Exception as e:
+    except HTTPError as e:
         print ("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
         print ("type is: %s" % e.__class__.__name__)
         print ("Message : %s" % e.message)
