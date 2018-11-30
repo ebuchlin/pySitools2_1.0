@@ -3,7 +3,7 @@
 
 """
 Test coronas-f dataset
-Medoc solar web interface
+Idoc medoc web interface
 """
 
 __author__ = "Pablo ALINGERY"
@@ -67,22 +67,33 @@ def main():
 
     print ("Download just one CORONAS data\nIn progress please wait ...")
     print("item : \n%s" % result[1])
-    print("id : %s" % result[1]['id_sitools_view'])
+    dataset_pk = ds1.primary_key.name
     try:
-        ds1.execute_plugin(plugin_name='pluginCORONAStar', pkey_values_list=[result[1]['id_sitools_view']],
+        ds1.execute_plugin(plugin_name='pluginCORONAStar', pkey_values_list=[result[1][dataset_pk]],
                            FILENAME='first_download_CORONAS.tar'
                            )
     except ValueError as e:
-        print ("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
+        print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
         print ("type is: %s" % e.__class__.__name__)
         print ("Message : %s" % e.message)
     except HTTPError as e:
-        print ("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
+        print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
         print ("type is: %s" % e.__class__.__name__)
         print ("Message : %s" % e.msg)
     else:
-        print ("Download id_sitools_view : %s,file %s completed" % (result[1]['id_sitools_view'],
+        print ("Download id_sitools_view : %s,file %s completed" % (result[1][dataset_pk],
                                                                     'first_download_CORONAS.tar'))
+    print("Try to download with urlretrieve")
+    print("item : \n%s" % result[2])
+    filename_item = (result[2]['filename'].split("/"))[-1]
+    try:
+        urlretrieve(result[2]['download_path'], filename_item)
+    except Exception as e:
+        print ("Issue downloading id_sitools_view : %s " % result[2][dataset_pk])
+        print ("type is: %s" % e.__class__.__name__)
+        print ("Message : %s" % e.message)
+    else:
+        print("Download id_sitools_view : %s , file %s completed" % (result[2][dataset_pk], filename_item))
 
 
 if __name__ == "__main__":
