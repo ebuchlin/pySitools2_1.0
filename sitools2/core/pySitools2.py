@@ -530,7 +530,8 @@ class Dataset:
             stderr.write("Error reason : %s\n" % e.reason)
             error_lines = e.readlines()
             for line in error_lines:
-                if 'Datasource not activated' in line:
+                str_line = str(line)
+                if "Datasource not activated" in str_line:
                     stderr.write("Explanation : Datasource %s not active\n" % self.name)
                     stderr.write("Try later, contact medoc-contacts@ias.u-psud.fr if the problem persists\n")
                     raise
