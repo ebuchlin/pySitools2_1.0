@@ -70,7 +70,7 @@ def main():
     print("id : %s" % result[1][dataset_pk])
     try:
         ds1.execute_plugin(plugin_name='pluginPICARDtar', pkey_values_list=[result[1][dataset_pk]],
-                           FILENAME='first_download_PICARD.tar')
+                           filename='first_download_PICARD.tar')
     except ValueError as e:
         print ("Issue downloading pk : %s " % result[1][dataset_pk])
         print ("type is: %s" % e.__class__.__name__)

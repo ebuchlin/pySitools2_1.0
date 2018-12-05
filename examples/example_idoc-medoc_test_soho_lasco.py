@@ -67,7 +67,7 @@ def main():
         ds1.execute_plugin(
             plugin_name='pluginSOHOtar',
             pkey_values_list=[result[1][dataset_pk]],
-            FILENAME='first_download_SOHO.tar'
+            filename='first_download_SOHO.tar'
         )
     except ValueError as e:
         print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])

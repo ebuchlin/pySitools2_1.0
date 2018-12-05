@@ -67,7 +67,7 @@ def main():
     dataset_pk = ds1.primary_key.name
     try:
         ds1.execute_plugin(plugin_name='pluginEITSYNtar', pkey_values_list=[result[1][dataset_pk]],
-                           FILENAME='first_download_EITSYN.tar'
+                           filename='first_download_EITSYN.tar'
                            )
     except ValueError as e:
         print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])

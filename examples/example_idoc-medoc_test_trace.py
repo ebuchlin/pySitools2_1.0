@@ -64,7 +64,7 @@ def main():
         ds1.execute_plugin(
             plugin_name='pluginTRACEtar',
             pkey_values_list=[result[1]['id_sitools_view']],
-            FILENAME='first_download_TRACE.tar'
+            filename='first_download_TRACE.tar'
         )
     except ValueError as e:
         print ("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
