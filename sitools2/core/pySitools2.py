@@ -298,8 +298,8 @@ class Dataset:
             load(urlopen(url))
         except HTTPError:
             err_mess = ("Error in Dataset.__init__() :\nDataset %s not "
-                        "available, please send an email to medoc-contact@ias.u-psud.fr "
-                        "to get some help\n" % url)
+                        "available\nPlease send an email to medoc-contact@ias.u-psud.fr "
+                        "to report an issue if the problem persists" % url)
             stderr.write(err_mess)
             raise
         self.name = ""
@@ -767,8 +767,8 @@ class Project:
         try:
             dom_wadl = parseString(wadl)
         except HTTPError:
-            out_mess = ("Project %s : project.resources_list() not allowed, "
-                        "please contact admin for more info\n" % self.name)
+            out_mess = ("Project %s : project.resources_list() not allowed\n"
+                        "Please contact medoc-contacts@ias.u-psud.fr and report that issue\n" % self.name)
             stderr.write(out_mess)
             raise
         else:
@@ -819,7 +819,7 @@ class Project:
                     ds_url = sitools_url + dataset['url']
                     data.append(Dataset(ds_url))
         except HTTPError:
-            out_mess = ("Error in Project.dataset_list() :\nCannot access "
-                        "dataset %s is protected\nContact admin for more info\n" % url)
+            out_mess = ("Error in Project.dataset_list() :\nCannot access dataset list %s"
+                        "\nContact medoc-contacts@ias.u-psud.fr and report that issue\n" % url)
             raise Exception(out_mess)
         return data
