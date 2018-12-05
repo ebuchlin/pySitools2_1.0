@@ -19,3 +19,4 @@ credits.txt
 /pySitools2.egg-info/
 /.cache/
 /.eggs/
+/venv/
