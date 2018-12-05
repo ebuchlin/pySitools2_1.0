@@ -1468,11 +1468,7 @@ def main():
     #sdo_data_list=media_search(dates=[d1,d2],waves=['335'],cadence=['1h'],
     #nb_res_max=10)
     #   print sdo_data_list
-    sdo_data_list = media_search(
-        dates=[d1, d2],
-        series='aia.lev1',
-        cadence=['1h'],
-        nb_res_max=10)
+    sdo_data_list = media_search(dates=[d1, d2], series='aia.lev1', cadence=['1h'], nb_res_max=10)
     print(sdo_data_list)
     # Unit test media_metadata_search
     print("Test media_metadata_search")
