@@ -299,7 +299,7 @@ class Dataset:
         except HTTPError:
             err_mess = ("Error in Dataset.__init__() :\nDataset %s not "
                         "available\nPlease send an email to medoc-contact@ias.u-psud.fr "
-                        "to report an issue if the problem persists" % url)
+                        "to report an issue if the problem persists\n" % url)
             stderr.write(err_mess)
             raise
         self.name = ""
