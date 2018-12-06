@@ -9,8 +9,6 @@ sitools2 server
 """
 
 import simplejson
-from future.moves.urllib.request import urlopen
-
 
 __author__ = "Pablo ALINGERY"
 
@@ -47,14 +45,14 @@ def main():
             print("%d) %s %s" % (i, dataset.name, dataset.url))
 
     ds1_url = sitools_url + "/webs_aia.lev1_dataset?media=json"
-    print ("\nTest : %s :" % ds1_url.__repr__())
+    print("\nTest : %s :" % ds1_url.__repr__())
     print(ds1_url)
 
     try:
         result = simplejson.load(urlopen(ds1_url))
     except simplejson.JSONDecodeError as e:
-        print (e.msg)
-        print (e.args)
+        print(e.msg)
+        print(e.args)
         raise
     else:
         print("Load json info ok")
@@ -66,7 +64,7 @@ def main():
     print("Loading SitoolsClient for", sitools_url)
     sitools1_instance = Sitools2Instance(sitools_url)
     print(sitools1_instance)
-    print ("\nTest IAS_SDO_HMI dataset :")
+    print("\nTest IAS_SDO_HMI dataset :")
     ds1 = Dataset(sitools_url + "/webs_IAS_SDO_HMI_dataset")
     #        ds1 = Dataset(sitools_url+"/webs_IAS_SDO_AIA_dataset")
 
