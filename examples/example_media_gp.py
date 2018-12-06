@@ -30,7 +30,7 @@ sdo_data_list = media_search(
 
 #And if you want to specifies files name do sthg like
 for item in sdo_data_list :
-	print item.date_obs, item.wave , item.recnum, item.sunum, item.ias_location
+	print(item.date_obs, item.wave , item.recnum, item.sunum, item.ias_location)
 	file_date_obs=item.date_obs.strftime('%Y-%m-%dT%H-%M-%S')
 	file_wave=item.wave
 	item.get_file(
