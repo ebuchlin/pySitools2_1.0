@@ -16,7 +16,7 @@ sitools_url = constants.SITOOLS2_URL
 def main():
     print("Loading SitoolsClient for", sitools_url)
     sitools_server = Sitools2Instance(sitools_url)
-    print ("sitools_server : %s " % sitools_server.list_project())
+    print("sitools_server : %s " % sitools_server.list_project())
 
     ds1 = Dataset(sitools_url + "/webs_EUV-SYN_dataset")
     ds1.display()
@@ -62,7 +62,7 @@ def main():
         for i, data in enumerate(result):
             print("%d) %s" % (i + 1, data))
 
-    print ("Download just one EUV-SYN data\nIn progress please wait ...")
+    print("Download just one EUV-SYN data\nIn progress please wait ...")
     print("item : \n%s" % result[1])
     dataset_pk = ds1.primary_key.name
     try:
@@ -70,25 +70,24 @@ def main():
                            filename='first_download_EITSYN.tar'
                            )
     except ValueError as e:
-        print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.message)
+        print("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
+        print("args is: %s" % e.args)
+        print("repr : %s" % e.__repr__())
     except HTTPError as e:
-        print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.msg)
+        print("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
+        print("code is: %s" % e.code)
+        print("message : %s" % e.msg)
     else:
-        print ("Download id_sitools_view : %s,file %s completed" % (result[1][dataset_pk],
-                                                                    'first_download_EITSYN.tar'))
+        print("Download id_sitools_view : %s,file %s completed" % (result[1][dataset_pk], 'first_download_EITSYN.tar'))
     print("Try to download with urlretrieve")
     print("item : \n%s" % result[2])
     filename_item = (result[2]['filename'].split("/"))[-1]
     try:
         urlretrieve(result[2]['download'], filename_item)
-    except Exception as e:
-        print ("Issue downloading id_sitools_view : %s " % result[2][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.message)
+    except HTTPError as e:
+        print("Issue downloading id_sitools_view : %s " % result[2][dataset_pk])
+        print("error code is: %s" % e.code)
+        print("message : %s" % e.msg)
     else:
         print("Download id_sitools_view : %s , file %s completed" % (result[2][dataset_pk], filename_item))
 
