@@ -8,7 +8,6 @@ Idoc medoc web interface
 
 __author__ = "Pablo ALINGERY"
 
-
 from sitools2.core.pySitools2 import *
 from sitools2.clients import constants
 
@@ -65,7 +64,7 @@ def main():
         for i, data in enumerate(result):
             print("%d) %s" % (i + 1, data))
 
-    print ("Download just one CORONAS data\nIn progress please wait ...")
+    print("Download just one CORONAS data\nIn progress please wait ...")
     print("item : \n%s" % result[1])
     dataset_pk = ds1.primary_key.name
     try:
@@ -73,25 +72,25 @@ def main():
                            filename='first_download_CORONAS.tar'
                            )
     except ValueError as e:
-        print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.message)
+        print("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
+        print("args: %s" % e.args)
+        print("Repr : %s" % e.__repr__())
     except HTTPError as e:
-        print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.msg)
+        print("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
+        print("code is: %s" % e.code)
+        print("Message : %s" % e.msg)
     else:
-        print ("Download id_sitools_view : %s,file %s completed" % (result[1][dataset_pk],
-                                                                    'first_download_CORONAS.tar'))
+        print("Download id_sitools_view : %s,file %s completed" % (result[1][dataset_pk],
+                                                                   'first_download_CORONAS.tar'))
     print("Try to download with urlretrieve")
     print("item : \n%s" % result[2])
     filename_item = (result[2]['filename'].split("/"))[-1]
     try:
         urlretrieve(result[2]['download_path'], filename_item)
-    except Exception as e:
-        print ("Issue downloading id_sitools_view : %s " % result[2][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.message)
+    except HTTPError as e:
+        print("Issue downloading id_sitools_view : %s " % result[2][dataset_pk])
+        print("code is: %s" % e.code)
+        print("Message : %s" % e.msg)
     else:
         print("Download id_sitools_view : %s , file %s completed" % (result[2][dataset_pk], filename_item))
 
