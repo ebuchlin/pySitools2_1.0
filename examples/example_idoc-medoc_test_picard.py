@@ -15,7 +15,7 @@ sitools_url = constants.SITOOLS2_URL
 def main():
     print("Loading SitoolsClient for", sitools_url)
     sitools2 = Sitools2Instance(sitools_url)
-    print ("sitoolsinstance : %s " % sitools2.list_project())
+    print("sitoolsinstance : %s " % sitools2.list_project())
 
     ds1 = Dataset(sitools_url + "/webs_PICARD_dataset")
     ds1.display()
@@ -63,7 +63,7 @@ def main():
         for i, data in enumerate(result):
             print("%d) %s" % (i + 1, data))
 
-    print ("Download just one PICARD data\nIn progress please wait ...")
+    print("Download just one PICARD data\nIn progress please wait ...")
     print("item : \n%s" % result[1])
 
     dataset_pk = ds1.primary_key.name
@@ -72,30 +72,30 @@ def main():
         ds1.execute_plugin(plugin_name='pluginPICARDtar', pkey_values_list=[result[1][dataset_pk]],
                            filename='first_download_PICARD.tar')
     except ValueError as e:
-        print ("Issue downloading pk : %s " % result[1][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.message)
+        print("Issue downloading pk : %s " % result[1][dataset_pk])
+        print("type is: %s" % e.args)
+        print("Message : %s" % e.__repr__())
     except Exception as e:
-        print ("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.message)
+        print("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
+        print("type is: %s" % e.args)
+        print("Message : %s" % e.__repr__())
 
     else:
-        print ("Download id_sitools_view : %s completed" % result[1][dataset_pk])
+        print("Download id_sitools_view : %s completed" % result[1][dataset_pk])
 
-    print("Try to download with urlretrieve")
+    print("Try to download with dir_fits dir")
     print("item : \n%s" % result[2])
     filename_item = (result[2]['filename'].split("/"))[-1]
     try:
         urlretrieve(result[2]['dir_fits'], filename_item)
     except IOError as e:
-        print ("Issue downloading pk : %s " % result[2][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.strerror)
+        print("Issue downloading pk : %s " % result[2][dataset_pk])
+        print("type is: %s" % e.__class__.__name__)
+        print("Message : %s" % e.strerror)
     except Exception as e:
-        print ("Issue downloading pk : %s " % result[2][dataset_pk])
-        print ("type is: %s" % e.__class__.__name__)
-        print ("Message : %s" % e.message)
+        print("Issue downloading pk : %s " % result[2][dataset_pk])
+        print("type is: %s" % e.__class__.__name__)
+        print("Message : %s" % e.__repr__())
     else:
         print("Download id_sitools_view : %s , file %s completed" % (result[2][dataset_pk], filename_item))
 
