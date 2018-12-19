@@ -53,7 +53,7 @@ for result in my_meta_search:
 #    #PS : The directory 'results' will be created if it does not exist
 
 for data in sdo_data_list:
-    data.get_file(target_dir='results')
+    data.get_file(target_dir='results', segment=['image_lev1'])
 # data.get_file(target_dir='results', IAS_PATH=True)
 # Need to get a tar ball or zip file :
 # A bit slower than the previous one
