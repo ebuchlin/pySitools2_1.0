@@ -563,7 +563,7 @@ class Dataset:
                 for data in result_temp['data']:
                     result_dict = {}
                     for k, v in data.items():
-                        if (k not in self.noClientAccess_list and k != 'uri' and k in output_name_list)\
+                        if (k not in self.noClientAccess_list and k != 'uri' and k in output_name_list) \
                                 or k in output_name_list:
                             if output_name_dict[k].ftype.startswith('int'):
                                 result_dict.update({k: int(v)})
@@ -702,15 +702,15 @@ class Dataset:
             })
 
         url = self.url + "/" + plugin_name + "?" + urlencode(kwargs)
-        print ("url exec_plugin : %s\n" % url)
+        print("url exec_plugin : %s\n" % url)
         try:
             urlopen(url)
         except HTTPError as e:
-            print ("code error :%s" % e.code)
-            print ("Reason : %s " % e.reason)
+            print("code error :%s" % e.code)
+            print("Reason : %s " % e.reason)
             raise
         except Exception as e:
-            print (e.args)
+            print(e.args)
             raise
         else:
             return urlretrieve('%s' % url, filename)
