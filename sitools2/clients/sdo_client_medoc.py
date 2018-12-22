@@ -19,20 +19,19 @@ __maintainer__ = "Pablo ALINGERY"
 __email__ = "medoc-contact@ias.u-psud.fr"
 
 from sitools2.core.pySitools2 import *
-from sys import stdout, stderr
+from sys import stdout
 from os import path, mkdir
 from collections import Counter
 from future.utils import iteritems
 from builtins import map
 from future.moves.urllib.request import urlretrieve
 from simplejson import load
-import requests
 from sitools2.clients import constants
 
 sitools2_url = constants.SITOOLS2_URL
 
 
-def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
+def media_get(media_data_list=None, target_dir=None, download_type=None, **kwds):
     """Download hmi and aia data from MEDOC server
 
     Parameters
@@ -46,7 +45,7 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
     download_type : str
         Can be 'TAR' or 'ZIP'
 
-    Raise
+    Raises
     -----
     ValueError
         In case parameter media_data_list is empty
@@ -72,6 +71,9 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
     allowed_params = [
         'MEDIA_DATA_LIST', 'TARGET_DIR', 'DOWNLOAD_TYPE', 'DECOMPRESS'
     ]
+    if media_data_list is None:
+        media_data_list = []
+
     for k, v in iteritems(kwds):
         if k not in allowed_params:
             mess_err = ("Error in search():\n'%s' entry for media_get function is not allowed\n" % k)
@@ -106,7 +108,7 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
 
 
 def media_get_selection(server=None,
-                        media_data_list=[],
+                        media_data_list=None,
                         download_type="TAR",
                         **kwds):
     """Download a selection from MEDOC server tar or zip file
@@ -150,6 +152,9 @@ def media_get_selection(server=None,
                             download_type='TAR'
        )
     """
+    if media_data_list is None:
+        media_data_list = []
+
     for k, v in iteritems(kwds):
         if k == 'DOWNLOAD_TYPE':
             download_type = v
@@ -634,9 +639,9 @@ def media_search(server=None, dates=None, waves=None, series=None,
 
 def media_metadata_search(
         server=None,
-        media_data_list=[],
-        keywords=[],
-        recnum_list=[],
+        media_data_list=None,
+        keywords=None,
+        recnum_list=None,
         series=None,
         **kwds):
     """Provide metadata information from MEDOC server
@@ -690,8 +695,15 @@ def media_metadata_search(
     #       stdout.write("Recnum list is : %s \n" % recnum_list)
     #       stdout.write("Serie is : %s \n" % series)
 
-    #    Allow lower case entries
+# Initialize
+    if media_data_list is None:
+        media_data_list = []
+    if recnum_list is None:
+        recnum_list = []
+    if keywords is None:
+        keywords = []
 
+    #    Allow lower case entries
     for k, v in iteritems(kwds):
         # if k not in ['KEYWORDS', 'RECNUM_LIST', 'SERIES', 'SEGMENT', 'SERVER', 'MEDIA_DATA_LIST']:
         if k not in ['KEYWORDS', 'RECNUM_LIST', 'SERIES', 'SERVER', 'MEDIA_DATA_LIST']:
@@ -738,6 +750,7 @@ def media_metadata_search(
                 "Several series_name detected in media_data_list\n")
             if server is None:
                 server = sitools2_url
+                stdout.write("server parameter not specified, default value is set : %s\n" % server)
             result = [
                 item.metadata_search(keywords) for item in media_data_list
             ]
@@ -754,18 +767,10 @@ def media_metadata_search(
         )
 
     # server
-    if server is None and series.startswith('aia'):
-        server = 'http://medoc-sdo.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://medoc-sdo.ias.u-psud.fr'\n"
-        )
-    elif server is None and series.startswith('hmi'):
-        server = 'http://idoc-medoc-test.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://idoc-medoc-test.ias.u-psud.fr'\n"
-        )
+    if server is None:
+        server = sitools2_url
+        stdout.write("server parameter not specified, default value is set : %s\n" % server)
+
     if server is not None and server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" %
                          (server, allowed_server))
@@ -798,12 +803,12 @@ def media_metadata_search(
             mess_err = ("Error metadata_search(): %s keyword does not exist for"
                         " series : %s \n" % (key, series))
             raise ValueError(mess_err)
-    S1_aia = [[metadata_ds.fields_dict['date__obs'], 'ASC']
+    s1_aia = [[metadata_ds.fields_dict['date__obs'], 'ASC']
               ]  # sort by date_obs ascendant
 
-    # Initialize recnumlist
+    # Initialize recnum_sublist
     # print("metadata_ds before request: %s" % metadata_ds.uri)
-    recnumlist = []
+    # recnum_sublist = []
     result = []
     i = 0
     # Make a request for each 500 recnum
@@ -811,25 +816,24 @@ def media_metadata_search(
         # print("recnum_list >500")
         while i < len(recnum_list):
             #               print i
-            recnumlist = recnum_list[i:i + 499]
-            recnumlist = list(map(str, recnumlist))
-            param_query_aia = [[metadata_ds.fields_dict['recnum']], recnumlist,
-                               'IN']
+            recnum_sublist = recnum_list[i:i + 499]
+            recnum_sublist = list(map(str, recnum_sublist))
+            param_query_aia = [[metadata_ds.fields_dict['recnum']], recnum_sublist, 'IN']
             q_aia = Query(param_query_aia)
-            result += metadata_ds.search([q_aia], o1_aia, S1_aia)
+            result += metadata_ds.search([q_aia], o1_aia, s1_aia)
             i = i + 499
 
     #               print "taille result : ",len(result)
     else:
-        recnumlist = list(map(str, recnum_list))
-        param_query_aia = [[metadata_ds.fields_dict['recnum']], recnumlist,
+        recnum_sublist = list(map(str, recnum_list))
+        param_query_aia = [[metadata_ds.fields_dict['recnum']], recnum_sublist,
                            'IN']
         #       print("param_query_aia : ", param_query_aia)
         q_aia = Query(param_query_aia)
         #       print("q_aia : %s", q_aia)
         #        print("metadata _ds :%s" %metadata_ds)
         try:
-            result += metadata_ds.search([q_aia], o1_aia, S1_aia)
+            result += metadata_ds.search([q_aia], o1_aia, s1_aia)
         except HTTPError as e:
             print("code error : %s" % e.code)
             print("error mess : %s" % e.msg)
@@ -941,7 +945,7 @@ class Sdo_ias_sdo_dataset(Dataset):
         Dataset.__init__(self, url)
 
     def __getSelection__(self,
-                         sunum_list=[],
+                         sunum_list=None,
                          filename=None,
                          target_dir=None,
                          download_type="TAR",
@@ -971,6 +975,9 @@ class Sdo_ias_sdo_dataset(Dataset):
             parameter not allowed
             special char at the end of target_dir
         """
+        if sunum_list is None:
+            sunum_list = []
+
         if download_type.upper() not in ['TAR', 'ZIP']:
             stdout.write(
                 "Error get_selection(): %s type not allowed\nOnly TAR or ZIP "
@@ -1217,7 +1224,6 @@ class Sdo_data:
             elif k == 'SEGMENT':
                 segment = v
 
-        filename_pre = ""
         segment_allowed = []
         kwargs = {}
         url = ""
@@ -1241,7 +1247,7 @@ class Sdo_data:
             pass
         else:
             ias_path = 'http://' + ias_path
-            print("Does not start with hhtp:// , let's add it")
+            print("Does not start with http:// , let's add it")
         # Define filename if not provided
         if filename is None and self.series_name == 'aia.lev1':
             # if not specified this is the default name
