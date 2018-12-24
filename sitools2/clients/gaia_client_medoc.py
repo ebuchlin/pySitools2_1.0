@@ -98,7 +98,7 @@ def get_selection(gaia_list=[], download_type="TAR", **kwds):
 
     Parameters
     ----------
-    gaia_list : list of Sdo_data objects
+    gaia_list : list of SdoData objects
         The result of media_search can be passed as an argument of that 
         function.       
     download_type : str
@@ -254,7 +254,7 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
 
 #Define decorator
 def singleton(class_def):
-    """Definition de la classe Sdo_aia_dataset that heritates of Dataset
+    """Definition de la classe SdoAiaDataset that heritates of Dataset
     This following classes will only have one instance 
     """
 
