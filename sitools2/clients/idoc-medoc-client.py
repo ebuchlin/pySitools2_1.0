@@ -5,7 +5,7 @@
 This script has been designed to give python programmers an easy way to
 interogate media sitools2 interface. You can make a search with the following
 entries : a date range , a wavelenghth or multiple wavelengths , a cadence.
-You will have as a result a list of Sdo_data objets on which you can apply the
+You will have as a result a list of SdoData objets on which you can apply the
 method display() that will give you for each the recnum, the sunum, the
 date_obs, the wavelength, the ias_location, the exptime and t_rec_index
 For each result you will be able to call metadata_search() method in order to
@@ -39,7 +39,7 @@ def idoc_medoc_get(media_data_list=[], target_dir=None, download_type=None, **kw
 
     Parameters
     ----------
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         The result of media_search can be passed as an argument of that
         function.
         The size of the list must be >0
@@ -120,7 +120,7 @@ def idoc_medoc_get_selection(server=None,
     ----------
     server : str
         Name of the MEDOC SOLAR server
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         The result of media_search can be passed as an argument
     download_type : str
         Can be 'TAR' or 'ZIP'
@@ -264,7 +264,7 @@ def idoc_medoc_search(server=None, dates=None, waves=None, series=None,
 
     Returns
     -------
-    Sdo_data object list
+    SdoData object list
 
     Example
     -------
@@ -650,7 +650,7 @@ def idoc_medoc_metadata_search(
     ----------
     server : str
         Name of the MEDOC SOLAR server
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         Result of media_search can be passed as an argument of that function.
     keywords : list of str
         List of names of metadata that you wish to have in the output.
@@ -891,7 +891,7 @@ def metadata_info(server=None, series='aia.lev1'):
 
 
 class Sdo_dataset(Dataset):
-    """Definition de la classe Sdo_dataset that heritates of Dataset
+    """Definition de la classe SdoDataset that heritates of Dataset
     Can have several instances
     """
 
@@ -913,7 +913,7 @@ def singleton(class_def):
 
 @singleton
 class Sdo_aia_dataset(Dataset):
-    """Definition de la classe Sdo_aia_dataset that heritates of Dataset
+    """Definition de la classe SdoAiaDataset that heritates of Dataset
     This following classes will only have one instance
     """
 
@@ -922,7 +922,7 @@ class Sdo_aia_dataset(Dataset):
 
 @singleton
 class Sdo_ias_sdo_dataset(Dataset):
-    """Definition de la classe Sdo_ias_sdo_dataset that heritates of Dataset
+    """Definition de la classe SdoIasSdoDataset that heritates of Dataset
     This following classes will only have one instance
 
     Methods
@@ -1031,7 +1031,7 @@ class Sdo_ias_sdo_dataset(Dataset):
 
 
 class Sdo_data():
-    """Definition de la classe Sdo_data
+    """Definition de la classe SdoData
 
     Attributes
     ---------
