@@ -5,7 +5,7 @@
 This script has been designed to give python programmers an easy way to
 interrogate media sitools2 interface. You can make a search with the following
 entries : a date range , a wavelenghth or multiple wavelengths , a cadence.
-You will have as a result a list of Sdo_data objets on which you can apply the
+You will have as a result a list of SdoData objets on which you can apply the
 method display() that will give you for each the recnum, the sunum, the
 date_obs, the wavelength, the ias_location, the exptime and t_rec_index
 For each result you will be able to call metadata_search() method in order to
@@ -36,7 +36,7 @@ def media_get(media_data_list=None, target_dir=None, download_type=None, **kwds)
 
     Parameters
     ----------
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         The result of media_search can be passed as an argument of that
         function.
         The size of the list must be >0
@@ -107,10 +107,7 @@ def media_get(media_data_list=None, target_dir=None, download_type=None, **kwds)
             **kwds)
 
 
-def media_get_selection(server=None,
-                        media_data_list=None,
-                        download_type="TAR",
-                        **kwds):
+def media_get_selection(server=None, media_data_list=None, download_type="TAR", **kwds):
     """Download a selection from MEDOC server tar or zip file
 
 
@@ -118,7 +115,7 @@ def media_get_selection(server=None,
     ----------
     server : str
         Name of the MEDOC SOLAR server
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         The result of media_search can be passed as an argument
     download_type : str
         Can be 'TAR' or 'ZIP'
@@ -176,7 +173,7 @@ def media_get_selection(server=None,
         'http://idoc-medoc.ias.u-psud.fr'
     ]
     if server is None:
-        server = 'http://medoc-sdo.ias.u-psud.fr'
+        server = sitools2_url
         stdout.write(
             "server parameter not specified, default value is set: server=%s\n"
             % server)
@@ -186,7 +183,7 @@ def media_get_selection(server=None,
             "available : %s\n"
             % (server, allowed_server))
 
-    sdo_dataset = Sdo_ias_sdo_dataset(server + "/webs_IAS_SDO_dataset")
+    sdo_dataset = SdoIasSdoDataset(server + "/webs_IAS_SDO_dataset")
 
     if len(media_data_list) == 0:
         mess_err = "Nothing to download\n"
@@ -265,7 +262,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
 
     Returns
     -------
-    Sdo_data object list
+    SdoData object list
 
     Example
     -------
@@ -533,23 +530,23 @@ def media_search(server=None, dates=None, waves=None, series=None,
     # Server definition
     # Define dataset url
     if server.startswith('http://medoc-sdo'):
-        sdo_dataset = Sdo_ias_sdo_dataset(server + "/webs_IAS_SDO_dataset")
+        sdo_dataset = SdoIasSdoDataset(server + "/webs_IAS_SDO_dataset")
     elif server.startswith('http://idoc-medoc') and series.startswith(
             'hmi'):
-        sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_HMI_dataset")
+        sdo_dataset = SdoDataset(server + "/webs_IAS_SDO_HMI_dataset")
     elif server.startswith('http://idoc-medoc') and series.startswith(
             'aia'):
-        sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_AIA_dataset")
+        sdo_dataset = SdoDataset(server + "/webs_IAS_SDO_AIA_dataset")
     elif server.startswith('http://localhost') and series.startswith('aia'):
-        sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_AIA_dataset")
+        sdo_dataset = SdoDataset(server + "/webs_IAS_SDO_AIA_dataset")
     elif server.startswith('http://localhost') and series.startswith('hmi'):
-        sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_HMI_dataset")
+        sdo_dataset = SdoDataset(server + "/webs_IAS_SDO_HMI_dataset")
     else:
         mess_err = server + " is not known"
         raise ValueError(mess_err)
 
-    #   sdo_dataset = Sdo_ias_sdo_dataset(server+"/webs_IAS_SDO_HMI_dataset")
-    #   sdo_dataset = Sdo_ias_sdo_dataset(server+"/webs_hmi_dataset")
+    #   sdo_dataset = SdoIasSdoDataset(server+"/webs_IAS_SDO_HMI_dataset")
+    #   sdo_dataset = SdoIasSdoDataset(server+"/webs_hmi_dataset")
     #   print sdo_dataset
     stdout.write("Loading client : %s \n" % server)
 
@@ -632,7 +629,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
     sdo_data_list = []
     if len(result) != 0:
         for i, data in enumerate(result):
-            sdo_data_list.append(Sdo_data(data))
+            sdo_data_list.append(SdoData(data))
     stdout.write("%s results returned\n" % len(sdo_data_list))
     return sdo_data_list
 
@@ -650,7 +647,7 @@ def media_metadata_search(
     ----------
     server : str
         Name of the MEDOC SOLAR server
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         Result of media_search can be passed as an argument of that function.
     keywords : list of str
         List of names of metadata that you wish to have in the output.
@@ -784,16 +781,16 @@ def media_metadata_search(
     # Define dataset target
     metadata_ds = None
     if server.startswith('http://medoc-sdo'):
-        metadata_ds = Sdo_aia_dataset(server + "/webs_aia_dataset")
+        metadata_ds = SdoAiaDataset(server + "/webs_aia_dataset")
         # print("metadata_ds definition : %s" % metadata_ds.uri)
     elif server.startswith(
             'http://idoc-medoc') and series == 'aia.lev1':
-        metadata_ds = Sdo_aia_dataset(server + "/webs_" + "aia_dataset")
+        metadata_ds = SdoAiaDataset(server + "/webs_" + "aia_dataset")
         # print("aia is targetted on idoc-medoc.ias.u-psud.fr")
         # print("metadata _ds :%s" %metadata_ds)
     elif server.startswith('http://idoc-medoc') and series.startswith(
             'hmi'):
-        metadata_ds = Sdo_dataset(server + "/webs_" + series + "_dataset")
+        metadata_ds = SdoDataset(server + "/webs_" + series + "_dataset")
         # print("hmi series %s is targetted on idoc-medoc.ias.u-psud.fr" % series)
     o1_aia = []
     for key in keywords:
@@ -876,29 +873,21 @@ def metadata_info(server=None, series='aia.lev1'):
     # Controls
     # server
     if server is None:
-        server = 'http://medoc-sdo.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://medoc-sdo.ias.u-psud.fr'\n"
-        )
-    elif server is None and series.startswith('hmi'):
-        server = 'http://idoc-medoc-test.ias.u-psud.fr'
+        server = sitools2_url
     if server is not None and server not in allowed_server:
-        raise ValueError("Server %s is not allowed\nServers available : %s\n" %
-                         (server, allowed_server))
+        raise ValueError("Server %s is not allowed\nServers available : %s\n" % (server, allowed_server))
     metadata_ds = None
     # Define dataset url
     if server == 'http://medoc-sdo-test.ias.u-psud.fr':
-        metadata_ds = Sdo_ias_sdo_dataset(server + "/webs_aia_dataset")
+        metadata_ds = SdoIasSdoDataset(server + "/webs_aia_dataset")
     elif server == 'http://idoc-medoc-test.ias.u-psud.fr':
-        metadata_ds = Sdo_ias_sdo_dataset(server + "/webs_" + series +
-                                          "_dataset")
+        metadata_ds = SdoIasSdoDataset(server + "/webs_" + series + "_dataset")
 
     return metadata_ds.display()
 
 
-class Sdo_dataset(Dataset):
-    """Definition de la classe Sdo_dataset that heritates of Dataset
+class SdoDataset(Dataset):
+    """Definition de la classe SdoDataset that heritates of Dataset
     Can have several instances
     """
 
@@ -911,17 +900,17 @@ def singleton(class_def):
     """
     instances = {}
 
-    def get_instance(Class_heritage):
+    def get_instance(class_heritage):
         if class_def not in instances:
-            instances[class_def] = class_def(Class_heritage)
+            instances[class_def] = class_def(class_heritage)
         return instances[class_def]
 
     return get_instance
 
 
 @singleton
-class Sdo_aia_dataset(Dataset):
-    """Definition de la classe Sdo_aia_dataset that heritates of Dataset
+class SdoAiaDataset(Dataset):
+    """Definition de la classe SdoAiaDataset that heritates of Dataset
     This following classes will only have one instance
     """
 
@@ -930,8 +919,8 @@ class Sdo_aia_dataset(Dataset):
 
 
 @singleton
-class Sdo_ias_sdo_dataset(Dataset):
-    """Definition de la classe Sdo_ias_sdo_dataset that heritates of Dataset
+class SdoIasSdoDataset(Dataset):
+    """Definition de la classe SdoIasSdoDataset that heritates of Dataset
     This following classes will only have one instance
 
     Methods
@@ -1042,8 +1031,8 @@ class Sdo_ias_sdo_dataset(Dataset):
                 stdout.write("Download selection %s completed\n" % filename)
 
 
-class Sdo_data:
-    """Definition de la classe Sdo_data
+class SdoData:
+    """Definition de la classe SdoData
 
     Attributes
     ---------
@@ -1532,13 +1521,13 @@ class Sdo_data:
             raise TypeError(mess_err)
 
         if server_url.startswith('http://medoc-sdo'):
-            metadata_ds = Sdo_aia_dataset(server_url + "/webs_aia_dataset")
+            metadata_ds = SdoAiaDataset(server_url + "/webs_aia_dataset")
         elif server_url.startswith('http://idoc-medoc'):
-            metadata_ds = Sdo_dataset(server_url + "/webs_" +
-                                      self.series_name + "_dataset")
+            metadata_ds = SdoDataset(server_url + "/webs_" +
+                                     self.series_name + "_dataset")
         elif server_url.startswith('http://localhost'):
-            metadata_ds = Sdo_dataset(server_url + "/webs_" +
-                                      self.series_name + "_dataset")
+            metadata_ds = SdoDataset(server_url + "/webs_" +
+                                     self.series_name + "_dataset")
 
         else:
             raise ValueError(
