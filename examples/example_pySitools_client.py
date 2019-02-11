@@ -22,12 +22,12 @@ def main():
     #       sitools_url = 'http://localhost:8184'
 
     print("Loading SitoolsClient for", sitools_url)
-    SItools1 = Sitools2Instance(sitools_url)
-    prj_list = SItools1.list_project()
+    sitools1 = Sitools2Instance(sitools_url)
+    prj_list = sitools1.list_project()
     #       print "Nombre de projets : ",len(prj_list)
     ds_list = []
     for p in prj_list:
-        #                p.display()
+        p.display()
         for ds in p.dataset_list():
             ds_list.append(ds)
 
@@ -43,74 +43,74 @@ def main():
 #               print ds.name
     ds1 = ds_list[69]
     ds1.display()
-    #display() or print works as well
+    # display() or print works as well
     #       print ds1
 
-    #date__ob
-    #Format must be somthing like 2015-11-01T00:00:00.000 in version Sitools2 3.0
+    # date__ob
+    # Format must be somthing like 2015-11-01T00:00:00.000 in version Sitools2 3.0
 
-    param_query1 = [[ds1.fields_list[3]],
+    param_query1 = [[ds1.fields_dict['date__obs']],
                     ['2015-11-01T00:00:00.000', '2015-11-01T01:00:00.000'],
                     'DATE_BETWEEN']
     #       param_query1 = [[ds1.fields_list[9]],['1123977851', '1123981271'],'NUMERIC_BETWEEN']
-    #wave
+    # wave
     #       param_query2 = [[ds1.fields_list[5]],['94','131','171','193','211','304','335','1600','1700'],'IN']
     #       param_query2 = [[ds1.fields_list[5]],['335'],'IN']
     #       param_query2 = [[ds1.fields_list[5]],['304','335'],'NUMERIC_BETWEEN']
     #       param_query2 = [[ds1.fields_list[5]],['171'],'eq']
-    #cadence
+    # cadence
     #       param_query3 = [[ds1.fields_list[10]],['1 min'],'CADENCE']
-    #exptime
+    # exptime
     #        param_query4 = [[ds1.fields_list[8]],['2.900849'],'LTE']
-    #series_name 
+    # series_name
     #       param_query2 = [[ds1.fields_list[3]],['hmi.m_720s'],'IN']
-    param_query2 = [[ds1.fields_list[2]], ['hmi.sharp_cea_720s_nrt'], 'IN']
-    Q1 = Query(param_query1)
-    Q2 = Query(param_query2)
+    param_query2 = [[ds1.fields_dict['series_name']], ['hmi.sharp_cea_720s_nrt'], 'IN']
+    q1 = Query(param_query1)
+    q2 = Query(param_query2)
     #        Q3 = Query(param_query3)
     #        Q4 = Query(param_query4)
 
-    #Ask date__obs,get, wave, exptime,ias_location
-    #       O1 = [ds1.fields_list[0],ds1.fields_list[4],ds1.fields_list[5],ds1.fields_list[7]]
+    # Ask date__obs,get, wave, exptime,ias_location
+    #       o1 = [ds1.fields_list[0],ds1.fields_list[4],ds1.fields_list[5],ds1.fields_list[7]]
 
-    #Ask recnum, sunum,date__obs, ias_location
-    O1 = [
-        ds1.fields_list[0], ds1.fields_list[1], ds1.fields_list[2],
-        ds1.fields_list[3], ds1.fields_list[6]
+    # Ask recnum, sunum,date__obs, ias_location
+    o1 = [
+        ds1.fields_dict['get'], ds1.fields_dict['get_segment'], ds1.fields_dict['recnum'],
+        ds1.fields_dict['sunum'], ds1.fields_dict['date__obs']
     ]
 
-    #Ask date__obs,get,recnum wave, exptime,ias_location
-    #        O1 = [ds1.fields_list[1],ds1.fields_list[3],ds1.fields_list[4],ds1.fields_list[5],ds1.fields_list[7]]
-    #Ask date__obs, exptime
-    #       O1 = [ds1.fields_list[4], ds1.fields_list[8]]
+    # Ask date__obs,get,recnum wave, exptime,ias_location
+    #        o1 = [ds1.fields_list[1],ds1.fields_list[3],ds1.fields_list[4],ds1.fields_list[5],ds1.fields_list[7]]
+    # Ask date__obs, exptime
+    #       o1 = [ds1.fields_list[4], ds1.fields_list[8]]
 
-    #Ask recnum
-    #       O1 = [ds1.fields_list[1]]
+    # Ask recnum
+    #       o1 = [ds1.fields_list[1]]
 
-    #Sort date__obs ASC, wave ASC, exptime DESC
+    # Sort date__obs ASC, wave ASC, exptime DESC
     #       S1 = [[ds1.fields_list[5],'ASC'],[ds1.fields_list[4],'ASC'],[ds1.fields_list[8],'DESC']]
-    #Sort date__obs ASC, exptime DESC
+    # Sort date__obs ASC, exptime DESC
     #       S1 = [[ds1.fields_list[4],'ASC'],[ds1.fields_list[8],'DESC']]
-    #Sort date__obs ASC, wave ASC
+    # Sort date__obs ASC, wave ASC
     #        S1 = [[ds1.fields_list[4],'ASC'],[ds1.fields_list[5],'ASC']]
 
-    #Sort date__obs ASC
-    S1 = [[ds1.fields_list[3], 'ASC']]
+    # Sort date__obs ASC
+    S1 = [[ds1.fields_dict['date__obs'], 'ASC']]
 
     #       for field in ds1.fields_list :
     #               field.display()
 
     print("\nPrint Query  ...")
-    Q1.display()
-    Q2.display()
+    q1.display()
+    q2.display()
     #       Q3.display()
     #       Q4.display()
 
     #       print "toto :",ds1.fields_list[2].name
-    #       result = ds1.search([Q1,Q2,Q3,Q4],O1,S1,nbr_to_display=10)
-    #       result = ds1.search([Q1,Q2,Q3],O1,S1,limit_to_nb_res_max=10)
-    result = ds1.search([Q1, Q2], O1, S1)
-    #        result = ds1.search([Q1,Q2],O1,S1,limit_to_nb_res_max=10)
+    #       result = ds1.search([q1,q2,Q3,Q4],o1,S1,nbr_to_display=10)
+    #       result = ds1.search([q1,q2,Q3],o1,S1,limit_to_nb_res_max=10)
+    result = ds1.search([q1, q2], o1, S1)
+    #        result = ds1.search([q1,q2],o1,S1,limit_to_nb_res_max=10)
     if len(result) != 0:
         print("Results :")
         for i, data in enumerate(result):
@@ -118,8 +118,8 @@ def main():
 
 #       else :
 #               sys.stdout.write("For the following queries :\n")
-#               Q1.display()
-#              Q2.display()
+#               q1.display()
+#              q2.display()
 #               sys.stdout.write("No results found\n")
 #        ds2=Dataset("http://sol-palinger-old:8182/webs_IAS_SDO_dataset")
 #        ds2.display()
@@ -128,21 +128,21 @@ def main():
         recnum_list.append(str(record['recnum']))
     ds_hmi = Dataset(sitools_url + "/webs_hmi.sharp_cea_720s_nrt_dataset")
 
-    #Old url for idoc-solar-portal-test for aia
+    # Old url for idoc-solar-portal-test for aia
     #        ds_aia=Dataset(sitools_url+"/webs_aia_dataset")
     ds_hmi.display()
     #        print recnum_list
-    #recnum
-    param_query_hmi = [[ds_hmi.fields_list[0]], recnum_list, 'IN']
+    # recnum
+    param_query_hmi = [[ds_hmi.fields_dict['recnum']], recnum_list, 'IN']
     Q_hmi = Query(param_query_hmi)
     Q_hmi.display()
-    #quality
+    # quality
 
     O1_hmi = [
-        ds_hmi.fields_list[0], ds_hmi.fields_list[1], ds_hmi.fields_list[114]
+        ds_hmi.fields_dict['sunum'], ds_hmi.fields_dict['recnum'], ds_hmi.fields_dict['harpnum']
     ]
     print("output : ", ds_hmi.fields_list[114].name)
-    S1_hmi = [[ds_hmi.fields_list[114], 'ASC']]
+    S1_hmi = [[ds_hmi.fields_dict['harpnum'], 'ASC']]
     #       for field in ds_aia.fields_list :
     #               field.display()
     result_hmi = ds_hmi.search([Q_hmi], O1_hmi, S1_hmi)
