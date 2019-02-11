@@ -77,7 +77,6 @@ def main():
         print("Message : %s" % e.__repr__())
     except Exception as e:
         print("Issue downloading id_sitools_view : %s " % result[1][dataset_pk])
-        print("type is: %s" % e.args)
         print("Message : %s" % e.__repr__())
 
     else:

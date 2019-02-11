@@ -78,7 +78,6 @@ def main():
         print("repr : %s" % e.__repr__())
     except Exception as e:
         print("Issue downloading id_sitools_view : %s " % result[1]['id_sitools_view'])
-        print("args is: %s" % e.args)
         print("Message : %s" % e.__repr__())
 
     else:
