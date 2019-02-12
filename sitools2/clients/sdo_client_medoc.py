@@ -29,6 +29,12 @@ from simplejson import load
 from sitools2.clients import constants
 
 sitools2_url = constants.SITOOLS2_URL
+medoc_sdo_dataset = constants.SDO_DATASET_ID #old interface medoc-sdo.ias.u-psud.fr
+medoc_sdo_aia_lev1_dataset = constants.SDO_AIA_LEV1_DATASET_ID #old interface medoc-sdo.ias.u-psud.fr
+idoc_medoc_sdo_aia_dataset = constants.SDO_AIA_DATASET_ID
+idoc_medoc_sdo_hmi_dataset = constants.SDO_HMI_DATASET_ID
+idoc_medoc_sdo_aia_lev1_dataset = constants.AIA_LEV1_DATASET_ID
+
 
 
 def media_get(media_data_list=None, target_dir=None, download_type=None, **kwds):
@@ -182,22 +188,22 @@ def media_get_selection(server=None, media_data_list=None, download_type="TAR", 
             "Server %s is not allowed for media_get_selection()\nServers "
             "available : %s\n"
             % (server, allowed_server))
+    try:
+        sdo_dataset = SdoIasSdoDataset(server + "/" + medoc_sdo_dataset)
+    except HTTPError:
+        raise HTTPError
+    else:
+        if len(media_data_list) == 0:
+            mess_err = "Nothing to download\n"
+            raise ValueError(mess_err)
 
-    sdo_dataset = SdoIasSdoDataset(server + "/webs_IAS_SDO_dataset")
-
-    if len(media_data_list) == 0:
-        mess_err = "Nothing to download\n"
-        raise ValueError(mess_err)
-
-    media_data_sunum_list = []
-    for item in media_data_list:
-        if item.ias_location != '':
-            media_data_sunum_list.append(item.sunum)
-        else:
-            stdout.write("The data for recnum %s is not at IAS\n" %
-                         str(item.recnum))
-    sdo_dataset.__getSelection__(
-        sunum_list=media_data_sunum_list, download_type=download_type, **kwds)
+        media_data_sunum_list = []
+        for item in media_data_list:
+            if item.ias_location != '':
+                media_data_sunum_list.append(item.sunum)
+            else:
+                stdout.write("The data for recnum %s is not at IAS\n" % str(item.recnum))
+        sdo_dataset.__getSelection__(sunum_list=media_data_sunum_list, download_type=download_type, **kwds)
 
 
 def media_search(server=None, dates=None, waves=None, series=None,
@@ -342,8 +348,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
             "server='http://idoc-medoc-test.ias.u-psud.fr'\n"
         )
     if server is not None and server not in allowed_server:
-        raise ValueError("Server %s is not allowed\nServers available : %s\n" %
-                         (server, allowed_server))
+        raise ValueError("Server %s is not allowed\nServers available : %s\n" % (server, allowed_server) )
 
     # dates
     if dates is None:
@@ -530,17 +535,15 @@ def media_search(server=None, dates=None, waves=None, series=None,
     # Server definition
     # Define dataset url
     if server.startswith('http://medoc-sdo'):
-        sdo_dataset = SdoIasSdoDataset(server + "/webs_IAS_SDO_dataset")
-    elif server.startswith('http://idoc-medoc') and series.startswith(
-            'hmi'):
-        sdo_dataset = SdoDataset(server + "/webs_IAS_SDO_HMI_dataset")
-    elif server.startswith('http://idoc-medoc') and series.startswith(
-            'aia'):
-        sdo_dataset = SdoDataset(server + "/webs_IAS_SDO_AIA_dataset")
+        sdo_dataset = SdoIasSdoDataset(server + "/"+ medoc_sdo_dataset)
+    elif server.startswith('http://idoc-medoc') and series.startswith('hmi'):
+        sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_hmi_dataset)
+    elif server.startswith('http://idoc-medoc') and series.startswith('aia'):
+        sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_aia_dataset)
     elif server.startswith('http://localhost') and series.startswith('aia'):
-        sdo_dataset = SdoDataset(server + "/webs_IAS_SDO_AIA_dataset")
+        sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_aia_dataset)
     elif server.startswith('http://localhost') and series.startswith('hmi'):
-        sdo_dataset = SdoDataset(server + "/webs_IAS_SDO_HMI_dataset")
+        sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_hmi_dataset)
     else:
         mess_err = server + " is not known"
         raise ValueError(mess_err)
@@ -781,15 +784,13 @@ def media_metadata_search(
     # Define dataset target
     metadata_ds = None
     if server.startswith('http://medoc-sdo'):
-        metadata_ds = SdoAiaDataset(server + "/webs_aia_dataset")
+        metadata_ds = SdoAiaDataset(server + "/" + medoc_sdo_aia_lev1_dataset)
         # print("metadata_ds definition : %s" % metadata_ds.uri)
-    elif server.startswith(
-            'http://idoc-medoc') and series == 'aia.lev1':
-        metadata_ds = SdoAiaDataset(server + "/webs_" + "aia_dataset")
+    elif server.startswith('http://idoc-medoc') and series == 'aia.lev1':
+        metadata_ds = SdoAiaDataset(server + "/" + idoc_medoc_sdo_aia_lev1_dataset)
         # print("aia is targetted on idoc-medoc.ias.u-psud.fr")
         # print("metadata _ds :%s" %metadata_ds)
-    elif server.startswith('http://idoc-medoc') and series.startswith(
-            'hmi'):
+    elif server.startswith('http://idoc-medoc') and series.startswith('hmi'):
         metadata_ds = SdoDataset(server + "/webs_" + series + "_dataset")
         # print("hmi series %s is targetted on idoc-medoc.ias.u-psud.fr" % series)
     o1_aia = []
@@ -831,9 +832,7 @@ def media_metadata_search(
         #        print("metadata _ds :%s" %metadata_ds)
         try:
             result += metadata_ds.search([q_aia], o1_aia, s1_aia)
-        except HTTPError as e:
-            print("code error : %s" % e.code)
-            print("error mess : %s" % e.msg)
+        except HTTPError:
             print("\nmetadata_ds.search() failed please send an email to medoc-contact@ias.u-psud.fr")
             raise
         else:
