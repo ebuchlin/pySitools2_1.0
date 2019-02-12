@@ -528,11 +528,16 @@ class Dataset:
             stderr.write("HttpError exception\n")
             stderr.write("Error code : %s\n" % e.code)
             stderr.write("Error reason : %s\n" % e.reason)
+            stderr.write("url : %s\n" % url_count)
             error_lines = e.readlines()
             for line in error_lines:
-                str_line = str(line)
+                str_line = str(line, 'utf-8')
                 if "Datasource not activated" in str_line:
                     stderr.write("Explanation : Datasource %s not active\n" % self.name)
+                    stderr.write("Try later, contact medoc-contacts@ias.u-psud.fr if the problem persists\n")
+                    raise
+                elif "Internal Server Error (500) - Error while querying datasource\n" in str_line:
+                    stderr.write("Explanation : Error querying datasource %s\n" % self.name)
                     stderr.write("Try later, contact medoc-contacts@ias.u-psud.fr if the problem persists\n")
                     raise
             stderr.write("Try later, contact medoc-contacts@ias.u-psud.fr if the problem persists\n")
@@ -821,5 +826,6 @@ class Project:
         except HTTPError:
             out_mess = ("Error in Project.dataset_list() :\nCannot access dataset list %s"
                         "\nContact medoc-contacts@ias.u-psud.fr and report that issue\n" % url)
-            raise Exception(out_mess)
+            stderr.write(out_mess)
+            raise
         return data
