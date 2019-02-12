@@ -13,6 +13,8 @@ FUNCTIONAL_TEST = False
 
 #Dataset_ID
 SDO_DATASET_ID = 'webs_IAS_SDO_dataset' #medoc-sdo.ias.u-psud.fr old interface
+SDO_AIA_LEV1_DATASET_ID = 'webs_aia_dataset' #medoc-sdo.ias.u-psud.fr old interface
+
 SDO_HMI_DATASET_ID = 'webs_IAS_SDO_HMI_dataset'
 SDO_AIA_DATASET_ID = 'webs_IAS_SDO_AIA_dataset'
 AIA_LEV1_DATASET_ID = 'webs_aia.lev1_dataset'
