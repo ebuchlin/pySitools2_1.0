@@ -1,17 +1,17 @@
 #! /usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """
 This script has been designed to give python programmers an easy way to
 interrogate media sitools2 interface. You can make a search with the following
 entries : a date range , a wavelenghth or multiple wavelengths , a cadence.
-You will have as a result a list of Sdo_data objets on which you can apply the
+You will have as a result a list of SdoData objets on which you can apply the
 method display() that will give you for each the recnum, the sunum, the
 date_obs, the wavelength, the ias_location, the exptime and t_rec_index
 For each result you will be able to call metadata_search() method in order to
 have the metadata information.
-@author: Pablo ALINGERY for IAS 28-08-2012
 """
+
 __license__ = "GPLV3"
 __author__ = "Pablo ALINGERY"
 __credit__ = ["Pablo ALINGERY", "Elie SOUBRIE"]
@@ -19,27 +19,30 @@ __maintainer__ = "Pablo ALINGERY"
 __email__ = "medoc-contact@ias.u-psud.fr"
 
 from sitools2.core.pySitools2 import *
-from sys import stdout, stderr
+from sys import stdout
 from os import path, mkdir
 from collections import Counter
 from future.utils import iteritems
 from builtins import map
 from future.moves.urllib.request import urlretrieve
 from simplejson import load
-import requests
 from sitools2.clients import constants
 
-
 sitools2_url = constants.SITOOLS2_URL
+medoc_sdo_dataset = constants.SDO_DATASET_ID #old interface medoc-sdo.ias.u-psud.fr
+medoc_sdo_aia_lev1_dataset = constants.SDO_AIA_LEV1_DATASET_ID #old interface medoc-sdo.ias.u-psud.fr
+idoc_medoc_sdo_aia_dataset = constants.SDO_AIA_DATASET_ID
+idoc_medoc_sdo_hmi_dataset = constants.SDO_HMI_DATASET_ID
+idoc_medoc_sdo_aia_lev1_dataset = constants.AIA_LEV1_DATASET_ID
 
 
 
-def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
-    """Donwload hmi and aia data from MEDOC server
+def media_get(media_data_list=None, target_dir=None, download_type=None, **kwds):
+    """Download hmi and aia data from MEDOC server
 
     Parameters
     ----------
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         The result of media_search can be passed as an argument of that
         function.
         The size of the list must be >0
@@ -48,7 +51,7 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
     download_type : str
         Can be 'TAR' or 'ZIP'
 
-    Raise
+    Raises
     -----
     ValueError
         In case parameter media_data_list is empty
@@ -74,10 +77,12 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
     allowed_params = [
         'MEDIA_DATA_LIST', 'TARGET_DIR', 'DOWNLOAD_TYPE', 'DECOMPRESS'
     ]
+    if media_data_list is None:
+        media_data_list = []
+
     for k, v in iteritems(kwds):
         if k not in allowed_params:
-            mess_err = ("Error in search():\n'%s' entry for the media_get "
-            "function is not allowed\n" % k)
+            mess_err = ("Error in search():\n'%s' entry for media_get function is not allowed\n" % k)
             raise ValueError(mess_err)
         if k == 'TARGET_DIR':
             target_dir = v
@@ -87,7 +92,7 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
             media_data_list = v
 
     if 'MEDIA_DATA_LIST' in kwds:
-        del kwds['MEDIA_DATA_LIST']  #don't pass it twice
+        del kwds['MEDIA_DATA_LIST']  # don't pass it twice
 
     if len(media_data_list) == 0:
         mess_err = "Nothing to download\n"
@@ -99,7 +104,7 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
                 item.get_file(target_dir=target_dir, **kwds)
             else:
                 stdout.write("The data for recnum %s is not at IAS \n" %
-                                 str(item.recnum))
+                             str(item.recnum))
     else:
         media_get_selection(
             media_data_list=media_data_list,
@@ -108,11 +113,7 @@ def media_get(media_data_list=[], target_dir=None, download_type=None, **kwds):
             **kwds)
 
 
-def media_get_selection(server=None,
-                        media_data_list=[],
-                        download_type="TAR",
-                        **kwds):
-
+def media_get_selection(server=None, media_data_list=None, download_type="TAR", **kwds):
     """Download a selection from MEDOC server tar or zip file
 
 
@@ -120,12 +121,12 @@ def media_get_selection(server=None,
     ----------
     server : str
         Name of the MEDOC SOLAR server
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         The result of media_search can be passed as an argument
     download_type : str
         Can be 'TAR' or 'ZIP'
 
-    Raise
+    Raises
     -----
     ValueError
         server parameter value is not allowed
@@ -154,6 +155,9 @@ def media_get_selection(server=None,
                             download_type='TAR'
        )
     """
+    if media_data_list is None:
+        media_data_list = []
+
     for k, v in iteritems(kwds):
         if k == 'DOWNLOAD_TYPE':
             download_type = v
@@ -165,9 +169,9 @@ def media_get_selection(server=None,
     if 'MEDIA_DATA_LIST' in kwds:
         del kwds['MEDIA_DATA_LIST']
 
-# Define dateset target
+    # Define dateset target
 
-#server
+    # server
     allowed_server = [
         'http://medoc-sdo.ias.u-psud.fr',
         'http://medoc-sdo-test.ias.u-psud.fr',
@@ -175,7 +179,7 @@ def media_get_selection(server=None,
         'http://idoc-medoc.ias.u-psud.fr'
     ]
     if server is None:
-        server = 'http://medoc-sdo.ias.u-psud.fr'
+        server = sitools2_url
         stdout.write(
             "server parameter not specified, default value is set: server=%s\n"
             % server)
@@ -184,26 +188,26 @@ def media_get_selection(server=None,
             "Server %s is not allowed for media_get_selection()\nServers "
             "available : %s\n"
             % (server, allowed_server))
+    try:
+        sdo_dataset = SdoIasSdoDataset(server + "/" + medoc_sdo_dataset)
+    except HTTPError:
+        raise HTTPError
+    else:
+        if len(media_data_list) == 0:
+            mess_err = "Nothing to download\n"
+            raise ValueError(mess_err)
 
-    sdo_dataset = Sdo_IAS_SDO_dataset(server + "/webs_IAS_SDO_dataset")
-
-    if len(media_data_list) == 0:
-        mess_err = "Nothing to download\n"
-        raise ValueError(mess_err)
-
-    media_data_sunum_list = []
-    for item in media_data_list:
-        if item.ias_location != '':
-            media_data_sunum_list.append(item.sunum)
-        else:
-            stdout.write("The data for recnum %s is not at IAS\n" %
-                             str(item.recnum))
-    sdo_dataset.__getSelection__(
-        sunum_list=media_data_sunum_list, download_type=download_type, **kwds)
+        media_data_sunum_list = []
+        for item in media_data_list:
+            if item.ias_location != '':
+                media_data_sunum_list.append(item.sunum)
+            else:
+                stdout.write("The data for recnum %s is not at IAS\n" % str(item.recnum))
+        sdo_dataset.__getSelection__(sunum_list=media_data_sunum_list, download_type=download_type, **kwds)
 
 
 def media_search(server=None, dates=None, waves=None, series=None,
-                    cadence=None, nb_res_max=-1, **kwds):
+                 cadence=None, nb_res_max=-1, **kwds):
     """Use the generic search() from pySitools2 library for Sitools2 SDO
     instance located at IAS
 
@@ -212,7 +216,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
     server : str
         Name of the MEDOC SOLAR server
 
-    dates : datetime
+    dates : list
         Interval of dates within you wish to make a research,
         It must be specifed and composed of 2 datetime elements d1 d2,
         with d2 >d1
@@ -230,7 +234,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
         Can be aia.lev1 , hmi.sharp_720s ...
         default value aia.lev1 if not specified
 
-    cadence : str
+    cadence : list
         Can be a string and in list
         ['12 sec','1 min', '2 min', '10 min', '30 min',
         '1 h', '2 h', '6 h', '12 h' , '1 day', '12 min']
@@ -240,7 +244,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
         Nbr of results you wish to display from the results
         Must be an integer and if specified must be >0
 
-    Raise
+    Raises
     -----
     ValueError
         parameter not in allowed_parmas list
@@ -264,7 +268,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
 
     Returns
     -------
-    Sdo_data object list
+    SdoData object list
 
     Example
     -------
@@ -276,14 +280,14 @@ def media_search(server=None, dates=None, waves=None, series=None,
                            )
     """
 
-    #Allow lower case entries
+    # Allow lower case entries
     allowed_params = [
         'DATES', 'WAVES', 'CADENCE', 'NB_RES_MAX', 'SERIES', 'SERVER'
     ]
     for k, v in iteritems(kwds):
         if k not in allowed_params:
             mess_err = ("Error in search():\n'%s' entry for the search "
-                "function is not allowed\n" % k)
+                        "function is not allowed\n" % k)
             raise ValueError(mess_err)
         else:
             if k == 'SERVER':
@@ -301,7 +305,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
 
     dates_optim = []
 
-    ######################CONTROL_START
+    #    CONTROL_START
     waves_allowed_aia_list = [
         '94', '131', '171', '193', '211', '304', '335', '1600', '1700'
     ]
@@ -324,7 +328,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
         'http://idoc-medoc-test.ias.u-psud.fr',
         'http://idoc-medoc.ias.u-psud.fr'
     ]
-    #server
+    # server
     if server is None and series is None:
         server = 'http://medoc-sdo.ias.u-psud.fr'
         stdout.write(
@@ -344,29 +348,28 @@ def media_search(server=None, dates=None, waves=None, series=None,
             "server='http://idoc-medoc-test.ias.u-psud.fr'\n"
         )
     if server is not None and server not in allowed_server:
-        raise ValueError("Server %s is not allowed\nServers available : %s\n" %
-                         (server, allowed_server))
+        raise ValueError("Server %s is not allowed\nServers available : %s\n" % (server, allowed_server) )
 
-#dates
+    # dates
     if dates is None:
         mess_err = "Error in search():\ndates entry must be specified"
         raise ValueError(mess_err)
     if type(dates).__name__ != 'list':
         mess_err = ("Error in search():\nentry type for dates is : %s\ndates "
-        "must be a list type" % type(dates).__name__)
+                    "must be a list type" % type(dates).__name__)
         raise TypeError(mess_err)
     if len(dates) != 2:
         mess_err = ("Error in search() : %d elements specified for dates\ndates"
-        " param must be specified and a list of 2 elements" % len(dates))
+                    " param must be specified and a list of 2 elements" % len(dates))
         raise ValueError(mess_err)
     for date in dates:
         if type(date).__name__ != 'datetime':
             mess_err = ("Error in search() : type for dates element is %s \n"
-            "dates list element must be a datetime type" % type(date).__name__)
+                        "dates list element must be a datetime type" % type(date).__name__)
             raise TypeError(mess_err)
         else:
-            #Trick to adapt to date format on solar-portal-test
-            #(to be fixed and that trick removed):
+            # Trick to adapt to date format on solar-portal-test
+            # (to be fixed and that trick removed):
             if server.startswith('http://medoc-sdo'):
                 dates_optim.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
             else:
@@ -374,12 +377,12 @@ def media_search(server=None, dates=None, waves=None, series=None,
                     str(date.strftime("%Y-%m-%dT%H:%M:%S")) + ".000")
     if dates[1] <= dates[0]:
         mess_err = ("Error in search():\nd1=%s\nd2=%s\nfor dates =[d1,d2] d2 "
-        "should be > d1" % (
-            dates[1].strftime("%Y-%m-%dT%H:%M:%S"),
-            dates[2].strftime("%Y-%m-%dT%H:%M:%S")))
+                    "should be > d1" % (
+                        dates[1].strftime("%Y-%m-%dT%H:%M:%S"),
+                        dates[2].strftime("%Y-%m-%dT%H:%M:%S")))
         raise ValueError(mess_err)
 
-#waves
+    # waves
 
     if waves is None and series is None:
         waves = [
@@ -401,7 +404,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
         )
     elif waves is None and series.startswith('hmi'):
         waves = [6173]
-    #print type(waves).__name__
+    # print type(waves).__name__
     if type(waves).__name__ == 'int':
         waves = [str(waves)]
 
@@ -414,32 +417,31 @@ def media_search(server=None, dates=None, waves=None, series=None,
         #        assert isinstance(counter_waves_type_list, list)
         #        print ("keys : ", counter_waves_type_list)
         # print("type : ",counter_waves_type_list[0])
-        if len(counter_waves_type_list) == 1 and counter_waves_type_list[
-                0] == 'int':  #same type
-            waves_STR = [str(wave) for wave in waves]
-            waves = waves_STR
+        if len(counter_waves_type_list) == 1 and counter_waves_type_list[0] == 'int':  # same type
+            waves_str = [str(wave) for wave in waves]
+            waves = waves_str
         elif len(counter_waves_type_list) > 1:
             raise ValueError("waves parameter must have same type !!!!\n")
     else:
         mess_err = ("Error in search():\nentry type for waves is : %s\nwaves "
-        "must be a list or int type " % type(waves).__name__)
+                    "must be a list or int type " % type(waves).__name__)
         raise TypeError(mess_err)
 
     for wave in waves:
         if type(wave).__name__ != 'str':
             mess_err = ("Error in search():\nEntry type for waves element is "
-            "%s\nlist element for waves must be a "
-            "string or a int type" % type(wave).__name__)
+                        "%s\nlist element for waves must be a "
+                        "string or a int type" % type(wave).__name__)
             raise TypeError(mess_err)
 
         if wave not in waves_allowed_aia_list \
-        and wave not in waves_allowed_hmi_list:
+                and wave not in waves_allowed_hmi_list:
             mess_err = ("Error in search():\nwaves= %s not allowed\nwaves"
-            " must be in list %s" % (
-                waves, waves_allowed_aia_list + waves_allowed_hmi_list))
+                        " must be in list %s" % (
+                            waves, waves_allowed_aia_list + waves_allowed_hmi_list))
             raise ValueError(mess_err)
 
-#series
+    # series
     series_allowed_list = [
         'aia.lev1', 'hmi.sharp_720s', 'hmi.sharp_720s_nrt', 'hmi.m_720s',
         'hmi.sharp_cea_720s_nrt', 'hmi.ic_720s', 'hmi.ic_nolimbdark_720s_nrt',
@@ -453,20 +455,20 @@ def media_search(server=None, dates=None, waves=None, series=None,
         )
     elif series is None and '6173' in waves:
         mess_err = "series parameter must be specified"
-        raise ValueError()
+        raise ValueError(mess_err)
     if type(series).__name__ != 'str':
         mess_err = ("Error in search():\nentry type for series is : %s\n"
-        "series must be a str type" % type(series).__name__)
+                    "series must be a str type" % type(series).__name__)
         raise TypeError(mess_err)
     if series not in series_allowed_list:
         mess_err = ("Error in search():\nseries= %s not allowed\nseries must "
-        "be in list %s" % (series, series_allowed_list))
+                    "be in list %s" % (series, series_allowed_list))
         raise ValueError(mess_err)
     if series.startswith('hmi'):
         if waves != ['6173']:
             raise ValueError(
                 "waves value %s does not correspond to the series specified :"
-                " %s "% (",".join(waves), series))
+                " %s " % (",".join(waves), series))
         if server.startswith('http://medoc-sdo'):
             raise ValueError("server %s only for aia.lev1 data\n" % server)
         cadence_allowed_list = {
@@ -481,9 +483,9 @@ def media_search(server=None, dates=None, waves=None, series=None,
             cadence = ['12m']
             stdout.write(
                 "cadence not specified, default value for %s is set :"
-                " cadence=['12m']\n"% series)
+                " cadence=['12m']\n" % series)
 
-#cadence
+    # cadence
     if cadence is None and series.startswith('aia.lev1'):
         cadence = ['1m']
         stdout.write(
@@ -494,67 +496,64 @@ def media_search(server=None, dates=None, waves=None, series=None,
         cadence = ['12m']
         stdout.write(
             "cadence parameter not specified, default value for %s is set :"
-            " cadence=[1m]\n"% series)
+            " cadence=[1m]\n" % series)
     if type(cadence).__name__ == 'str':
         cadence = [cadence]
     if type(cadence).__name__ != 'list':
         mess_err = ("Entry type for cadence is : %s\ncadence must be a list or"
-        " a string type" % type(cadence).__name__)
+                    " a string type" % type(cadence).__name__)
         raise ValueError(mess_err)
     if len(cadence) != 1:
         mess_err = ("Error in search():\n%d elements specified for cadence"
-        "\ncadence param must be specified and a list of only one"
-        "element" % len(cadence))
+                    "\ncadence param must be specified and a list of only one"
+                    "element" % len(cadence))
         raise ValueError(mess_err)
 
     for cadence in cadence:
         if (cadence not in cadence_allowed_list.keys()) and (
                 cadence not in cadence_allowed_list.values()):
-            mess_err =("Error in search():\ncadence= %s not allowed\n"
-            "cadence for %s must be in list :\n%s\n" % (
-                cadence, series, cadence_allowed_list))
+            mess_err = ("Error in search():\ncadence= %s not allowed\n"
+                        "cadence for %s must be in list :\n%s\n" % (
+                            cadence, series, cadence_allowed_list))
             raise ValueError(mess_err)
         elif cadence in cadence_allowed_list.values():
             cadence = [cadence]
         else:
             cadence = [cadence_allowed_list[cadence]]
 
-#nb_res_max
+    # nb_res_max
     if type(nb_res_max).__name__ != 'int':
-        mess_err =("Error in search():\nentry type for nb_res_max is : "
-        "%s\nnb_res_max must be a int type" % type(
-            nb_res_max).__name__)
+        mess_err = ("Error in search():\nentry type for nb_res_max is : "
+                    "%s\nnb_res_max must be a int type" % type(nb_res_max).__name__)
         raise TypeError(mess_err)
     if nb_res_max != -1 and nb_res_max < 0:
-        mess_err =("Error in search():\nnb_res_max= %s not allowed\n"
-        "nb_res_max must be >0" % nb_res_max)
+        mess_err = ("Error in search():\nnb_res_max= %s not allowed\n"
+                    "nb_res_max must be >0" % nb_res_max)
         raise ValueError(mess_err)
-#######################CONTROL_END
+    #    CONTROL_END
 
-#Server definition
-#Define dataset url
+    # Server definition
+    # Define dataset url
     if server.startswith('http://medoc-sdo'):
-        sdo_dataset = Sdo_ias_sdo_dataset(server + "/webs_IAS_SDO_dataset")
-    elif server.startswith('http://idoc-medoc') and series.startswith(
-            'hmi'):
-        sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_HMI_dataset")
-    elif server.startswith('http://idoc-medoc') and series.startswith(
-            'aia'):
-        sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_AIA_dataset")
+        sdo_dataset = SdoIasSdoDataset(server + "/"+ medoc_sdo_dataset)
+    elif server.startswith('http://idoc-medoc') and series.startswith('hmi'):
+        sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_hmi_dataset)
+    elif server.startswith('http://idoc-medoc') and series.startswith('aia'):
+        sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_aia_dataset)
     elif server.startswith('http://localhost') and series.startswith('aia'):
-        sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_AIA_dataset")
+        sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_aia_dataset)
     elif server.startswith('http://localhost') and series.startswith('hmi'):
-        sdo_dataset = Sdo_dataset(server + "/webs_IAS_SDO_HMI_dataset")
+        sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_hmi_dataset)
     else:
         mess_err = server + " is not known"
         raise ValueError(mess_err)
 
-#   sdo_dataset=Sdo_IAS_SDO_dataset(server+"/webs_IAS_SDO_HMI_dataset")
-#   sdo_dataset=Sdo_IAS_SDO_dataset(server+"/webs_hmi_dataset")
-#   print sdo_dataset
+    #   sdo_dataset = SdoIasSdoDataset(server+"/webs_IAS_SDO_HMI_dataset")
+    #   sdo_dataset = SdoIasSdoDataset(server+"/webs_hmi_dataset")
+    #   print sdo_dataset
     stdout.write("Loading client : %s \n" % server)
 
-    #Param
+    # Param
     dates_param = [[sdo_dataset.fields_dict['date__obs']], dates_optim,
                    'DATE_BETWEEN']
     wave_param = [[sdo_dataset.fields_dict['wavelnth']], waves, 'IN']
@@ -562,67 +561,68 @@ def media_search(server=None, dates=None, waves=None, series=None,
     cadence_param = [[sdo_dataset.fields_dict['mask_cadence']], cadence,
                      'cadence']
 
-    #OUTPUT get,recnum,sunum,series_name,date__obs,wave,ias_location,exptime,
-    #t_rec_index,ias_path
+    # OUTPUT get,recnum,sunum,series_name,date__obs,wave,ias_location,exptime,
+    # t_rec_index,ias_path
+    output_options = []
     if series == 'aia.lev1':
-        output_options=[sdo_dataset.fields_dict['get'],
-                        sdo_dataset.fields_dict['recnum'],
-                        sdo_dataset.fields_dict['sunum'],
-                        sdo_dataset.fields_dict['series_name'],
-                        sdo_dataset.fields_dict['date__obs'],
-                        sdo_dataset.fields_dict['wavelnth'],
-                        sdo_dataset.fields_dict['ias_location'],
-                        sdo_dataset.fields_dict['exptime'],
-                        sdo_dataset.fields_dict['t_rec_index'],
-                        sdo_dataset.fields_dict['ias_path']
-        ]
+        output_options = [sdo_dataset.fields_dict['get'],
+                          sdo_dataset.fields_dict['recnum'],
+                          sdo_dataset.fields_dict['sunum'],
+                          sdo_dataset.fields_dict['series_name'],
+                          sdo_dataset.fields_dict['date__obs'],
+                          sdo_dataset.fields_dict['wavelnth'],
+                          sdo_dataset.fields_dict['ias_location'],
+                          sdo_dataset.fields_dict['exptime'],
+                          sdo_dataset.fields_dict['t_rec_index'],
+                          sdo_dataset.fields_dict['ias_path']
+                          ]
     elif series.startswith('hmi.sharp'):
-        output_options=[sdo_dataset.fields_dict['get'],
-                        sdo_dataset.fields_dict['recnum'],
-                        sdo_dataset.fields_dict['sunum'],
-                        sdo_dataset.fields_dict['series_name'],
-                        sdo_dataset.fields_dict['date__obs'],
-                        sdo_dataset.fields_dict['wavelnth'],
-                        sdo_dataset.fields_dict['ias_location'],
-                        sdo_dataset.fields_dict['exptime'],
-                        sdo_dataset.fields_dict['t_rec_index'],
-                        sdo_dataset.fields_dict['ias_path'],
-                        sdo_dataset.fields_dict['harpnum']
-        ]
+        output_options = [sdo_dataset.fields_dict['get'],
+                          sdo_dataset.fields_dict['recnum'],
+                          sdo_dataset.fields_dict['sunum'],
+                          sdo_dataset.fields_dict['series_name'],
+                          sdo_dataset.fields_dict['date__obs'],
+                          sdo_dataset.fields_dict['wavelnth'],
+                          sdo_dataset.fields_dict['ias_location'],
+                          sdo_dataset.fields_dict['exptime'],
+                          sdo_dataset.fields_dict['t_rec_index'],
+                          sdo_dataset.fields_dict['ias_path'],
+                          sdo_dataset.fields_dict['harpnum']
+                          ]
     elif series.startswith('hmi'):
-        output_options=[sdo_dataset.fields_dict['get'],
-                        sdo_dataset.fields_dict['recnum'],
-                        sdo_dataset.fields_dict['sunum'],
-                        sdo_dataset.fields_dict['series_name'],
-                        sdo_dataset.fields_dict['date__obs'],
-                        sdo_dataset.fields_dict['wavelnth'],
-                        sdo_dataset.fields_dict['ias_location'],
-                        sdo_dataset.fields_dict['exptime'],
-                        sdo_dataset.fields_dict['t_rec_index'],
-                        sdo_dataset.fields_dict['ias_path']
-        ]
+        output_options = [sdo_dataset.fields_dict['get'],
+                          sdo_dataset.fields_dict['recnum'],
+                          sdo_dataset.fields_dict['sunum'],
+                          sdo_dataset.fields_dict['series_name'],
+                          sdo_dataset.fields_dict['date__obs'],
+                          sdo_dataset.fields_dict['wavelnth'],
+                          sdo_dataset.fields_dict['ias_location'],
+                          sdo_dataset.fields_dict['exptime'],
+                          sdo_dataset.fields_dict['t_rec_index'],
+                          sdo_dataset.fields_dict['ias_path']
+                          ]
 
-#   output_options=[sdo_dataset.fields_dict['recnum'],
-#sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],\
-#sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],
-#sdo_dataset.fields_dict['ias_location'],
-#sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'],
-#sdo_dataset.fields_dict['ias_path'] ]
+    #   output_options=[sdo_dataset.fields_dict['recnum'],
+    # sdo_dataset.fields_dict['sunum'],sdo_dataset.fields_dict['series_name'],\
+    # sdo_dataset.fields_dict['date__obs'],sdo_dataset.fields_dict['wavelnth'],
+    # sdo_dataset.fields_dict['ias_location'],
+    # sdo_dataset.fields_dict['exptime'],sdo_dataset.fields_dict['t_rec_index'],
+    # sdo_dataset.fields_dict['ias_path'] ]
 
-#Sort date_obs ASC, wave ASC
+    # Sort date_obs ASC, wave ASC
     sort_options = [[sdo_dataset.fields_dict['date__obs'], 'ASC'],
                     [sdo_dataset.fields_dict['wavelnth'], 'ASC']]
-    Q1 = Query(dates_param)
-    Q2 = Query(wave_param)
-    Q3 = Query(cadence_param)
-    Q4 = Query(serie_param)
-    #   print Q1
-    #   print Q2
-    #   print Q3
-    #   print Q4
+    q1 = Query(dates_param)
+    q2 = Query(wave_param)
+    q3 = Query(cadence_param)
+    q4 = Query(serie_param)
+    #   print q1
+    #   print q2
+    #   print q3
+    #   print q4
 
-    query_list = [Q1, Q2, Q3, Q4]
-    #   query_list=[Q1]
+    query_list = [q1, q2, q3, q4]
+    #   query_list=[q1]
 
     result = sdo_dataset.search(
         query_list,
@@ -632,25 +632,25 @@ def media_search(server=None, dates=None, waves=None, series=None,
     sdo_data_list = []
     if len(result) != 0:
         for i, data in enumerate(result):
-            sdo_data_list.append(Sdo_data(data))
+            sdo_data_list.append(SdoData(data))
     stdout.write("%s results returned\n" % len(sdo_data_list))
     return sdo_data_list
 
 
 def media_metadata_search(
-                            server=None,
-                            media_data_list=[],
-                            keywords=[],
-                            recnum_list=[],
-                            series=None,
-                            **kwds):
+        server=None,
+        media_data_list=None,
+        keywords=None,
+        recnum_list=None,
+        series=None,
+        **kwds):
     """Provide metadata information from MEDOC server
 
     Parameters
     ----------
     server : str
         Name of the MEDOC SOLAR server
-    media_data_list : list of Sdo_data objects
+    media_data_list : list of SdoData objects
         Result of media_search can be passed as an argument of that function.
     keywords : list of str
         List of names of metadata that you wish to have in the output.
@@ -662,7 +662,7 @@ def media_metadata_search(
         name of the series requested
         That param is computed in case media_data_list is provided
 
-    Raise
+    Raises
     -----
     ValueError
         Parameter not in allowed list
@@ -695,12 +695,18 @@ def media_metadata_search(
     #       stdout.write("Recnum list is : %s \n" % recnum_list)
     #       stdout.write("Serie is : %s \n" % series)
 
-    #Allow lower case entries
+# Initialize
+    if media_data_list is None:
+        media_data_list = []
+    if recnum_list is None:
+        recnum_list = []
+    if keywords is None:
+        keywords = []
+
+    #    Allow lower case entries
     for k, v in iteritems(kwds):
-        if k not in [
-                'KEYWORDS', 'RECNUM_LIST', 'SERIES', 'SEGMENT', 'SERVER',
-                'MEDIA_DATA_LIST'
-        ]:
+        # if k not in ['KEYWORDS', 'RECNUM_LIST', 'SERIES', 'SEGMENT', 'SERVER', 'MEDIA_DATA_LIST']:
+        if k not in ['KEYWORDS', 'RECNUM_LIST', 'SERIES', 'SERVER', 'MEDIA_DATA_LIST']:
             raise ValueError(
                 "Error media_metatada_search():\n'%s' parameter for "
                 "media_search() function is not allowed\n"
@@ -711,8 +717,8 @@ def media_metadata_search(
             recnum_list = v
         if k == 'SERIES':
             series = v
-        if k == 'SEGMENT':
-            segment = v
+        #        if k == 'SEGMENT':
+        #            segment = v
         if k == 'MEDIA_DATA_LIST':
             media_data_list = v
         if k == 'SERVER':
@@ -725,26 +731,26 @@ def media_metadata_search(
         'http://idoc-medoc-test.ias.u-psud.fr'
     ]
 
-    #Controls
-    ##Keywords
+    # Controls
+    # Keywords
     if len(keywords) == 0:
         raise ValueError("KEYWORD must be specified")
     if type(keywords).__name__ != 'list':
-        mess_err =("Error in media_metadata_search():\nentry type for keywords"
-        " is : %s\nkeywords must be a list type" % type(
-            keywords).__name__)
+        mess_err = ("Error in media_metadata_search():\nentry type for keywords"
+                    " is : %s\nkeywords must be a list type" % type(keywords).__name__)
         raise TypeError(mess_err)
-##media_data_list
+    # media_data_list
     if len(media_data_list) != 0:
         series_list = [item.series_name for item in media_data_list]
         count_series_list = Counter(series_list)
-        #print count_series_list
-        #print count_series_list.keys()
+        # print count_series_list
+        # print count_series_list.keys()
         if len(count_series_list.keys()) > 1:
             stdout.write(
                 "Several series_name detected in media_data_list\n")
             if server is None:
-                server = 'http://idoc-medoc-test.ias.u-psud.fr'
+                server = sitools2_url
+                stdout.write("server parameter not specified, default value is set : %s\n" % server)
             result = [
                 item.metadata_search(keywords) for item in media_data_list
             ]
@@ -753,94 +759,84 @@ def media_metadata_search(
             recnum_list = [item.recnum for item in media_data_list]
             series = media_data_list[0].series_name
 
-#series
+    # series
     if series is None and len(media_data_list) == 0:
         raise ValueError(
             "Error in media_metadata_search():\nseries parameter must be "
             "specified\n"
         )
 
-##server
-    if server is None and series.startswith('aia'):
-        server = 'http://medoc-sdo.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://medoc-sdo.ias.u-psud.fr'\n"
-        )
-    elif server is None and series.startswith('hmi'):
-        server = 'http://idoc-medoc-test.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://idoc-medoc-test.ias.u-psud.fr'\n"
-        )
+    # server
+    if server is None:
+        server = sitools2_url
+        stdout.write("server parameter not specified, default value is set : %s\n" % server)
+
     if server is not None and server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" %
                          (server, allowed_server))
 
-##recnum_list
+    # recnum_list
     if len(recnum_list) == 0:
         mess_err = "Error in media_metadata_search():\nNo recnum_list "
         "provided\nPlease check your request\n"
         raise ValueError(mess_err)
 
-#Define dataset target
+    # Define dataset target
+    metadata_ds = None
     if server.startswith('http://medoc-sdo'):
-        metadata_ds = Sdo_aia_dataset(server + "/webs_aia_dataset")
-        #print("metadata_ds definition : %s" % metadata_ds.uri)
-    elif server.startswith(
-            'http://idoc-medoc') and series == 'aia.lev1':
-        metadata_ds = Sdo_aia_dataset(server + "/webs_" + "aia_dataset")
-        #print("aia is targetted on idoc-medoc.ias.u-psud.fr")
-        #print("metadata _ds :%s" %metadata_ds)
-    elif server.startswith('http://idoc-medoc') and series.startswith(
-            'hmi'):
-        metadata_ds = Sdo_dataset(server + "/webs_" + series + "_dataset")
-        #print("hmi series %s is targetted on idoc-medoc.ias.u-psud.fr" % series)
-    O1_aia = []
+        metadata_ds = SdoAiaDataset(server + "/" + medoc_sdo_aia_lev1_dataset)
+        # print("metadata_ds definition : %s" % metadata_ds.uri)
+    elif server.startswith('http://idoc-medoc') and series == 'aia.lev1':
+        metadata_ds = SdoAiaDataset(server + "/" + idoc_medoc_sdo_aia_lev1_dataset)
+        # print("aia is targetted on idoc-medoc.ias.u-psud.fr")
+        # print("metadata _ds :%s" %metadata_ds)
+    elif server.startswith('http://idoc-medoc') and series.startswith('hmi'):
+        metadata_ds = SdoDataset(server + "/webs_" + series + "_dataset")
+        # print("hmi series %s is targetted on idoc-medoc.ias.u-psud.fr" % series)
+    o1_aia = []
     for key in keywords:
         if key in metadata_ds.fields_dict:
-            O1_aia.append(metadata_ds.fields_dict[key])
+            o1_aia.append(metadata_ds.fields_dict[key])
         else:
-            mess_err =("Error metadata_search(): %s keyword does not exist for"
-            " series : %s \n" % (key, series))
+            mess_err = ("Error metadata_search(): %s keyword does not exist for"
+                        " series : %s \n" % (key, series))
             raise ValueError(mess_err)
-    S1_aia = [[metadata_ds.fields_dict['date__obs'], 'ASC']
-            ]  #sort by date_obs ascendant
+    s1_aia = [[metadata_ds.fields_dict['date__obs'], 'ASC']
+              ]  # sort by date_obs ascendant
 
-#Initialize recnumlist
-    #print("metadata_ds before request: %s" % metadata_ds.uri)
-    recnumlist = []
+    # Initialize recnum_sublist
+    # print("metadata_ds before request: %s" % metadata_ds.uri)
+    # recnum_sublist = []
     result = []
     i = 0
     # Make a request for each 500 recnum
     if len(recnum_list) > 500:
-        #print("recnum_list >500")
+        # print("recnum_list >500")
         while i < len(recnum_list):
             #               print i
-            recnumlist = recnum_list[i:i + 499]
-            recnumlist = list(map(str, recnumlist))
-            param_query_aia = [[metadata_ds.fields_dict['recnum']], recnumlist,
-                               'IN']
-            Q_aia = Query(param_query_aia)
-            result += metadata_ds.search([Q_aia], O1_aia, S1_aia)
+            recnum_sublist = recnum_list[i:i + 499]
+            recnum_sublist = list(map(str, recnum_sublist))
+            param_query_aia = [[metadata_ds.fields_dict['recnum']], recnum_sublist, 'IN']
+            q_aia = Query(param_query_aia)
+            result += metadata_ds.search([q_aia], o1_aia, s1_aia)
             i = i + 499
 
-#               print "taille result : ",len(result)
+    #               print "taille result : ",len(result)
     else:
-        recnumlist = list(map(str, recnum_list))
-        param_query_aia = [[metadata_ds.fields_dict['recnum']], recnumlist,
+        recnum_sublist = list(map(str, recnum_list))
+        param_query_aia = [[metadata_ds.fields_dict['recnum']], recnum_sublist,
                            'IN']
- #       print("param_query_aia : ", param_query_aia)
-        Q_aia = Query(param_query_aia)
- #       print("Q_aia : %s", Q_aia)
-        #print("metadata _ds :%s" %metadata_ds)
-        try :
-            result += metadata_ds.search([Q_aia], O1_aia, S1_aia)
-        except HTTPError :
-            print("Http Error\nmetadata_ds.search() failed please send an email to medoc-contact@ias.u-psud.fr")
+        #       print("param_query_aia : ", param_query_aia)
+        q_aia = Query(param_query_aia)
+        #       print("q_aia : %s", q_aia)
+        #        print("metadata _ds :%s" %metadata_ds)
+        try:
+            result += metadata_ds.search([q_aia], o1_aia, s1_aia)
+        except HTTPError:
+            print("\nmetadata_ds.search() failed please send an email to medoc-contact@ias.u-psud.fr")
             raise
-        else :
-#           print("result : %s" %result)
+        else:
+            #           print("result : %s" %result)
             return result
 
 
@@ -850,11 +846,13 @@ def metadata_info(server=None, series='aia.lev1'):
 
     Parameters
     ------------
+    server : str
+    name of targetted server
     series : str
     name of the series requested
     default value aia.lev1
 
-    Raise
+    Raises
     -----
     ValueError
         server not in allowed list
@@ -871,32 +869,24 @@ def metadata_info(server=None, series='aia.lev1'):
         'http://idoc-medoc.ias.u-psud.fr'
 
     ]
-    #Controls
-    ##server
+    # Controls
+    # server
     if server is None:
-        server = 'http://medoc-sdo.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://medoc-sdo.ias.u-psud.fr'\n"
-        )
-    elif server is None and series.startswith('hmi'):
-        server = 'http://idoc-medoc-test.ias.u-psud.fr'
+        server = sitools2_url
     if server is not None and server not in allowed_server:
-        raise ValueError("Server %s is not allowed\nServers available : %s\n" %
-                         (server, allowed_server))
-
-    #Define dataset url
+        raise ValueError("Server %s is not allowed\nServers available : %s\n" % (server, allowed_server))
+    metadata_ds = None
+    # Define dataset url
     if server == 'http://medoc-sdo-test.ias.u-psud.fr':
-        metadata_ds = Sdo_IAS_SDO_dataset(server + "/webs_aia_dataset")
+        metadata_ds = SdoIasSdoDataset(server + "/webs_aia_dataset")
     elif server == 'http://idoc-medoc-test.ias.u-psud.fr':
-        metadata_ds = Sdo_IAS_SDO_dataset(server + "/webs_" + series +
-                                          "_dataset")
+        metadata_ds = SdoIasSdoDataset(server + "/webs_" + series + "_dataset")
 
     return metadata_ds.display()
 
 
-class Sdo_dataset(Dataset):
-    """Definition de la classe Sdo_dataset that heritates of Dataset
+class SdoDataset(Dataset):
+    """Definition de la classe SdoDataset that heritates of Dataset
     Can have several instances
     """
 
@@ -909,25 +899,27 @@ def singleton(class_def):
     """
     instances = {}
 
-    def get_instance(Class_heritage):
+    def get_instance(class_heritage):
         if class_def not in instances:
-            instances[class_def] = class_def(Class_heritage)
+            instances[class_def] = class_def(class_heritage)
         return instances[class_def]
 
     return get_instance
 
+
 @singleton
-class Sdo_aia_dataset(Dataset):
-    """Definition de la classe Sdo_aia_dataset that heritates of Dataset
+class SdoAiaDataset(Dataset):
+    """Definition de la classe SdoAiaDataset that heritates of Dataset
     This following classes will only have one instance
     """
 
     def __init__(self, url):
         Dataset.__init__(self, url)
 
+
 @singleton
-class Sdo_ias_sdo_dataset(Dataset):
-    """Definition de la classe Sdo_ias_sdo_dataset that heritates of Dataset
+class SdoIasSdoDataset(Dataset):
+    """Definition de la classe SdoIasSdoDataset that heritates of Dataset
     This following classes will only have one instance
 
     Methods
@@ -941,7 +933,7 @@ class Sdo_ias_sdo_dataset(Dataset):
         Dataset.__init__(self, url)
 
     def __getSelection__(self,
-                         sunum_list=[],
+                         sunum_list=None,
                          filename=None,
                          target_dir=None,
                          download_type="TAR",
@@ -971,6 +963,9 @@ class Sdo_ias_sdo_dataset(Dataset):
             parameter not allowed
             special char at the end of target_dir
         """
+        if sunum_list is None:
+            sunum_list = []
+
         if download_type.upper() not in ['TAR', 'ZIP']:
             stdout.write(
                 "Error get_selection(): %s type not allowed\nOnly TAR or ZIP "
@@ -994,7 +989,7 @@ class Sdo_ias_sdo_dataset(Dataset):
         if filename is None:
             filename = "IAS_SDO_export_" + datetime.utcnow().strftime(
                 "%Y-%m-%dT%H-%M-%S") + "." + download_type.lower(
-                )  #if not specified this is the default name
+            )  # if not specified this is the default name
         if target_dir is not None:
             if not path.isdir(target_dir):
                 stdout.write(
@@ -1018,25 +1013,25 @@ class Sdo_ias_sdo_dataset(Dataset):
             plugin_id = "plugin03"
         if not quiet:
             stdout.write("Download %s file in progress ..." %
-                             download_type.lower())
+                         download_type.lower())
 
-    #   Dataset.execute_plugin(self,plugin_name=plugin_id, "
-    #pkey_list=sunum_list, filename=filename)
+        #   Dataset.execute_plugin(self,plugin_name=plugin_id, "
+        # pkey_list=sunum_list, filename=filename)
         try:
             Dataset.execute_plugin(
                 self,
                 plugin_name=plugin_id,
                 pkey_values_list=sunum_list,
                 filename=filename)
-        except:
+        except HTTPError:
             stdout.write("Error downloading selection %s " % filename)
         else:
             if not quiet:
-                stdout.write("Download selection %s completed" % filename)
+                stdout.write("Download selection %s completed\n" % filename)
 
 
-class Sdo_data():
-    """Definition de la classe Sdo_data
+class SdoData:
+    """Definition de la classe SdoData
 
     Attributes
     ---------
@@ -1071,7 +1066,7 @@ class Sdo_data():
     Methods
     -------
     get_file()
-        Donwload the record
+        Download the record
     metadata_search()
         Print meta information
 
@@ -1093,11 +1088,11 @@ class Sdo_data():
 
     def compute_attributes(self, data):
         if 'get' in data:
-#            print ("field get used : %s" % data['get'])
+            #            print ("field get used : %s" % data['get'])
             self.url = data['get']
-        #ias_path added for hmi (to be removed)
+        # ias_path added for hmi (to be removed)
         elif 'ias_path' in data:
-            print ("field ias_path used : %s" % data['ias_path'])
+            print("field ias_path used : %s" % data['ias_path'])
             self.url = data['ias_path']
         else:
             self.url = ''
@@ -1140,22 +1135,22 @@ class Sdo_data():
         print(self.__repr__())
 
     def __repr__(self):
-        if (self.series_name).startswith('hmi.sharp'):
+        if self.series_name.startswith('hmi.sharp'):
             return (
-                "url : %s,recnum : %d, sunum : %d, series_name : %s, "
-                "date_obs : %s, wave : %d, ias_location : %s, exptime : %s, "
-                "t_rec_index : %d, harpnum : %d\n"
-                % (self.url, self.recnum, self.sunum, self.series_name,
-                   self.date_obs, self.wave, self.ias_location,
-                   self.exptime, self.t_rec_index, self.harpnum))
+                    "url : %s,recnum : %d, sunum : %d, series_name : %s, "
+                    "date_obs : %s, wave : %d, ias_location : %s, exptime : %s, "
+                    "t_rec_index : %d, harpnum : %d, ias_path : %s\n"
+                    % (self.url, self.recnum, self.sunum, self.series_name,
+                       self.date_obs, self.wave, self.ias_location,
+                       self.exptime, self.t_rec_index, self.harpnum, self.ias_path))
         else:
             return (
-                "url : %s,recnum : %d, sunum : %d, series_name : %s, "
-                "date_obs : %s, wave : %d, ias_location : %s, exptime : %s, "
-                "t_rec_index : %d, ias_path : %s\n"
-                % (self.url, self.recnum, self.sunum, self.series_name,
-                   self.date_obs, self.wave, self.ias_location,
-                   self.exptime, self.t_rec_index, self.ias_path))
+                    "url : %s,recnum : %d, sunum : %d, series_name : %s, "
+                    "date_obs : %s, wave : %d, ias_location : %s, exptime : %s, "
+                    "t_rec_index : %d, ias_path : %s\n"
+                    % (self.url, self.recnum, self.sunum, self.series_name,
+                       self.date_obs, self.wave, self.ias_location,
+                       self.exptime, self.t_rec_index, self.ias_path))
 
     def get_file(self,
                  decompress=False,
@@ -1187,7 +1182,7 @@ class Sdo_data():
             Can value aia.lev1 or spikes for SDO/AIA-LEV1
             Can value 'bitmap', 'Bp_err', 'Bt','conf_disambig', ...
 
-        Raise
+        Raises
         -----
         ValueError
             parameter not allowed
@@ -1198,10 +1193,10 @@ class Sdo_data():
 
         """
 
-        #Allow upper case entries
+        # Allow upper case entries
         for k, v in iteritems(kwds):
             if k not in [
-                    'DECOMPRESS', 'FILENAME', 'TARGET_DIR', 'QUIET', 'SEGMENT'
+                'DECOMPRESS', 'FILENAME', 'TARGET_DIR', 'QUIET', 'SEGMENT'
             ]:
                 mess_err = "Error get_file():\n""'%s' parameter " % k
                 mess_err += "for the search function is not allowed \n"
@@ -1217,101 +1212,193 @@ class Sdo_data():
             elif k == 'SEGMENT':
                 segment = v
 
-        filename_pre = ""
         segment_allowed = []
-        #Define filename if not provided
-        if filename is None and self.series_name == 'aia.lev1':
-            filename_pre = self.series_name + "_" + str(
-                self.wave) + "A_" + self.date_obs.strftime(
-                    '%Y-%m-%dT%H-%M-%S_'+str(self.recnum)+"."
-                )  #if not specified this is the default name
+        kwargs = {}
+        url = ""
+        file_url = ""
+        filename_pre = ""
+        filename_path = ""
+        ias_path = ""
+        print("self.url : %s" % self.url)
+        print("self.ias_path : %s" % self.ias_path)
 
-        elif filename is None and (self.series_name).startswith('hmi.sharp'):
-            filename_pre = self.series_name + "_" + str(
-                self.wave) + "A_" + self.date_obs.strftime(
-                    '%Y-%m-%dT%H-%M-%S_') + str(self.harpnum) + "."
-        #Check for Ic_720s data
-        elif filename is None and (self.series_name).startswith('hmi'):
-            filename_pre = self.series_name + "_" + str(
-                self.wave) + "A_" + self.date_obs.strftime(
-                    '%Y-%m-%dT%H-%M-%S.')
+        # if ias_path ends with image_lev1.fits remove end
+        if self.ias_path.endswith("/image_lev1.fits"):
+            print("End with file")
+            ias_path = self.ias_path.split("/image_lev1.fits")[0]
+            print("ias_path : %s" % ias_path)
+        else:
+            ias_path = self.ias_path
+
+        # if ias_path start withh http
+        if self.ias_path.startswith('http://'):
+            pass
+        else:
+            ias_path = 'http://' + ias_path
+            print("Does not start with http:// , let's add it")
+        # Define filename if not provided
+        if filename is None and self.series_name == 'aia.lev1':
+            # if not specified this is the default name
+            filename_pre = self.series_name + "_" + str(self.wave) + "A_" + self.date_obs.strftime('%Y-%m-%dT%H-%M-%S_'
+                                                                                                   + str(self.recnum) +
+                                                                                                   ".")
+            print("filename_pre : %s" % filename_pre)
+        elif filename is None and self.series_name.startswith('hmi.sharp'):
+            filename_pre = self.series_name + "_" + str(self.wave) + "A_" + \
+                           self.date_obs.strftime('%Y-%m-%dT%H-%M-%S_') \
+                           + str(self.harpnum) + "."
+            print("filename_pre : %s" % filename_pre)
+
+        # Check for Ic_720s data
+        elif filename is None and self.series_name.startswith('hmi'):
+            filename_pre = self.series_name + "_" + str(self.wave) + "A_" + self.date_obs.strftime('%Y-%m-%dT%H-%M-%S.')
+            print("filename_pre : %s" % filename_pre)
+
         elif filename is not None:
             stdout.write("filename defined by user : %s\n" % filename)
             filename_pre = path.splitext(filename)[0]
+            print("filename_pre : %s" % filename_pre)
 
-#Define segment if it does not exist
-        if segment is None and filename is None and (
-            self.series_name == 'aia.lev1'):
-#                segment = ['image_lev1', 'spikes']
-                segment = ['image_lev1']
-        elif segment is None and filename is None and (
-            self.series_name).startswith('hmi.sharp'):
-            segment=[]
-            kwargs={}
+        # Define segment if it does not exist
+        if segment is None and filename is None and self.series_name == 'aia.lev1':
+            # segment = ['image_lev1', 'spikes']
+            segment = ['image_lev1']
+            kwargs.update({'segment': ','.join(segment)})
+            #            print("kwargs : %s" % kwargs)
+            url = self.url + ';' + urlencode(kwargs)
+            print("url : %s" % url)
+        elif segment is None and filename is None and self.series_name.startswith('hmi.sharp'):
+            segment = []
+            #            #kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-            result = load(urlopen(url))
-            if result['items']:
-                for item in result['items'] :
-                    segment.append(item['name'].split(".fits")[0])
-                    segment_allowed.append(item['name'].split(".fits")[0])
-            else :
-                print ("No key 'items' found for %s " % url )
-        elif segment is not None and filename is None and (
-            self.series_name).startswith('hmi.sharp'):
-            kwargs={}
-            kwargs.update({'media': 'json'})
-            
-#           url = self.url + '?' + urlencode(kwargs)
-#           print ("ias_path : %s" % self.ias_path)
-#           url = self.ias_path + '?' + urlencode(kwargs)
-#           url = self.url
-#            print ("url 2: %s" % url)
+            print("url : %s" % url)
+            url_build_seg = ias_path + '?' + urlencode(kwargs)
+            print("url_build_seg : %s" % url_build_seg)
+            try:
+                result = load(urlopen(url_build_seg))
+            #    #result = urlretrieve(url, filename_pre+".tar")
+            #    stdout.write("File %star downloaded\n" % filename_pre )
+            except HTTPError:
+                stdout.write("HttpError exception unable to load url : %s" % url_build_seg)
+            # except Exception as e:
+            #    stderr.write("Exception unable to load url : %s\n" % url_build_seg)
+            #     stderr.write("args : %s\n" %e.args)
+            #     stderr.write("repr : %s\n" % e.__repr__())
+            #     raise
+            else:
+                if result['items']:
+                    for item in result['items']:
+                        segment.append(item['name'].split(".fits")[0])
+                        segment_allowed.append(item['name'].split(".fits")[0])
+                else:
+                    print("No key 'items' found for %s " % url_build_seg)
 
-
-#           toto = load(urlopen(url))
-#           print("toto 2: %s" % toto)
-#           result = load(urlopen(url))
-#           print result
-            url = self.url + '?' + urlencode(kwargs)
-            result = load(urlopen(url))
-#           url = self.ias_path + '/?' + urlencode(kwargs)
-
-#           result = load(urlopen(url))
-#           print (result)
-            if result['items']:
-                for item in result['items'] :
-                    segment_allowed.append(item['name'].split(".fits")[0])
-            else :
-                print ("No key 'items' found for %s " % url )
-
-        elif segment is None and filename is None and (self.series_name).startswith('hmi.ic'):
+        #       Segment is None
+        elif segment is None and filename is None and self.series_name.startswith('hmi.ic'):
             segment = ['continuum']
+            kwargs.update({'segment': ",".join(segment)})
+            url = self.url + '/?' + urlencode(kwargs)
+            print("url : %s" % url)
             segment_allowed.append('continuum')
-        elif segment is None and filename is None and (self.series_name).startswith('hmi.m'):
+        elif segment is None and filename is None and self.series_name.startswith('hmi.m'):
             segment = ['magnetogram']
+            kwargs.update({'segment': ",".join(segment)})
+            url = self.url + '/?' + urlencode(kwargs)
+            print("url : %s" % url)
             segment_allowed.append('magnetogram')
+
+        #       Segment exists
+        elif segment is not None and filename is None and self.series_name.startswith('hmi.sharp'):
+            #            kwargs={}
+            # kwargs.update({'media': 'json'})
+            kwargs.update({'segment': ','.join(segment)})
+            # url = self.ias_path
+
+            url = self.url + ';' + urlencode(kwargs)
+            print("url : %s" % url)
+            url_build_seg = ias_path + "/?" + "media=json"
+            print("url_build_seg : %s" % url_build_seg)
+            try:
+                result = load(urlopen(url_build_seg))
+            except HTTPError:
+                stdout.write("HttpError exception unable to load url :\n %s" % url_build_seg)
+            else:
+                if result['items']:
+                    for item in result['items']:
+                        segment_allowed.append(item['name'].split(".fits")[0])
+                else:
+                    print("No key 'items' found for %s " % url_build_seg)
+        #            kwargs.update({'segment': segment})
+        #            print("kwargs : %s" % kwargs)
+
+        #       #Segment exist and aia
+        elif segment is not None and filename is None and self.series_name == 'aia.lev1':
+            # kwargs={}
+            # kwargs.update({'media': 'json'})
+            kwargs.update({'segment': ','.join(segment)})
+            # url = self.ias_path
+            segment_allowed += ['image_lev1', "spikes"]
+            url = self.url + ';' + urlencode(kwargs)
+            print("url aia.lev1 : %s" % url)
+
+            #           print ("ias_path : %s" % self.ias_path)
+            #           url = self.ias_path + '?' + urlencode(kwargs)
+            #           url = self.url
+            #            print ("url 2: %s" % url)
+
+            #           toto = load(urlopen(url))
+            #           print("toto 2: %s" % toto)
+            #           result = load(urlopen(url))
+            #           print result
+            #            url = self.url + '?' + urlencode(kwargs)
+            # url = self.url
+            print("ias_path : %s " % ias_path)
+            url_build_seg = ias_path + "/?" + "media=json"
+            print("url_build_seg : %s" % url_build_seg)
+            try:
+                result = load(urlopen(url_build_seg))
+            except HTTPError:
+                stdout.write("HttpError exception unable to load url :\n %s" % url_build_seg)
+            # except Exception as e:
+            #    stderr.write("Exception unable to load aia url :\n %s\n" % url_build_seg)
+            else:
+                if result['items']:
+                    for item in result['items']:
+                        segment_allowed.append(item['name'].split(".fits")[0])
+                else:
+                    print("No key 'items' found for %s " % url_build_seg)
+        #            kwargs.update({'segment': segment})
+        #            print("kwargs : %s" % kwargs)
 
         elif filename is not None:
             segment = [filename]
+            kwargs.update({'segment': ','.join(segment)})
+            url = self.url + ';' + urlencode(kwargs)
+            print("url : %s" % url)
 
-#        segment_allowed += [ 'image_lev1', 'spikes']
-        segment_allowed += [ 'image_lev1']
-#        print ("segment : %s" % segment)
-#       print (segment_allowed)
+        # Define default segment
+        #        #segment_allowed += ['image_lev1', 'spikes']
+        #        #        segment_allowed += [ 'image_lev1']
+        #        #        print ("segment : %s" % segment)
+        #        #        print(segment_allowed)
+        #        print("kwargs : %s" % kwargs)
+        print("url : %s" % url)
         for seg in segment:
             if seg not in segment_allowed and filename is None:
                 raise ValueError(
                     "%s segment value not allowed\nSegment allowed :%s" %
                     (seg, segment_allowed))
 
-#Create target location if it does not exist
+        #        # kwargs.update({'segment': segment})
+        #        # print("kwargs  %s :" % kwargs)
+        #        # Create target location if it does not exist
         if target_dir is not None:
             if not path.isdir(target_dir):
                 mess_warn = (("Warning get_file(): '%s' directory "
-                    "does not exist.\n") % target_dir)
+                              "does not exist.\n") % target_dir)
                 mess_warn += "Creation of directory in progress ... \n"
-                stdout.write( mess_warn)
+                stdout.write(mess_warn)
                 mkdir(target_dir)
             if target_dir[-1].isalnum():
                 filename_pre = target_dir + '/' + filename_pre
@@ -1319,48 +1406,52 @@ class Sdo_data():
                 filename_pre = target_dir + filename_pre
             else:
                 mess_err = ("Error get_file()\nCheck the parameter target_dir,"
-                "special char %s at the end of the target_dir is not "
-                "allowed.\n" % target_dir[-1])
+                            "special char %s at the end of the target_dir is not "
+                            "allowed.\n" % target_dir[-1])
                 raise ValueError(mess_err)
 
-#Specification for aia.lev1 and COMPRESS param
+        # Specification for aia.lev1 and COMPRESS param
         if not decompress and self.series_name == 'aia.lev1':
-            self.url = self.url + ";compress=rice"
+            url = self.url + ";compress=rice"
 
-#Define filename_path and file_url
-        for file_suff in segment:
+        # Define filename_path and file_url
+        for seg in segment:
+            print(seg)
             if filename is None:
-                filename_path = filename_pre + file_suff + '.fits'
+                filename_path = filename_pre + seg + '.fits'
             else:
                 filename_path = filename_pre + '.fits'
-                file_url = self.url
-
-            if (self.series_name).startswith('hmi'):
-                #   filename_path=filename_pre+file_suff+'.fits'
+                file_url = url
+                print("file_url 1 : %s" % file_url)
+            if self.series_name.startswith('hmi'):
+                #   filename_path=filename_pre+seg+'.fits'
                 #   print "filename_path :", filename_path
-                file_url = self.url + "/" + file_suff + '.fits'
-            #   file_url=self.url+"/"+file_suff+'.fits'
-            #   print "filename_url :", file_url
-            elif self.series_name == ('aia.lev1'):
-                # filename_path=filename_pre+file_suff+'.fits'
-                file_url = self.url
+                # file_url = url + "/" + seg + '.fits'
+                file_url = url
+                #   file_url=self.url+"/"+seg+'.fits'
+            #               # print("file_url : %s " % file_url)
+            elif self.series_name == 'aia.lev1':
+                # filename_path=filename_pre+seg+'.fits'
+                file_url = url
+            #                print("file_url 2 : %s" % file_url)
 
-            #print("filename_url :", file_url)
-            #print("filename_pre :", filename_pre)
-            #print("filename_path :", filename_path)
+            #            print("filename_url : %s" % file_url)
+            #            print("filename_pre : %s" % filename_pre)
+            #            print("filename_path : %s" % filename_path)
 
-#Retrieve data
+            # Retrieve data
             try:
                 urlretrieve(file_url, filename_path)
-            except:
+            except HTTPError:
                 stdout.write("Error downloading %s\n" % filename_path)
+                raise
             else:
                 if not quiet:
                     stdout.write("Download file %s completed\n" %
-                                     filename_path)
+                                 filename_path)
                     stdout.flush()
 
-    def metadata_search(self, server=None, keywords=[], **kwds):
+    def metadata_search(self, server=None, keywords=None, **kwds):
         """Provide metadata information from MEDOC server
 
         Parameters
@@ -1370,7 +1461,7 @@ class Sdo_data():
         keywords : list of str
             List of names of metadata that you wish to have in the output.
 
-        Raise
+        Raises
         -----
         ValueError
             parameter is not allowed
@@ -1386,7 +1477,7 @@ class Sdo_data():
             Returns the exact data from db
         """
 
-        #Allow lower case entries
+        # Allow lower case entries
         for k, v in iteritems(kwds):
             if k not in ['SERVER', 'KEYWORDS']:
                 raise ValueError(
@@ -1399,15 +1490,15 @@ class Sdo_data():
                 server = v
 
         allowed_server = [
-        'http://medoc-sdo.ias.u-psud.fr',
-        'http://medoc-sdo-test.ias.u-psud.fr',
-        'http://idoc-medoc-test.ias.u-psud.fr',
-        'http://idoc-medoc.ias.u-psud.fr',
-        'http://localhost:8184'
+            'http://medoc-sdo.ias.u-psud.fr',
+            'http://medoc-sdo-test.ias.u-psud.fr',
+            'http://idoc-medoc-test.ias.u-psud.fr',
+            'http://idoc-medoc.ias.u-psud.fr',
+            'http://localhost:8184'
         ]
 
-        server_url=sitools2_url
-#server
+        server_url = sitools2_url
+        # server
         if server_url.startswith("http://localhost"):
             pass
         elif server is None and self.series_name.startswith('aia'):
@@ -1418,50 +1509,48 @@ class Sdo_data():
         if server is not None and server not in allowed_server:
             raise ValueError(
                 "Server %s is not allowed \nServers available : %s\n" %
-                         (server, allowed_server)
+                (server, allowed_server)
             )
-
- #       print ("server : %s" % server_url)
 
         if len(keywords) == 0:
             raise ValueError("keywords must be specified")
         if type(keywords).__name__ != 'list':
-            mess_err = "Error in metadata_search():\nentry type for keywords "
-            "is : %s\nkeywords must be a list type" % type(keywords).__name__
+            mess_err = "Error in metadata_search():\nentry type for keywords is : %s\nkeywords must be a list type" % \
+                       type(keywords).__name__
             raise TypeError(mess_err)
 
         if server_url.startswith('http://medoc-sdo'):
-            metadata_ds = Sdo_aia_dataset(server_url + "/webs_aia_dataset")
+            metadata_ds = SdoAiaDataset(server_url + "/webs_aia_dataset")
         elif server_url.startswith('http://idoc-medoc'):
-            metadata_ds = Sdo_dataset(server_url + "/webs_" +
-                                      self.series_name + "_dataset")
+            metadata_ds = SdoDataset(server_url + "/webs_" +
+                                     self.series_name + "_dataset")
         elif server_url.startswith('http://localhost'):
-            metadata_ds = Sdo_dataset(server_url + "/webs_" +
-                                      self.series_name + "_dataset")
+            metadata_ds = SdoDataset(server_url + "/webs_" +
+                                     self.series_name + "_dataset")
 
         else:
             raise ValueError(
                 "metadata_ds is not valued please check your server param\n")
 
-#       print "Dataset targetted :" ,metadata_ds.name ,metadata_ds.uri
-#       print "Query is for %s recnum %s " % (self.series_name, self.recnum)
-#controls
+        #       print "Dataset targetted :" ,metadata_ds.name ,metadata_ds.uri
+        #       print "Query is for %s recnum %s " % (self.series_name, self.recnum)
+        # controls
         recnum_list = [str(self.recnum)]
         param_query = [[metadata_ds.fields_dict['recnum']], recnum_list, 'IN']
-        Q1 = Query(param_query)
-        O1 = []
+        q1 = Query(param_query)
+        o1 = []
         for key in keywords:
             if key in metadata_ds.fields_dict:
-                O1.append(metadata_ds.fields_dict[key])
+                o1.append(metadata_ds.fields_dict[key])
             else:
                 raise ValueError(
                     "Error metadata_search(): %s keyword does not exist for %s"
                     % (key, metadata_ds.name))
-        S1 = [[metadata_ds.fields_dict['date__obs'], 'ASC']
-              ]  #sort by date_obs ascendant
-        #print(metadata_ds.search([Q1], O1, S1))
-        if len(metadata_ds.search([Q1], O1, S1)) != 0:
-            return metadata_ds.search([Q1], O1, S1)[0]
+        s1 = [[metadata_ds.fields_dict['date__obs'], 'ASC']
+              ]  # sort by date_obs ascendant
+        # print(metadata_ds.search([q1], o1, s1))
+        if len(metadata_ds.search([q1], o1, s1)) != 0:
+            return metadata_ds.search([q1], o1, s1)[0]
         else:
             raise ValueError(
                 "No data found for your request\nCheck your parameters")
@@ -1470,37 +1559,29 @@ class Sdo_data():
 def main():
     d1 = datetime(2016, 6, 10, 0, 0, 0)
     d2 = d1 + timedelta(days=1)
-    #sdo_data_list=media_search(dates=[d1,d2],waves=['335'],cadence=['1h'],
-    #nb_res_max=10)
+    # sdo_data_list=media_search(dates=[d1,d2],waves=['335'],cadence=['1h'],
+    # nb_res_max=10)
     #   print sdo_data_list
-    sdo_data_list = media_search(
-        dates=[d1, d2],
-        series='aia.lev1',
-        cadence=['1h'],
-        nb_res_max=10)
+    sdo_data_list = media_search(dates=[d1, d2], series='aia.lev1', cadence=['1h'], nb_res_max=10)
     print(sdo_data_list)
     # Unit test media_metadata_search
     print("Test media_metadata_search")
     recnum_list = []
     for item in sdo_data_list:
-        recnum_list.append(str(item.recnum))
+        recnum_list.append(item.recnum)
     print("recnum list : %s" % recnum_list)
-    meta = media_metadata_search(
-        keywords=[
-            'recnum', 'sunum', 'date__obs', 'quality', 'cdelt1', 'cdelt2',
-            'crval1'
-        ],
-        series="aia.lev1",
-        recnum_list=recnum_list)
-    print(meta)
+    meta = media_metadata_search(keywords=['recnum', 'sunum', 'date__obs', 'quality', 'cdelt1', 'cdelt2', 'crval1'],
+                                 series="aia.lev1", recnum_list=recnum_list)
+    for result in meta:
+        print(result)
 
 
-#Unit test get_file
+# Unit test get_file
 #   for data in sdo_data_list :
 #   for data in sdo_hmi_data_list :
 #       data.get_file(target_dir='results', segment=['Br'])
 
-#Unit test metadata_search
+# Unit test metadata_search
 #   print "Test metadata_search"
 #   for item in sdo_data_list:
 #       my_meta_search=item.metadata_search(keywords=['sunum','recnum',

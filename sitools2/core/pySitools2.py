@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """
 This is a generic python Sitools2 tool
@@ -11,10 +11,8 @@ A Solar tool to request and retrieve SDO data from IAS (Institut
 d'Astrophysique Spatiale)
 see http://sdo.ias.u-psud.fr/python/sdo_client_idoc.html
 
-
-
-@author: Pablo ALINGERY for IAS 28-08-2012
 """
+
 __license__ = "GPLV3"
 __author__ = "Pablo ALINGERY"
 __credit__ = ["Pablo ALINGERY", "Elie SOUBRIE"]
@@ -24,29 +22,24 @@ __email__ = "pablo.alingery.ias.u-psud.fr"
 from sys import stdout, stderr
 from datetime import datetime, timedelta
 from future.moves.urllib.parse import urlencode
-from future.moves.urllib.request import urlopen, urlretrieve , Request
+from future.moves.urllib.request import urlopen, urlretrieve
 from future.moves.urllib.error import HTTPError
 
 try:
     from simplejson import load
-except:
-    stderr.write(
-        "Import failed in module sdo_client_medoc :\n\tsimplejson module is"
-        "required\n"
-    )
-    raise ImportError
+except ImportError:
+    stderr.write("Import failed in module sdo_client_medoc :\n\tsimplejson module is required\n")
+    raise
+
 try:
     from xml.dom.minidom import parseString
 
-except:
-    stderr.write(
-        "Import failed in module sdo_client_medoc :\n\txml.dom.minidom module "
-        "is required\n"
-    )
-    raise ImportError
+except ImportError:
+    stderr.write("Import failed in module sdo_client_medoc :\n\txml.dom.minidom module is required\n")
+    raise
 
 
-class Sitools2Instance():
+class Sitools2Instance:
     """Define an server instance of Sitools2.
     An instance of Sitools2Instance is defined using its url.
 
@@ -61,20 +54,17 @@ class Sitools2Instance():
         Return a list of the projects available for the instance
     """
 
-
     def __init__(self, url):
         """Initialize class Sitools2Instance"""
 
         self.instanceUrl = url
         try:
             load(urlopen(url + "/sitools/portal"))
-        except:
-            err_mess = ("Error in Sitools2Instance.__init__() :\nSitools2 "
-            "instance %s not available please contact admin for more info\n"
-            "" % url)
+        except HTTPError:
+            err_mess = ("Error in Sitools2Instance.__init__() :\nSitools2 instance %s not available please "
+                        "contact admin for more info\n" % url)
             stderr.write(err_mess)
-            raise Exception
-
+            raise
 
     def list_project(self, **kwargs):
         """List all projects available for that SitoolsInstance
@@ -84,9 +74,9 @@ class Sitools2Instance():
         kwargs : object
             Any param that can be usefull for the function urlencode()
 
-        Raise
+        Raises
         -----
-        Exception
+        HttpError
             Cannot create project a Project instance
 
         Return
@@ -98,29 +88,28 @@ class Sitools2Instance():
         kwargs.update({'media': 'json'})
         url = sitools_url + '/sitools/portal/projects' + '?' + urlencode(
             kwargs)
- #       print("url portal : %s" % url)
+        #        print("url portal : %s" % url)
         result = load(urlopen(url))
         out_mess = "%s projects detected\n" % result['total']
         stdout.write(out_mess)
         stdout.flush()
         projects = result['data']
-#        print ("projects : %s\n" % projects)
+        #        print ("projects : %s\n" % projects)
         for i, project in enumerate(projects):
             p_url = sitools_url + project['sitoolsAttachementForUsers']
-#             print ("project url : %s" % p_url)
+            #             print ("project url : %s" % p_url)
             try:
                 data.append(Project(p_url))
-            except:
-                out_mess = ("Error in Sitools2Instance.list_project() :"
-                "\nCannot create object project %s, %s protected \n"
-                "Contact admin for more info\n" % (project['name'], p_url))
+            except HTTPError:
+                out_mess = ("Error in Sitools2Instance.list_project() :\nCannot create object project %s,"
+                            " %s protected \nContact admin for more info\n" % (project['name'], p_url))
                 stdout.write(out_mess)
                 stdout.flush()
-                raise Exception
+                raise
         return data
 
 
-class Field():
+class Field:
     """Definition of a Field class.
     A field is a item from a dataset.
     It has several attributes : name, ftype, ffilter(boolean), sort(boolean),
@@ -147,11 +136,11 @@ class Field():
         Return a list of the projects available for the instance
     """
 
-
     def __init__(self, dictionary):
         """Initialize class Field"""
+
         self.name = ""
-        self.component=""
+        self.component = ""
         self.ftype = ""
         self.ffilter = False
         self.sort = False
@@ -160,10 +149,10 @@ class Field():
 
     def compute_attributes(self, dictionary):
         """Compute attribute from web service dataset description"""
-        keys_list_ = []
+
         if 'columnAlias' in dictionary:
-            #print ("type : %s" % type(dictionary['columnAlias']).__name__)
-            #print (dictionary['columnAlias'])
+            # print ("type : %s" % type(dictionary['columnAlias']).__name__)
+            # print (dictionary['columnAlias'])
             self.name = dictionary['columnAlias']
         if 'sqlColumnType' in dictionary:
             self.ftype = dictionary['sqlColumnType']
@@ -176,18 +165,17 @@ class Field():
         if 'dataIndex' in dictionary:
             self.component = dictionary['dataIndex']
 
-    def display(self) :
+    def display(self):
         """Display a representation of the data"""
         print(self.__repr__())
 
     def __repr__(self):
-        return (
-            "Field object display() :\n\t%s\n\t\tftype : %s\n\t\tffilter : "
-               "%s\n\t\tsort : %s\n\t\tbehavior : %s" % (self.name,
-                    self.ftype, self.ffilter, self.sort, self.behavior))
+        return ("Field object display() :\n\t%s\n\t\tftype : %s\n\t\tffilter : "
+                "%s\n\t\tsort : %s\n\t\tbehavior : %s" % (self.name, self.ftype, self.ffilter, self.sort,
+                                                          self.behavior))
 
 
-class Query():
+class Query:
     """Definition of a Query class.
        A Query defines the request passed to the server.
 
@@ -204,15 +192,14 @@ class Query():
         Name of operation ge, le, gte, lte, lt, eq, gt,
        lte, like, in, numeric_between, date_between, cadence
 
-    Raise
+    Raises
     -----
     TypeError
         Query first argument is not a list
         Query second argument is not a list
     """
 
-
-    def __init__(self, param_list) :
+    def __init__(self, param_list):
         """Initialize class Query"""
         self.fields_list = []
         self.name_list = []
@@ -221,18 +208,17 @@ class Query():
         self.compute_attributes(param_list)
 
     def compute_attributes(self, param_list):
-        """Compute attribute from client request
-        """
+        """Compute attribute from client request"""
+
         if type(param_list[0]).__name__ != 'list':
             mess_err = ("Error in Query.compute_attributes() :\n"
-            "Query first argument type is : %s\nQuery first argument type "
-            "should be : list\n" % type(param_list[0]).__name__)
+                        "Query first argument type is : %s\nQuery first argument type "
+                        "should be : list\n" % type(param_list[0]).__name__)
             stderr.write(mess_err)
             raise TypeError(mess_err)
         if type(param_list[1]).__name__ != 'list':
-            mess_err = ("Error in Query.compute_attributes() :\n"
-            "Query second argument type is : %s\nQuery second argument type "
-            "should be : list\n\n\n" % type(param_list[1]).__name__)
+            mess_err = ("Error in Query.compute_attributes() :\n Query second argument type is : %s\n"
+                        "Query second argument type should be : list\n\n\n" % type(param_list[1]).__name__)
             stderr.write(mess_err)
             raise TypeError(mess_err)
         for field in param_list[0]:
@@ -241,12 +227,12 @@ class Query():
         self.value_list = param_list[1]
         self.operation = param_list[2]
 
-#Ouptut attributes of Query
+    # Ouptut attributes of Query
 
     def display(self):
         print(self.__repr__())
 
-#Define a repr of this Class
+    # Define a repr of this Class
 
     def __repr__(self):
         return ("name : % s\nvalue : %s\nOperation : %s" %
@@ -254,7 +240,7 @@ class Query():
                  self.operation))
 
 
-class Dataset():
+class Dataset:
     """Definition of a Dataset class.
        It is related to a Sitools2 dataset, which is a set of instances of
        the class Field with specific properties.
@@ -282,7 +268,7 @@ class Dataset():
         list of field object that can be sorted
     allowed_sort_list : list
         list of the sorted field.name attributes of field
-    resource_target : list
+    resources_target : list
         list of str of the resources associated with the dataset like tar zip
         plugin
     noClientAccess_list : list
@@ -304,19 +290,18 @@ class Dataset():
         Dataset not accessible
     """
 
-
     def __init__(self, url):
         """Initialize class Dataset"""
         #        print("url to load :",url)
         #        dataset_url_txt=urlopen(url)
         try:
             load(urlopen(url))
-        except:
+        except HTTPError:
             err_mess = ("Error in Dataset.__init__() :\nDataset %s not "
-            "available, please send an email to medoc-contact@ias.u-psud.fr "
-            "to get some help\n" % url)
+                        "available\nPlease send an email to medoc-contact@ias.u-psud.fr "
+                        "to report an issue if the problem persists\n" % url)
             stderr.write(err_mess)
-            raise Exception
+            raise
         self.name = ""
         self.description = ""
         self.uri = "/" + url.split("/")[-1]
@@ -333,48 +318,43 @@ class Dataset():
         self.compute_attributes()
         self.resources_list()
 
-
     def compute_attributes(self, **kwargs):
         """Compute attribute from web service answer dataset description
 
-        Raise
+        Raises
         -----
-        Exception
+        HttpError
             Compute attributes failed
         """
         kwargs.update({'media': 'json'})
         url = self.url + '?' + urlencode(kwargs)
-        #print ("url : %s " % url)
+        # print ("url : %s " % url)
         try:
             result = load(urlopen(url))
-            #print ("result : \n %s " % result)
+            # print ("result : \n %s " % result)
             self.name = result['dataset']['name']
             self.description = result['dataset']['description']
             columns = result['dataset']['columnModel']
             for column in columns:
-                #print(type(column).__name__)
+                # print(type(column).__name__)
                 self.fields_list.append(Field(column))
                 self.fields_dict.update({column['columnAlias']: Field(column)})
-                if ('filter' in column and column['filter']):
+                if 'filter' in column and column['filter']:
                     self.filter_list.append(Field(column))
-                if ('sortable' in column and column['sortable']):
+                if 'sortable' in column and column['sortable']:
                     self.sort_list.append(Field(column))
-                if ('primaryKey' in column and column['primaryKey']):
+                if 'primaryKey' in column and column['primaryKey']:
                     self.primary_key = (Field(column))
-                if ('columnRenderer' in column and
-                        column['columnRenderer']['behavior'] ==
-                        "noClientAccess"):
+                if 'columnRenderer' in column and column['columnRenderer']['behavior'] == "noClientAccess":
                     self.noClientAccess_list.append(column['columnAlias'])
-        except:
-            err_mess = ("Error in Dataset.compute_attributes(), "
-            "please contact medoc-contact@ias.u-psud.fr for more info\n")
+        except HTTPError:
+            err_mess = "Error in Dataset.compute_attributes(), please report it to medoc-contact@ias.u-psud.fr\n"
             stderr.write(err_mess)
-            raise Exception
+            raise
         for field in self.filter_list:
             self.allowed_filter_list.append(field.name)
         for field in self.sort_list:
             self.allowed_sort_list.append(field.name)
-
 
     def resources_list(self):
         """Explore and list dataset resources, method=options has to be allowed
@@ -382,17 +362,16 @@ class Dataset():
         try:
             url = urlopen(self.url + '?method=OPTIONS')
             wadl = url.read()
-            domWadl = parseString(wadl)
-            resources = domWadl.getElementsByTagName('resource')
+            domwadl = parseString(wadl)
+            resources = domwadl.getElementsByTagName('resource')
             for i in range(len(resources)):
                 self.resources_target.append(self.url + "/" + resources[i]
                                              .getAttribute('path'))
-        except:
-            out_mess = ("\t\t\tError in Dataset.ressources_list() not "
-            "accessible, please contact admin for more info\n")
-            raise ValueError(out_mess)
-
-
+        except HTTPError:
+            out_mess = ("Error in Dataset.ressources_list() not accessible, please report it to "
+                        "medoc-contact@ias.u-psud.fr\n")
+            stderr.write(out_mess)
+            raise
 
     def search(self,
                query_list,
@@ -418,7 +397,7 @@ class Dataset():
         limit_to_nb_res_max :
             From the results sent by the server limit to that value
 
-        Raise
+        Raises
         -----
         ValueError
             field provided for filter is not allowed
@@ -431,28 +410,36 @@ class Dataset():
 
         Example
         -------
-        >>>result=ds1.search([Q1,Q2,Q3,Q4],O1,S1,limit_to_nb_res_max=10)
-        Where Q1, Q2, Q3 & Q4 can be :
-        >>>Q1=Query(param_query1)
-        >>>Q2=Query(param_query2)
-        >>>Q3=Query(param_query3)
-        >>>Q4=Query(param_query4)
-        Where param _query1, param_query2, param_query3, param_query4 can
-        value :
-        >>>param_query1=[[ds1.fields_list[4]],['2012-08-10T00:00',
-                        '2012-08-10T01:00'],'DATE_BETWEEN']
+        Define server url and dataset uri
+        >>>sitools_url = "http://idoc-medoc.ias.u-psud.fr"
+        >>>ds1 = Dataset(sitools_url + "/webs_IAS_AIA_dataset")
+        Define param _query1, param_query2, param_query3, param_query4 :
+        >>>param_query1=[[ds1.fields_list[4]],['2012-08-10T00:00','2012-08-10T01:00'],'DATE_BETWEEN']
         >>>param_query2=[[ds1.fields_list[5]],['335'],'IN']
         >>>param_query3=[[ds1.fields_list[10]],['1 min'],'CADENCE']
         >>>param_query4=[[ds1.fields_list[8]],['2.900849'],'LTE']
+        Define q1, q2, q3 & q4 can be :
+        >>>q1=Query(param_query1)
+        >>>q2=Query(param_query2)
+        >>>q3=Query(param_query3)
+        >>>q4=Query(param_query4)
+        Define output
+        >>>o1 = [ ds1.fields_dict['recnum'], ds1.fields_dict['sunum'], ds1.fields_dict['series_name'],
+        >>>       ds1.fields_dict['date__obs'], ds1.fields_dict['ias_location'], ds1.fields_dict['harpnum'],
+        >>>       ds1.fields_dict['ias_path']]
+        Define sort
+        >>>s1 = [[ds1.fields_dict['date__obs'], 'ASC']]
+        >>>result = ds1.search([q1,q2,q3,q4],o1,s1,limit_to_nb_res_max=10)
+        10 results found
         """
+
         kwargs.update({'media': 'json', 'limit': 300, 'start': 0})
-        #Initialize counter
-        j = 0  #filter counter
-        i = 0  #p counter
+        # Initialize counter
+        j = 0  # filter counter
+        i = 0  # p counter
         for num_query, query in enumerate(
-                query_list):  #create url options p[$i] and filter[$j]
-            operation = query.operation.upper(
-            )  #transform entries as upper letter
+                query_list):  # create url options p[$i] and filter[$j]
+            operation = query.operation.upper()  # transform entries as upper letter
             if operation == 'GE':
                 operation = 'GTE'
             elif operation == 'LE':
@@ -461,64 +448,64 @@ class Dataset():
                 for field in query.fields_list:
                     if field.name not in self.allowed_filter_list:
                         err_mess = ("Error in Dataset.search() :\nfilter on %s"
-                        "is not allowed\n" % field.name)
+                                    "is not allowed\n" % field.name)
                         stdout.write(err_mess)
                         raise ValueError(err_mess)
                 kwargs.update({
                     'filter[' + str(j) + '][columnAlias]':
-                    "|".join(query.name_list),
+                        "|".join(query.name_list),
                     'filter[' + str(j) + '][data][type]': 'numeric',
                     'filter[' + str(j) + '][data][value]':
-                    "|".join(query.value_list),
+                        "|".join(query.value_list),
                     'filter[' + str(j) + '][data][comparison]': operation
                 })
-                j += 1  #increment filter counter
+                j += 1  # increment filter counter
             elif operation in ['LIKE']:
                 operation = 'TEXT'
-                i += 1  #increment p counter
+                i += 1  # increment p counter
             elif operation in ['IN']:
                 operation = 'LISTBOXMULTIPLE'
                 kwargs.update({
                     'p[' + str(i) + ']': operation + "|" + "|".join(
                         query.name_list) + "|" + "|".join(query.value_list)
                 })
-                i += 1  #increment p counter
+                i += 1  # increment p counter
             elif operation in ['DATE_BETWEEN', 'NUMERIC_BETWEEN', 'CADENCE']:
-                #print (operation)
-                #print (query.name_list)
-                #print (query.value_list)
+                # print (operation)
+                # print (query.name_list)
+                # print (query.value_list)
                 kwargs.update({
                     'p[' + str(i) + ']': operation + "|" + "|".join(
                         query.name_list) + "|" + "|".join(query.value_list)
                 })
-                i += 1  #increment p counter
+                i += 1  # increment p counter
             else:
                 allowed_operations = "ge, le, gte, lte, lt, eq, gt, lte, like,"
                 "  in, numeric_between, date_between"
                 err_mess = ("Operation not available : %s \nAllowed operations"
-                "are : %s\n" % (operation, allowed_operations))
+                            "are : %s\n" % (operation, allowed_operations))
                 stderr.write(err_mess)
                 raise ValueError(err_mess)
         output_name_list = []
         output_name_dict = {}
         for i, field in enumerate(
                 output_list
-        ):  #build output object list and output object dict with name as a key
+        ):  # build output object list and output object dict with name as a key
             output_name_list.append(str(field.name))
             output_name_dict.update({str(field.name): field})
-        kwargs.update({#build colModel url options
-            'colModel' : '"'+", ".join(output_name_list)+'"'
+        kwargs.update({  # build colModel url options
+            'colModel': '"' + ", ".join(output_name_list) + '"'
         })
         sort_dic_list = []
-        for field in sort_list:  #build sort output options
+        for field in sort_list:  # build sort output options
             if field[0].name not in self.allowed_sort_list:
                 err_mess = ("Error in Dataset.search():\nsort on %s is not "
-                "allowed\n" % field.name)
+                            "allowed\n" % field.name)
                 stderr.write(err_mess)
                 raise ValueError(err_mess)
             sort_dictionary = {}
             sort_dictionary.update({
-#                 "field" : (field[0].name).encode('utf-8') ,
+                #                 "field" : (field[0].name).encode('utf-8') ,
                 "field": (str(field[0].name)),
                 "direction": field[1]
             })
@@ -527,45 +514,62 @@ class Dataset():
         temp_kwargs.update({'sort': {"ordersList": sort_dic_list}})
         temp_url = urlencode(temp_kwargs).replace('+', '').replace('%27',
                                                                    '%22')
-#        stdout.write( "temp_url : "+temp_url+"\n")
-#        stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
+        #        stdout.write( "temp_url : "+temp_url+"\n")
+        #        stdout.write( "kwargs : "+urlencode(kwargs)+"\n")
         url_count = self.url + "/count" + '?' + urlencode(
-            kwargs) + "&" + temp_url  #Build url just for count
-#        stdout.write( "url_count : "+url_count+"\n")
+            kwargs) + "&" + temp_url  # Build url just for count
+        #        stdout.write( "url_count : "+url_count+"\n")
         url = self.url + "/records" + '?' + urlencode(
-            kwargs) + "&" + temp_url  #Build url for the request
-#        stdout.write( "url : "+url+"\n")
-        result_count = load(urlopen(url_count))
+            kwargs) + "&" + temp_url  # Build url for the request
+        #        stdout.write( "url : "+url+"\n")
+        try:
+            result_count = load(urlopen(url_count))
+        except HTTPError as e:
+            stderr.write("HttpError exception\n")
+            stderr.write("Error code : %s\n" % e.code)
+            stderr.write("Error reason : %s\n" % e.reason)
+            stderr.write("url : %s\n" % url_count)
+            error_lines = e.readlines()
+            for line in error_lines:
+                str_line = str(line, 'utf-8')
+                if "Datasource not activated" in str_line:
+                    stderr.write("Explanation : Datasource %s not active\n" % self.name)
+                    stderr.write("Try later, contact medoc-contacts@ias.u-psud.fr if the problem persists\n")
+                    raise
+                elif "Internal Server Error (500) - Error while querying datasource\n" in str_line:
+                    stderr.write("Explanation : Error querying datasource %s\n" % self.name)
+                    stderr.write("Try later, contact medoc-contacts@ias.u-psud.fr if the problem persists\n")
+                    raise
+            stderr.write("Try later, contact medoc-contacts@ias.u-psud.fr if the problem persists\n")
+            raise
         nbr_results = result_count['total']
         result = []
-        #Check if the request does not exceed 350 000 items
+        # Check if the request does not exceed 350 000 items
         if nbr_results < limit_request:
-            if limit_to_nb_res_max > 0 and limit_to_nb_res_max < kwargs[
-                    'limit']:  #if nbr to display is specified and < 300
+            if 0 < limit_to_nb_res_max < kwargs['limit']:
+                # if nbr to display is specified and < 300
                 kwargs['limit'] = limit_to_nb_res_max
                 kwargs['nocount'] = 'true'
                 nbr_results = limit_to_nb_res_max
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs) + "&" + temp_url
-        #        stdout.write( "if url : "+url+"\n")
-            elif limit_to_nb_res_max > 0 and limit_to_nb_res_max >= kwargs[
-                    'limit']:  #if nbr to display is specified and >= 300
+            #        stdout.write( "if url : "+url+"\n")
+            elif limit_to_nb_res_max > 0 and limit_to_nb_res_max >= kwargs['limit']:
+                # if nbr to display is specified and >= 300
                 if limit_to_nb_res_max < nbr_results:
                     nbr_results = limit_to_nb_res_max
                 kwargs['nocount'] = 'true'
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs) + "&" + temp_url
-        #        stdout.write( "elif url : "+url+"\n")
-            while (nbr_results - kwargs['start']
-                   ) > 0:  #Do the job per 300 items till nbr_result is reached
-                #Check that request is done each 300 items
+            #        stdout.write( "elif url : "+url+"\n")
+            while (nbr_results - kwargs['start']) > 0:  # Do the job per 300 items till nbr_result is reached
+                # Check that request is done each 300 items
                 result_temp = load(urlopen(url))
                 for data in result_temp['data']:
                     result_dict = {}
                     for k, v in data.items():
-                        if (k not in self.noClientAccess_list and
-                                k != 'uri' and k in output_name_list
-                            ) or k in output_name_list:
+                        if (k not in self.noClientAccess_list and k != 'uri' and k in output_name_list) \
+                                or k in output_name_list:
                             if output_name_dict[k].ftype.startswith('int'):
                                 result_dict.update({k: int(v)})
                             elif output_name_dict[k].ftype.startswith('float'):
@@ -574,25 +578,24 @@ class Dataset():
                                     'timestamp'):
                                 (dt, mSecs) = v.split(".")
                                 dt = datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S")
-                                mSeconds = timedelta(microseconds=int(mSecs))
-                                result_dict.update({k: dt + mSeconds})
+                                m_seconds = timedelta(microseconds=int(mSecs))
+                                result_dict.update({k: dt + m_seconds})
                             else:
                                 result_dict.update({k: v})
                     result.append(result_dict)
                 kwargs['start'] += kwargs[
-                    'limit']  #increment the job by the kwargs limit given
-                    #(by design)
+                    'limit']  # increment the job by the kwargs limit given
+                # (by design)
                 url = self.url + "/records" + '?' + urlencode(
                     kwargs
-                ) + "&" + temp_url  #encode new kwargs and build new url
-                #for request
-                #stdout.write( "url : "+url+"\n")
+                ) + "&" + temp_url  # encode new kwargs and build new url
+                # for request
+                # stdout.write( "url : "+url+"\n")
             return result
         else:
             out_mess = ("Not allowed\nNbr results (%d) exceeds limit_request"
-            " param: %d\n" % ( result_count['total'], limit_request))
+                        " param: %d\n" % (result_count['total'], limit_request))
             raise ValueError(out_mess)
-
 
     def display(self):
         """Output attributes of Dataset
@@ -607,10 +610,9 @@ class Dataset():
         All info available for a dataset
         """
         phrase = ""
-        phrase += ("\n\nDataset object display() :\n\t%s\n\t\tdescription : "
-        "%s\n\t\turi : %s\n\t\turl : %s\n\t\tprimary_key : %s" % (
-            self.name, self.description, self.uri, self.url,
-            self.primary_key.name))
+        phrase += ("\n\nDataset object display() :\n\t%s\n\t\tdescription :"
+                   "%s\n\t\turi : %s\n\t\turl : %s\n\t\tprimary_key : %s" % (self.name, self.description, self.uri,
+                                                                             self.url, self.primary_key.name))
         phrase += "\n\t\tresources_list :"
         for i, res in enumerate(self.resources_target):
             phrase += "\n\t\t\t%d) %s" % (i, res)
@@ -625,11 +627,7 @@ class Dataset():
             phrase += "\n\t\t\t%d) %s" % (i, str(field.name))
         return phrase
 
-    def execute_plugin(self,
-                       plugin_name=None,
-                       pkey_values_list=[],
-                       FILENAME=None,
-                       **kwargs):
+    def execute_plugin(self, plugin_name=None, pkey_values_list=[], filename=None, **kwargs):
         """Donwload a selection of data
 
         parameter
@@ -638,7 +636,7 @@ class Dataset():
             name of the plugin within sitools2
         pkey_values_list
             list of primary_key values for the current dataset
-        FILENAME
+        filename
             name of the file donwloaded
 
         raise
@@ -654,79 +652,76 @@ class Dataset():
             can be a tar zip etc...
         """
 
-        #Determine if pk is a couple
+        # Determine if pk is a couple
         pk_item = self.fields_dict[self.primary_key.name]
         pk_item_component = pk_item.component.split("||','||")
 
-        #primary key is like : (pk_item1, pk_item2)
-        if len(pk_item_component)==2 :
+        # primary key is like : (pk_item1, pk_item2)
+        if len(pk_item_component) == 2:
 
             operation = 'LISTBOXMULTIPLE'
             pk_item1 = pk_item_component[0]
             pk_item2 = pk_item_component[1]
-            recnum_list =[
-                elmnt for idx,elmnt in enumerate(pkey_values_list)
-                    if idx % 2 ==0
+            recnum_list = [
+                elmnt for idx, elmnt in enumerate(pkey_values_list)
+                if idx % 2 == 0
             ]
-            series_name_list =[
-                elmnt for idx,elmnt in enumerate(pkey_values_list)
-                    if idx % 2 !=0
+            series_name_list = [
+                elmnt for idx, elmnt in enumerate(pkey_values_list)
+                if idx % 2 != 0
             ]
-
 
             kwargs.update({
-            'p[0]': operation + "|" + pk_item1 + "|"+
-                "|".join( str(recnum) for recnum in recnum_list),
-            'p[1]': operation + "|" + pk_item2 + "|"+
-                "|".join(str(series) for series in series_name_list)
+                'p[0]': operation + "|" + pk_item1 + "|" + "|".join(str(recnum) for recnum in recnum_list),
+                'p[1]': operation + "|" + pk_item2 + "|" + "|".join(str(series) for series in series_name_list)
             })
 
-        #primary_key is like : recnum
-        elif len(pk_item_component)==1 :
+        # primary_key is like : recnum
+        elif len(pk_item_component) == 1:
             resources_list = []
             if plugin_name is None:
                 err_mess = "Error execute_plugin():\nNo plugin_name provided\n"
-                raise ValueError (err_mess)
+                raise ValueError(err_mess)
             for resource in self.resources_target:
                 resources_list.append(resource.split("/")[-1])
             if plugin_name not in resources_list:
                 err_mess = (
-                    "Error execute_plugin():\n This plugin_name %s does not"
-                    "exist in %s dataset\n" % (plugin_name, self.name)
+                        "Error execute_plugin():\n This plugin_name %s does not"
+                        "exist in %s dataset\n" % (plugin_name, self.name)
                 )
-                raise ValueError (err_mess)
+                raise ValueError(err_mess)
             if len(pkey_values_list) == 0:
                 err_mess = (
                     "Error execute_plugin():\nNo identifiers pkey provided\n"
                 )
-                raise ValueError (err_mess)
-            if FILENAME is None:
+                raise ValueError(err_mess)
+            if filename is None:
                 err_mess = (
-                    "Error execute_plugin():\nNo FILENAME provided\n"
+                    "Error execute_plugin():\nNo filename provided\n"
                 )
-                raise ValueError (err_mess)
+                raise ValueError(err_mess)
             operation = 'LISTBOXMULTIPLE'
             kwargs.update({
-            'p[0]': operation + "|" + self.primary_key.name + "|" + "|".join(
-                str(pkey_value) for pkey_value in pkey_values_list)
+                'p[0]': operation + "|" + self.primary_key.name + "|" + "|".join(
+                    str(pkey_value) for pkey_value in pkey_values_list)
             })
 
         url = self.url + "/" + plugin_name + "?" + urlencode(kwargs)
-        print ("url exec_plugin : %s\n" % url)
-        try :
+        print("url exec_plugin : %s\n" % url)
+        try:
             urlopen(url)
-        except HTTPError as e :
-            print ("code error :%s" % e.code)
-            print ("Reason : %s " % e.reason)
+        except HTTPError as e:
+            print("code error :%s" % e.code)
+            print("Reason : %s " % e.reason)
             raise
-        except Exception as e :
-            print (e.args)
+        except Exception as e:
+            print(e.args)
             raise
-        else :
-            return urlretrieve('%s' % url, FILENAME)
+        else:
+            return urlretrieve('%s' % url, filename)
 
 
-class Project():
+class Project:
     """Define a Project class.
        A Project instance gives details about a project of Sitools2.
 
@@ -740,7 +735,7 @@ class Project():
         uniform resource location
     url : str
         uniform resource identifier
-    resource_target : list
+    resources_target : list
         list of resources target
 
     methods
@@ -749,7 +744,6 @@ class Project():
         returns information about the number of datasets available,
         their name and uri.
     """
-
 
     def __init__(self, url):
         """Initialize Project"""
@@ -770,24 +764,23 @@ class Project():
         self.name = result['project']['name']
         self.description = result['project']['description']
 
-
     def resources_list(self):
         """Explore Project resources (method=options should be allowed)
         """
         url = urlopen(self.url + '?method=OPTIONS')
         wadl = url.read()
         try:
-            domWadl = parseString(wadl)
-        except:
-            out_mess = ("Project %s : project.resources_list() not allowed, "
-            "please contact admin for more info\n" % self.name)
-            raise ValueError(out_mess)
+            dom_wadl = parseString(wadl)
+        except HTTPError:
+            out_mess = ("Project %s : project.resources_list() not allowed\n"
+                        "Please contact medoc-contacts@ias.u-psud.fr and report that issue\n" % self.name)
+            stderr.write(out_mess)
+            raise
         else:
-            resources = domWadl.getElementsByTagName('resource')
+            resources = dom_wadl.getElementsByTagName('resource')
             for i in range(len(resources)):
                 self.resources_target.append(self.url + "/" + resources[i]
                                              .getAttribute('path'))
-
 
     def display(self):
         """Ouptut Project attributes"""
@@ -802,8 +795,8 @@ class Project():
         """
         phrase = ""
         phrase += ("\n\nProject object display() :\n\t"
-        "%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s" % (self.name,
-            self.description, self.uri, self.url))
+                   "%s\n\t\tdescription : %s\n\t\turi : %s\n\t\turl : %s" % (self.name,
+                                                                             self.description, self.uri, self.url))
         phrase += "\n\t\tresources list :"
         if len(self.resources_target) != 0:
             for i, res in enumerate(self.resources_target):
@@ -830,8 +823,9 @@ class Project():
                 for i, dataset in enumerate(result['data']):
                     ds_url = sitools_url + dataset['url']
                     data.append(Dataset(ds_url))
-        except:
-            out_mess = ("Error in Project.dataset_list() :\nCannot access "
-            "dataset %s is protected\nContact admin for more info\n" % url)
-            raise Exception(out_mess)
+        except HTTPError:
+            out_mess = ("Error in Project.dataset_list() :\nCannot access dataset list %s"
+                        "\nContact medoc-contacts@ias.u-psud.fr and report that issue\n" % url)
+            stderr.write(out_mess)
+            raise
         return data
