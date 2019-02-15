@@ -5,7 +5,6 @@
 This script has been designed to give python programmers an easy way to 
 interrogate medoc gaia-dem sitools2 interface. You can make a search providing 
 a date range and get your selection very easilly.
-@author: Pablo ALINGERY for IAS 07-03-2013
 """
 __license__ = "GPL"
 __author__ = "Pablo ALINGERY"
@@ -99,7 +98,7 @@ def get_selection(gaia_list=[], download_type="TAR", **kwds):
 
     Parameters
     ----------
-    gaia_list : list of Sdo_data objects
+    gaia_list : list of SdoData objects
         The result of media_search can be passed as an argument of that 
         function.       
     download_type : str
@@ -157,7 +156,9 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
 
     Returns 
     -------
-    gaia_data list 
+    gaia_data list
+
+        ..todo:: Add var server for gaia_search()
     """
 
     #Allow lower case entries
@@ -253,7 +254,7 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
 
 #Define decorator
 def singleton(class_def):
-    """Definition de la classe Sdo_aia_dataset that heritates of Dataset
+    """Definition de la classe SdoAiaDataset that heritates of Dataset
     This following classes will only have one instance 
     """
 

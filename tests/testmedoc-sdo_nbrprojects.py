@@ -22,6 +22,7 @@ __date__ ="$9 juin 2013 11:38:58$"
 import unittest
 from sitools2.core.pySitools2 import *
 
+@unittest.skip("Functional Test medoc-sdo interface")
 class TestSitools2Core(unittest.TestCase):        
     
     def setUp(self):

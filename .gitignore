@@ -5,6 +5,7 @@
 /examples/results/
 /tests/results/
 /results/
+/.idea/
 *.pyc
 *.swp
 *.py~
@@ -12,3 +13,10 @@
 reinstall_pySitools2.sh~
 *.md~
 *.egg
+*.tar
+credits.txt
+*.fits
+/pySitools2.egg-info/
+/.cache/
+/.eggs/
+/venv/

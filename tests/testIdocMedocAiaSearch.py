@@ -22,7 +22,13 @@ __date__ ="$9 juin 2013 12:17:18$"
 import unittest
 from sitools2.clients.sdo_client_medoc import media_search
 from datetime import datetime, timedelta
+from sitools2.clients import constants
 
+sitools2_url = constants.SITOOLS2_URL
+functional_test = constants.FUNCTIONAL_TEST
+
+
+@unittest.skipUnless(functional_test,"Functional test "+ sitools2_url +" interface ")
 class TestMedia(unittest.TestCase):        
     
     def setUp(self):
@@ -33,7 +39,7 @@ class TestMedia(unittest.TestCase):
         d1 = datetime(2012,8,10,0,0,0)
         d2 = d1 + timedelta(days=1)
         sdo_data_list = media_search( 
-        	server="http://idoc-medoc-test.ias.u-psud.fr", 
+        	server=sitools2_url,
         	dates=[d1,d2], 
         	waves=['335','304'], 
         	cadence=['10 min'] )
