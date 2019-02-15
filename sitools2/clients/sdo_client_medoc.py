@@ -29,12 +29,11 @@ from simplejson import load
 from sitools2.clients import constants
 
 sitools2_url = constants.SITOOLS2_URL
-medoc_sdo_dataset = constants.SDO_DATASET_ID #old interface medoc-sdo.ias.u-psud.fr
-medoc_sdo_aia_lev1_dataset = constants.SDO_AIA_LEV1_DATASET_ID #old interface medoc-sdo.ias.u-psud.fr
+medoc_sdo_dataset = constants.SDO_DATASET_ID  # old interface medoc-sdo.ias.u-psud.fr
+medoc_sdo_aia_lev1_dataset = constants.SDO_AIA_LEV1_DATASET_ID  # old interface medoc-sdo.ias.u-psud.fr
 idoc_medoc_sdo_aia_dataset = constants.SDO_AIA_DATASET_ID
 idoc_medoc_sdo_hmi_dataset = constants.SDO_HMI_DATASET_ID
 idoc_medoc_sdo_aia_lev1_dataset = constants.AIA_LEV1_DATASET_ID
-
 
 
 def media_get(media_data_list=None, target_dir=None, download_type=None, **kwds):
@@ -113,7 +112,7 @@ def media_get(media_data_list=None, target_dir=None, download_type=None, **kwds)
             **kwds)
 
 
-def media_get_selection(server=None, media_data_list=None, download_type="TAR", **kwds):
+def media_get_selection(server=sitools2_url, media_data_list=None, download_type="TAR", **kwds):
     """Download a selection from MEDOC server tar or zip file
 
 
@@ -178,12 +177,8 @@ def media_get_selection(server=None, media_data_list=None, download_type="TAR", 
         'http://idoc-medoc-test.ias.u-psud.fr',
         'http://idoc-medoc.ias.u-psud.fr'
     ]
-    if server is None:
-        server = sitools2_url
-        stdout.write(
-            "server parameter not specified, default value is set: server=%s\n"
-            % server)
-    if server is not None and server not in allowed_server:
+
+    if server not in allowed_server:
         raise ValueError(
             "Server %s is not allowed for media_get_selection()\nServers "
             "available : %s\n"
@@ -206,8 +201,7 @@ def media_get_selection(server=None, media_data_list=None, download_type="TAR", 
         sdo_dataset.__getSelection__(sunum_list=media_data_sunum_list, download_type=download_type, **kwds)
 
 
-def media_search(server=None, dates=None, waves=None, series=None,
-                 cadence=None, nb_res_max=-1, **kwds):
+def media_search(server=sitools2_url, dates=None, waves=None, series=None, cadence=None, nb_res_max=-1, **kwds):
     """Use the generic search() from pySitools2 library for Sitools2 SDO
     instance located at IAS
 
@@ -235,7 +229,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
         default value aia.lev1 if not specified
 
     cadence : list
-        Can be a string and in list
+        Can be a list of one element among the following value
         ['12 sec','1 min', '2 min', '10 min', '30 min',
         '1 h', '2 h', '6 h', '12 h' , '1 day', '12 min']
         cadence default values '1 min' or 12 min for hmi data
@@ -247,7 +241,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
     Raises
     -----
     ValueError
-        parameter not in allowed_parmas list
+        parameter not in allowed_parms list
         server parameter value is not allowed
         server not specified and hmi data requested ie wave = 6173
         dates parameter is not specified
@@ -281,13 +275,10 @@ def media_search(server=None, dates=None, waves=None, series=None,
     """
 
     # Allow lower case entries
-    allowed_params = [
-        'DATES', 'WAVES', 'CADENCE', 'NB_RES_MAX', 'SERIES', 'SERVER'
-    ]
+    allowed_params = ['DATES', 'WAVES', 'CADENCE', 'NB_RES_MAX', 'SERIES', 'SERVER']
     for k, v in iteritems(kwds):
         if k not in allowed_params:
-            mess_err = ("Error in search():\n'%s' entry for the search "
-                        "function is not allowed\n" % k)
+            mess_err = ("Error in search():\n'%s' entry for the search function is not allowed\n" % k)
             raise ValueError(mess_err)
         else:
             if k == 'SERVER':
@@ -306,49 +297,15 @@ def media_search(server=None, dates=None, waves=None, series=None,
     dates_optim = []
 
     #    CONTROL_START
-    waves_allowed_aia_list = [
-        '94', '131', '171', '193', '211', '304', '335', '1600', '1700'
-    ]
+    waves_allowed_aia_list = ['94', '131', '171', '193', '211', '304', '335', '1600', '1700']
     waves_allowed_hmi_list = ['6173']
-    cadence_allowed_list = {
-        '12s': '12 sec',
-        '1m': '1 min',
-        '2m': '2 min',
-        '10m': '10 min',
-        '30m': '30 min',
-        '1h': '1 h',
-        '2h': '2 h',
-        '6h': '6 h',
-        '12h': '12 h',
-        '1d': '1 day'
-    }
-    allowed_server = [
-        'http://medoc-sdo.ias.u-psud.fr',
-        'http://medoc-sdo-test.ias.u-psud.fr',
-        'http://idoc-medoc-test.ias.u-psud.fr',
-        'http://idoc-medoc.ias.u-psud.fr'
-    ]
+    cadence_allowed_list = {'12s': '12 sec', '1m': '1 min', '2m': '2 min', '10m': '10 min', '30m': '30 min',
+                            '1h': '1 h', '2h': '2 h', '6h': '6 h', '12h': '12 h', '1d': '1 day'}
+    allowed_server = ['http://medoc-sdo.ias.u-psud.fr', 'http://medoc-sdo-test.ias.u-psud.fr',
+                      'http://idoc-medoc-test.ias.u-psud.fr', 'http://idoc-medoc.ias.u-psud.fr']
     # server
-    if server is None and series is None:
-        server = 'http://medoc-sdo.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://medoc-sdo.ias.u-psud.fr'\n"
-        )
-    elif server is None and series.startswith('aia'):
-        server = 'http://medoc-sdo.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://medoc-sdo.ias.u-psud.fr'\n"
-        )
-    elif server is None and series.startswith('hmi'):
-        server = 'http://idoc-medoc-test.ias.u-psud.fr'
-        stdout.write(
-            "server parameter not specified, default value is set : "
-            "server='http://idoc-medoc-test.ias.u-psud.fr'\n"
-        )
-    if server is not None and server not in allowed_server:
-        raise ValueError("Server %s is not allowed\nServers available : %s\n" % (server, allowed_server) )
+    if server not in allowed_server:
+        raise ValueError("Server %s is not allowed\nServers available : %s\n" % (server, allowed_server))
 
     # dates
     if dates is None:
@@ -509,17 +466,18 @@ def media_search(server=None, dates=None, waves=None, series=None,
                     "element" % len(cadence))
         raise ValueError(mess_err)
 
-    for cadence in cadence:
-        if (cadence not in cadence_allowed_list.keys()) and (
-                cadence not in cadence_allowed_list.values()):
+    for cadence_item in cadence:
+        if (cadence_item not in cadence_allowed_list.keys()) and (
+                cadence_item not in cadence_allowed_list.values()):
             mess_err = ("Error in search():\ncadence= %s not allowed\n"
                         "cadence for %s must be in list :\n%s\n" % (
-                            cadence, series, cadence_allowed_list))
+                            cadence_item, series, cadence_allowed_list))
             raise ValueError(mess_err)
-        elif cadence in cadence_allowed_list.values():
-            cadence = [cadence]
+        elif cadence_item in cadence_allowed_list.values():
+            cadence = [cadence_item]
         else:
-            cadence = [cadence_allowed_list[cadence]]
+            cadence_value = cadence_allowed_list[str(cadence_item)]
+            cadence = [cadence_value]
 
     # nb_res_max
     if type(nb_res_max).__name__ != 'int':
@@ -535,7 +493,7 @@ def media_search(server=None, dates=None, waves=None, series=None,
     # Server definition
     # Define dataset url
     if server.startswith('http://medoc-sdo'):
-        sdo_dataset = SdoIasSdoDataset(server + "/"+ medoc_sdo_dataset)
+        sdo_dataset = SdoIasSdoDataset(server + "/" + medoc_sdo_dataset)
     elif server.startswith('http://idoc-medoc') and series.startswith('hmi'):
         sdo_dataset = SdoDataset(server + "/" + idoc_medoc_sdo_hmi_dataset)
     elif server.startswith('http://idoc-medoc') and series.startswith('aia'):
@@ -637,13 +595,8 @@ def media_search(server=None, dates=None, waves=None, series=None,
     return sdo_data_list
 
 
-def media_metadata_search(
-        server=None,
-        media_data_list=None,
-        keywords=None,
-        recnum_list=None,
-        series=None,
-        **kwds):
+def media_metadata_search(server=sitools2_url, media_data_list=None, keywords=None, recnum_list=None, series=None,
+                          **kwds):
     """Provide metadata information from MEDOC server
 
     Parameters
@@ -767,11 +720,7 @@ def media_metadata_search(
         )
 
     # server
-    if server is None:
-        server = sitools2_url
-        stdout.write("server parameter not specified, default value is set : %s\n" % server)
-
-    if server is not None and server not in allowed_server:
+    if server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" %
                          (server, allowed_server))
 
@@ -840,7 +789,7 @@ def media_metadata_search(
             return result
 
 
-def metadata_info(server=None, series='aia.lev1'):
+def metadata_info(server=sitools2_url, series='aia.lev1'):
     """Displays information concerning the dataset specified
     For example if you need the list of the fields in aia_dataset
 
@@ -871,14 +820,12 @@ def metadata_info(server=None, series='aia.lev1'):
     ]
     # Controls
     # server
-    if server is None:
-        server = sitools2_url
-    if server is not None and server not in allowed_server:
+    if server not in allowed_server:
         raise ValueError("Server %s is not allowed\nServers available : %s\n" % (server, allowed_server))
     metadata_ds = None
     # Define dataset url
     if server == 'http://medoc-sdo-test.ias.u-psud.fr':
-        metadata_ds = SdoIasSdoDataset(server + "/webs_aia_dataset")
+        metadata_ds = SdoIasSdoDataset(server + "/" + medoc_sdo_aia_lev1_dataset)
     elif server == 'http://idoc-medoc-test.ias.u-psud.fr':
         metadata_ds = SdoIasSdoDataset(server + "/webs_" + series + "_dataset")
 
@@ -1044,7 +991,7 @@ class SdoData:
     sunum : int
         Another Id of the SDO data_sums db
         Attention you can several records wih same sunum
-    date_obs : str
+    date_obs : datetime
         Observation date (UTC) without time zone of the record computed by IAS
     series_name : str
         Name of the series name , can b hmi.m_720s or aia.lev1 etc ...
@@ -1076,7 +1023,7 @@ class SdoData:
         self.url = ''
         self.recnum = 0
         self.sunum = 0
-        self.date_obs = ''
+        self.date_obs = None
         self.series_name = ''
         self.wave = 0
         self.ias_location = ''
@@ -1217,15 +1164,15 @@ class SdoData:
         url = ""
         file_url = ""
         filename_pre = ""
-        filename_path = ""
-        ias_path = ""
+        filename_path = None
+        ias_path = None
         print("self.url : %s" % self.url)
         print("self.ias_path : %s" % self.ias_path)
 
         # if ias_path ends with image_lev1.fits remove end
         if self.ias_path.endswith("/image_lev1.fits"):
             print("End with file")
-            ias_path = self.ias_path.split("/image_lev1.fits")[0]
+            ias_path += self.ias_path.split("/image_lev1.fits")[0]
             print("ias_path : %s" % ias_path)
         else:
             ias_path = self.ias_path
@@ -1418,9 +1365,9 @@ class SdoData:
         for seg in segment:
             print(seg)
             if filename is None:
-                filename_path = filename_pre + seg + '.fits'
+                filename_path += filename_pre + seg + '.fits'
             else:
-                filename_path = filename_pre + '.fits'
+                filename_path += filename_pre + '.fits'
                 file_url = url
                 print("file_url 1 : %s" % file_url)
             if self.series_name.startswith('hmi'):
@@ -1451,7 +1398,7 @@ class SdoData:
                                  filename_path)
                     stdout.flush()
 
-    def metadata_search(self, server=None, keywords=None, **kwds):
+    def metadata_search(self, server=sitools2_url, keywords=None, **kwds):
         """Provide metadata information from MEDOC server
 
         Parameters
@@ -1499,14 +1446,7 @@ class SdoData:
 
         server_url = sitools2_url
         # server
-        if server_url.startswith("http://localhost"):
-            pass
-        elif server is None and self.series_name.startswith('aia'):
-            server_url = 'http://medoc-sdo.ias.u-psud.fr'
-        elif server is None and self.series_name.startswith('hmi'):
-            server_url = 'http://idoc-medoc-test.ias.u-psud.fr'
-
-        if server is not None and server not in allowed_server:
+        if server not in allowed_server:
             raise ValueError(
                 "Server %s is not allowed \nServers available : %s\n" %
                 (server, allowed_server)
@@ -1520,18 +1460,14 @@ class SdoData:
             raise TypeError(mess_err)
 
         if server_url.startswith('http://medoc-sdo'):
-            metadata_ds = SdoAiaDataset(server_url + "/webs_aia_dataset")
+            metadata_ds = SdoAiaDataset(server_url + "/" + medoc_sdo_aia_lev1_dataset)
         elif server_url.startswith('http://idoc-medoc'):
-            metadata_ds = SdoDataset(server_url + "/webs_" +
-                                     self.series_name + "_dataset")
+            metadata_ds = SdoDataset(server_url + "/webs_" + self.series_name + "_dataset")
         elif server_url.startswith('http://localhost'):
-            metadata_ds = SdoDataset(server_url + "/webs_" +
-                                     self.series_name + "_dataset")
+            metadata_ds = SdoDataset(server_url + "/webs_" + self.series_name + "_dataset")
 
         else:
-            raise ValueError(
-                "metadata_ds is not valued please check your server param\n")
-
+            raise ValueError("metadata_ds is not valued please check your server param\n")
         #       print "Dataset targetted :" ,metadata_ds.name ,metadata_ds.uri
         #       print "Query is for %s recnum %s " % (self.series_name, self.recnum)
         # controls
