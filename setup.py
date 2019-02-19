@@ -31,7 +31,7 @@ else:
     setup(
         name='pySitools2',
         packages=find_packages(),
-        version="0.0.1",
+        version="0.0.2",
         # Declare your packages' dependencies here, for eg:
         install_requires=['simplejson', 'future', 'pip'],
 
