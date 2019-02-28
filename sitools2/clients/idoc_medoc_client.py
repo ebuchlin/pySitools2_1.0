@@ -1506,6 +1506,8 @@ def main():
     # sdo_data_list=media_search(dates=[d1,d2],waves=['335'],cadence=['1h'],
     # nb_res_max=10)
     #   print sdo_data_list
+    sdo_data_list = idoc_medoc_search(dates=[d1, d2], series='aia.lev1', cadence=['1h'], nb_res_max=10,
+                                      keywords=['cdelt1', 'cdelt2', 'crval1'])
     for item in sdo_data_list:
         print(item)
 
