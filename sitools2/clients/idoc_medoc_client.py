@@ -1506,7 +1506,6 @@ def main():
     # sdo_data_list=media_search(dates=[d1,d2],waves=['335'],cadence=['1h'],
     # nb_res_max=10)
     #   print sdo_data_list
-    git s
     for item in sdo_data_list:
         print(item)
 
