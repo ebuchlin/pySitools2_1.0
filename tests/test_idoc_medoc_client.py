@@ -1,36 +1,34 @@
 import unittest
 
-from sitools2.clients.sdo_client_medoc import media_search, media_get, media_get_selection, media_metadata_search,\
-    metadata_info
+from sitools2.clients.idoc_medoc_client import idoc_medoc_search, idoc_medoc_get, idoc_medoc_get_selection,\
+    idoc_medoc_metadata_search, metadata_info
 
 
 class MyTestCase(unittest.TestCase):
-
-    def test_media_search(self):
+    def test_idoc_medoc_search(self):
         try:
             # self.assertRaises(ValueError("Nothing to download"), sdo_client_medoc.media_get())
-
-            media_search()
+            idoc_medoc_search()
             self.fail("No exception raised")
         except ValueError:
             pass
         except AssertionError:
             self.fail("exception")
 
-    def test_media_get(self):
+    def test_idoc_medoc_get(self):
         try:
             # self.assertRaises(ValueError("Nothing to download"), sdo_client_medoc.media_get())
 
-            media_get()
+            idoc_medoc_get()
             self.fail("No exception raised")
         except ValueError:
             pass
         except AssertionError:
             self.fail("exception")
 
-    def test_media_get_selection(self):
+    def test_idoc_medoc_get_selection(self):
         try:
-            media_get_selection()
+            idoc_medoc_get_selection()
         except IOError:
             pass
         except ValueError:
@@ -42,7 +40,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_metadata_search(self):
         try:
-            media_metadata_search()
+            idoc_medoc_metadata_search()
 
         except ValueError:
             pass
