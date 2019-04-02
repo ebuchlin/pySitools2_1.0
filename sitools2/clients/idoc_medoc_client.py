@@ -79,7 +79,7 @@ def idoc_medoc_get(media_data_list=None, target_dir=None, download_type=None, **
 
     for k, v in iteritems(kwds):
         if k not in allowed_params:
-            mess_err = ("Error in search():\n'%s' entry for media_get function is not allowed\n" % k)
+            mess_err = ("Error in search():\n'%s' entry for idoc_medoc_get function is not allowed\n" % k)
             raise ValueError(mess_err)
         if k == 'TARGET_DIR':
             target_dir = v
@@ -596,9 +596,9 @@ def idoc_medoc_search(server=sitools2_url, dates=None, waves=None, series=None, 
         stdout.write("Meta Data Search in progress ...\n")
         sdo_dict_list = idoc_medoc_metadata_search(media_data_list=sdo_data_list, keywords=keywords)
         for i, sdo_data_item in enumerate(sdo_data_list):
-            print(sdo_data_item.__getitem__())
-            sdo_dict_list[i].update(sdo_data_item.__getitem__())
-        return sdo_dict_list
+            sdo_data_item.keywords = sdo_dict_list[i]
+        return sdo_data_list
+
     else:
         stdout.write("%s results returned\n" % len(sdo_data_list))
         return sdo_data_list
@@ -959,7 +959,7 @@ class SdoIasSdoDataset(Dataset):
         else:
             plugin_id = "plugin03"
         if not quiet:
-            stdout.write("Download %s file in progress ..." %
+            stdout.write("Download %s file in progress ...\n" %
                          download_type.lower())
 
         #   Dataset.execute_plugin(self,plugin_name=plugin_id, "
@@ -1032,6 +1032,7 @@ class SdoData:
         self.t_rec_index = 0
         self.harpnum = 0
         self.compute_attributes(data)
+        self.keywords = None
 
     def compute_attributes(self, data):
         if 'get' in data:
@@ -1077,10 +1078,19 @@ class SdoData:
         -------
         Dictionary with all the attributes of SdoData
         """
-
-        return {'url': self.url, 'recnum': self.recnum, 'sunum': self.sunum, 'date_obs': self.date_obs,
-                'series_name': self.series_name, 'ias_location': self.ias_location, 'ias_path': self.ias_path,
-                'exptime': self.exptime, 'harpnum': self.harpnum}
+        if self.series_name.startswith('hmi.sharp'):
+            idoc_medoc_dict = {'url': self.url, 'recnum': self.recnum, 'sunum': self.sunum, 'date_obs': self.date_obs,
+                               'series_name': self.series_name, 'ias_location': self.ias_location,
+                               'ias_path': self.ias_path, 'exptime': self.exptime, 'harpnum': self.harpnum}
+        else:
+            idoc_medoc_dict = {'url': self.url, 'recnum': self.recnum, 'sunum': self.sunum, 'date_obs': self.date_obs,
+                               'series_name': self.series_name, 'ias_location': self.ias_location,
+                               'ias_path': self.ias_path, 'exptime': self.exptime}
+        if self.keywords is None:
+            return idoc_medoc_dict
+        else:
+            idoc_medoc_dict.update(self.keywords)
+            return idoc_medoc_dict
 
     def display(self):
         """Display a representation of SDO data from MEDOC server
@@ -1094,22 +1104,7 @@ class SdoData:
         print(self.__repr__())
 
     def __repr__(self):
-        if self.series_name.startswith('hmi.sharp'):
-            return (
-                    "url : %s,recnum : %d, sunum : %d, series_name : %s, "
-                    "date_obs : %s, wave : %d, ias_location : %s, exptime : %s, "
-                    "t_rec_index : %d, harpnum : %d, ias_path : %s\n"
-                    % (self.url, self.recnum, self.sunum, self.series_name,
-                       self.date_obs, self.wave, self.ias_location,
-                       self.exptime, self.t_rec_index, self.harpnum, self.ias_path))
-        else:
-            return (
-                    "url : %s,recnum : %d, sunum : %d, series_name : %s, "
-                    "date_obs : %s, wave : %d, ias_location : %s, exptime : %s, "
-                    "t_rec_index : %d, ias_path : %s\n"
-                    % (self.url, self.recnum, self.sunum, self.series_name,
-                       self.date_obs, self.wave, self.ias_location,
-                       self.exptime, self.t_rec_index, self.ias_path))
+        return str(self.__getitem__())
 
     def get_file(self,
                  decompress=False,
@@ -1136,8 +1131,8 @@ class SdoData:
             set print output active or not
             By design the output is active
             For a quiet get_file process set quiet=True
-        segment : str
-            Type of the file
+        segment : list
+            Type of the files can be a list of single or multiple segments
             Can value aia.lev1 or spikes for SDO/AIA-LEV1
             Can value 'bitmap', 'Bp_err', 'Bt','conf_disambig', ...
 
@@ -1149,6 +1144,7 @@ class SdoData:
         Returns
         -------
         Files located in the target_dir directory
+
 
         """
 
@@ -1176,16 +1172,16 @@ class SdoData:
         url = ""
         file_url = ""
         filename_pre = ""
-        filename_path = None
+#        filename_path = None
         ias_path = None
-        print("self.url : %s" % self.url)
-        print("self.ias_path : %s" % self.ias_path)
+        # stdout.write("self.url : %s" % self.url)
+        # stdout.write("self.ias_path : %s" % self.ias_path)
 
         # if ias_path ends with image_lev1.fits remove end
         if self.ias_path.endswith("/image_lev1.fits"):
-            print("End with file")
+            stdout.write("End with file")
             ias_path += self.ias_path.split("/image_lev1.fits")[0]
-            print("ias_path : %s" % ias_path)
+            # stdout.write("ias_path : %s" % ias_path)
         else:
             ias_path = self.ias_path
 
@@ -1194,46 +1190,48 @@ class SdoData:
             pass
         else:
             ias_path = 'http://' + ias_path
-            print("Does not start with http:// , let's add it")
+            # stdout.write("Does not start with http:// , let's add it")
         # Define filename if not provided
         if filename is None and self.series_name == 'aia.lev1':
             # if not specified this is the default name
             filename_pre = self.series_name + "_" + str(self.wave) + "A_" + self.date_obs.strftime('%Y-%m-%dT%H-%M-%S_'
                                                                                                    + str(self.recnum) +
                                                                                                    ".")
-            print("filename_pre : %s" % filename_pre)
+            # stdout.write("filename_pre : %s \n" % filename_pre)
         elif filename is None and self.series_name.startswith('hmi.sharp'):
             filename_pre = self.series_name + "_" + str(self.wave) + "A_" + \
                            self.date_obs.strftime('%Y-%m-%dT%H-%M-%S_') \
                            + str(self.harpnum) + "."
-            print("filename_pre : %s" % filename_pre)
+            # stdout.write("filename_pre : %s \n" % filename_pre)
 
         # Check for Ic_720s data
         elif filename is None and self.series_name.startswith('hmi'):
             filename_pre = self.series_name + "_" + str(self.wave) + "A_" + self.date_obs.strftime('%Y-%m-%dT%H-%M-%S.')
-            print("filename_pre : %s" % filename_pre)
+            # stdout.write("filename_pre : %s \n" % filename_pre)
 
         elif filename is not None:
             stdout.write("filename defined by user : %s\n" % filename)
             filename_pre = path.splitext(filename)[0]
-            print("filename_pre : %s" % filename_pre)
+            stdout.write("filename_pre : %s" % filename_pre)
 
         # Define segment if it does not exist
         if segment is None and filename is None and self.series_name == 'aia.lev1':
             # segment = ['image_lev1', 'spikes']
             segment = ['image_lev1']
+            stdout.write("segment : %s" % segment)
+            segment_allowed.append('image_lev1')
             kwargs.update({'segment': ','.join(segment)})
             #            print("kwargs : %s" % kwargs)
             url = self.url + ';' + urlencode(kwargs)
-            print("url : %s" % url)
+            stdout.write("url : %s" % url)
         elif segment is None and filename is None and self.series_name.startswith('hmi.sharp'):
             segment = []
             #            #kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-            print("url : %s" % url)
+            # stdout.write("url : %s" % url)
             url_build_seg = ias_path + '?' + urlencode(kwargs)
-            print("url_build_seg : %s" % url_build_seg)
+            stdout.write("url_build_seg : %s" % url_build_seg)
             try:
                 result = load(urlopen(url_build_seg))
             #    #result = urlretrieve(url, filename_pre+".tar")
@@ -1251,20 +1249,20 @@ class SdoData:
                         segment.append(item['name'].split(".fits")[0])
                         segment_allowed.append(item['name'].split(".fits")[0])
                 else:
-                    print("No key 'items' found for %s " % url_build_seg)
+                    stdout.write("No key 'items' found for %s " % url_build_seg)
 
         #       Segment is None
         elif segment is None and filename is None and self.series_name.startswith('hmi.ic'):
             segment = ['continuum']
             kwargs.update({'segment': ",".join(segment)})
             url = self.url + '/?' + urlencode(kwargs)
-            print("url : %s" % url)
+            # stdout.write("url : %s" % url)
             segment_allowed.append('continuum')
         elif segment is None and filename is None and self.series_name.startswith('hmi.m'):
             segment = ['magnetogram']
             kwargs.update({'segment': ",".join(segment)})
             url = self.url + '/?' + urlencode(kwargs)
-            print("url : %s" % url)
+            # stdout.write("url : %s" % url)
             segment_allowed.append('magnetogram')
 
         #       Segment exists
@@ -1275,9 +1273,9 @@ class SdoData:
             # url = self.ias_path
 
             url = self.url + ';' + urlencode(kwargs)
-            print("url : %s" % url)
+            # stdout.write("url : %s" % url)
             url_build_seg = ias_path + "/?" + "media=json"
-            print("url_build_seg : %s" % url_build_seg)
+            stdout.write("url_build_seg : %s" % url_build_seg)
             try:
                 result = load(urlopen(url_build_seg))
             except HTTPError:
@@ -1287,7 +1285,7 @@ class SdoData:
                     for item in result['items']:
                         segment_allowed.append(item['name'].split(".fits")[0])
                 else:
-                    print("No key 'items' found for %s " % url_build_seg)
+                    stdout.write("No key 'items' found for %s " % url_build_seg)
         #            kwargs.update({'segment': segment})
         #            print("kwargs : %s" % kwargs)
 
@@ -1299,7 +1297,7 @@ class SdoData:
             # url = self.ias_path
             segment_allowed += ['image_lev1', "spikes"]
             url = self.url + ';' + urlencode(kwargs)
-            print("url aia.lev1 : %s" % url)
+            # stdout.write("url aia.lev1 : %s" % url)
 
             #           print ("ias_path : %s" % self.ias_path)
             #           url = self.ias_path + '?' + urlencode(kwargs)
@@ -1312,9 +1310,9 @@ class SdoData:
             #           print result
             #            url = self.url + '?' + urlencode(kwargs)
             # url = self.url
-            print("ias_path : %s " % ias_path)
+            # stdout.write("ias_path : %s " % ias_path)
             url_build_seg = ias_path + "/?" + "media=json"
-            print("url_build_seg : %s" % url_build_seg)
+            # stdout.write("url_build_seg : %s" % url_build_seg)
             try:
                 result = load(urlopen(url_build_seg))
             except HTTPError:
@@ -1326,7 +1324,7 @@ class SdoData:
                     for item in result['items']:
                         segment_allowed.append(item['name'].split(".fits")[0])
                 else:
-                    print("No key 'items' found for %s " % url_build_seg)
+                    stdout.write("No key 'items' found for %s " % url_build_seg)
         #            kwargs.update({'segment': segment})
         #            print("kwargs : %s" % kwargs)
 
@@ -1334,7 +1332,7 @@ class SdoData:
             segment = [filename]
             kwargs.update({'segment': ','.join(segment)})
             url = self.url + ';' + urlencode(kwargs)
-            print("url : %s" % url)
+            # stdout.write("url : %s" % url)
 
         # Define default segment
         #        #segment_allowed += ['image_lev1', 'spikes']
@@ -1342,7 +1340,7 @@ class SdoData:
         #        #        print ("segment : %s" % segment)
         #        #        print(segment_allowed)
         #        print("kwargs : %s" % kwargs)
-        print("url : %s" % url)
+        # stdout.write("url : %s" % url)
         for seg in segment:
             if seg not in segment_allowed and filename is None:
                 raise ValueError(
@@ -1357,7 +1355,8 @@ class SdoData:
                 mess_warn = (("Warning get_file(): '%s' directory "
                               "does not exist.\n") % target_dir)
                 mess_warn += "Creation of directory in progress ... \n"
-                stdout.write(mess_warn)
+                if not quiet:
+                    stdout.write(mess_warn)
                 mkdir(target_dir)
             if target_dir[-1].isalnum():
                 filename_pre = target_dir + '/' + filename_pre
@@ -1375,13 +1374,14 @@ class SdoData:
 
         # Define filename_path and file_url
         for seg in segment:
-            print(seg)
+            # stdout.write(seg)
+            # filename_path = ""
             if filename is None:
-                filename_path += filename_pre + seg + '.fits'
+                filename_path = filename_pre + seg + '.fits'
             else:
-                filename_path += filename_pre + '.fits'
+                filename_path = filename_pre + '.fits'
                 file_url = url
-                print("file_url 1 : %s" % file_url)
+                # stdout.write("file_url 1 : %s" % file_url)
             if self.series_name.startswith('hmi'):
                 #   filename_path=filename_pre+seg+'.fits'
                 #   print "filename_path :", filename_path
@@ -1406,9 +1406,9 @@ class SdoData:
                 raise
             else:
                 if not quiet:
-                    stdout.write("Download file %s completed\n" %
-                                 filename_path)
+                    stdout.write("Download file %s completed\n" % filename_path)
                     stdout.flush()
+        return
 
     def metadata_search(self, server=sitools2_url, keywords=None, **kwds):
         """Provide metadata information from MEDOC server
@@ -1528,9 +1528,10 @@ def main():
 
 
 # Unit test get_file
-#   for data in sdo_data_list :
-#   for data in sdo_hmi_data_list :
-#       data.get_file(target_dir='results', segment=['Br'])
+#  for data in sdo_hmi_data_list :
+    for data in sdo_data_list:
+        # print(item.__class__)
+        data.get_file(target_dir='results', segment=['spikes'])
 
 # Unit test metadata_search
 #   print "Test metadata_search"
@@ -1538,5 +1539,7 @@ def main():
 #       my_meta_search=item.metadata_search(keywords=['sunum','recnum',
 #       'quality','cdelt1','cdelt2','crval1'])
 #       print my_meta_search
+
+
 if __name__ == "__main__":
     main()
