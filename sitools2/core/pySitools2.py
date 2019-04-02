@@ -707,7 +707,7 @@ class Dataset:
             })
 
         url = self.url + "/" + plugin_name + "?" + urlencode(kwargs)
-        print("url exec_plugin : %s\n" % url)
+        # print("url exec_plugin : %s\n" % url)
         try:
             urlopen(url)
         except HTTPError as e:
