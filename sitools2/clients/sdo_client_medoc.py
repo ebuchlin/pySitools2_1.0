@@ -1359,15 +1359,15 @@ class SdoData:
 
         # Specification for aia.lev1 and COMPRESS param
         if not decompress and self.series_name == 'aia.lev1':
-            url = self.url + ";compress=rice"
+            url += ";compress=rice"
 
         # Define filename_path and file_url
         for seg in segment:
             print(seg)
             if filename is None:
-                filename_path += filename_pre + seg + '.fits'
+                filename_path = filename_pre + seg + '.fits'
             else:
-                filename_path += filename_pre + '.fits'
+                filename_path = filename_pre + '.fits'
                 file_url = url
                 print("file_url 1 : %s" % file_url)
             if self.series_name.startswith('hmi'):
@@ -1387,6 +1387,7 @@ class SdoData:
             #            print("filename_path : %s" % filename_path)
 
             # Retrieve data
+            print("file url : %s"  % file_url)
             try:
                 urlretrieve(file_url, filename_path)
             except HTTPError:
