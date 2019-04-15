@@ -1,5 +1,5 @@
 #! /usr/bin/python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """
 This script has been designed to give python programmers an easy way to 
@@ -13,20 +13,18 @@ __maintainer__ = "Pablo ALINGERY"
 __email__ = "pablo.alingery.ias.u-psud.fr"
 
 from sitools2.core.pySitools2 import *
-from sys import stdout,stderr
+from sys import stdout
 from os import path, mkdir
 from future.utils import iteritems
 from future.moves.urllib.request import urlretrieve
-
-#sitools2_url='http://medoc-dem.ias.u-psud.fr'
-sitools2_url = 'http://idoc-medoc-test.ias.u-psud.fr'
+from sitools2.clients import constants
 
 
-def gaia_get(gaia_list=[],
-             target_dir=None,
-             download_type=None,
-             type=None,
-             **kwds):
+sitools2_url = constants.SITOOLS2_URL
+gaia_dem_ds = constants.GAIA_DEM_DATASET_ID
+
+
+def gaia_get(gaia_list=None, target_dir=None, download_type=None, **kwds):
     """Donwload gaia dem data from MEDOC server 
 
     Parameters
@@ -37,9 +35,9 @@ def gaia_get(gaia_list=[],
     target_dir : str 
         User can specify the directory of download
     download_type : str
-        Can be 'TAR' or 'ZIP' 
+        Can be 'TAR' or 'ZIP'
 
-    Raise 
+    Raises
     -----
     ValueError
         Parameter not allowed
@@ -51,21 +49,21 @@ def gaia_get(gaia_list=[],
 
     Example
     -------
+        >>>d1 = "2018-01-01 00:00:00"
+        >>>d2 = "2018-01-01 01:00:00"
         >>>gaia_data_list = gaia_search(dates=[d1,d2], nb_res_max=10)
         >>>gaia_get(gaia_list=gaia_data_list)
         >>>gaia_get(gaia_list=gaia_data_list, target_dir='results')
         >>>gaia_get(gaia_list=gaia_data_list,download_type="tar")
 
     """
-    kwds = kwds
 
     allowed_params = [
         'GAIA_LIST', 'TARGET_DIR', 'DOWNLOAD_TYPE'
     ]
     for k, v in iteritems(kwds):
         if k not in allowed_params:
-            mess_err = ("Error in search():\n'%s' entry for the media_get " 
-            "function is not allowed\n" % k)
+            mess_err = ("Error in search():\n'%s' entry for the media_get function is not allowed\n" % k)
             raise ValueError(mess_err)
         if k == 'TARGET_DIR':
             target_dir = v
@@ -75,16 +73,16 @@ def gaia_get(gaia_list=[],
             gaia_list = v
 
     if 'GAIA_LIST' in kwds:
-        del kwds['GAIA_LIST']  #don't pass it twice
+        del kwds['GAIA_LIST']  # don't pass it twice
 
     if len(gaia_list) == 0:
         mess_err = "Nothing to download\n"
         raise ValueError(mess_err)
 
     if download_type is not None:
-        #filetype is ignored
+        # filetype is ignored
         get_selection(
-            gaia_list=gaia_data_list,
+            gaia_list=gaia_list,
             target_dir=target_dir,
             download_type=download_type,
             **kwds)
@@ -93,11 +91,13 @@ def gaia_get(gaia_list=[],
             item.get_file(target_dir=target_dir, **kwds)
 
 
-def get_selection(gaia_list=[], download_type="TAR", **kwds):
+def get_selection(server=sitools2_url, gaia_list=None, download_type="TAR", **kwds):
     """Donwload a selection from MEDOC server tar or zip file  
 
     Parameters
     ----------
+    server : str
+        Name of GAIA DEM server
     gaia_list : list of SdoData objects
         The result of media_search can be passed as an argument of that 
         function.       
@@ -105,14 +105,15 @@ def get_selection(gaia_list=[], download_type="TAR", **kwds):
         Can be 'TAR' or 'ZIP' 
     **kwds : any 
         Can value target_dir for ex 
-    target_dir : str 
-        User can specify the directory of download
-    Returns 
+
+    Returns
     -------
     Files located in the current directory 
 
     Example
     -------
+        >>>d1 = "2018-01-01 00:00:00"
+        >>>d2 = "2018-01-01 01:00:00"
         >>>gaia_data_list = gaia_search(dates=[d1,d2], nb_res_max=10)
         >>>get_selection(gaia_list=gaia_data_list,download_type='TAR')
         >>>gaia_get(gaia_list=gaia_data_list,download_type="TAR")
@@ -120,30 +121,31 @@ def get_selection(gaia_list=[], download_type="TAR", **kwds):
                          download_type='TAR')
     """
 
-    gaia_dataset = Sdo_IAS_gaia_dataset(sitools2_url + "/ws_SDO_DEM")
+    gaia_dataset = SdoIasGaiaDataset(server + "/" + gaia_dem_ds)
     gaia_data_sunum_list = []
     for item in gaia_list:
-        #To be checked
+        # To be checked
         gaia_data_sunum_list.append(item.sunum_193)
 
-    gaia_dataset.__getSelection__(
-        sunum_list=gaia_data_sunum_list, download_type=download_type, **kwds)
+    gaia_dataset.__getSelection__(sunum_list=gaia_data_sunum_list, download_type=download_type, **kwds)
 
 
-def gaia_search(dates=None, nb_res_max=-1, **kwds):
+def gaia_search(server=sitools2_url, dates=None, nb_res_max=-1, **kwds):
     """Use the gaia_search() from pySitools2 library for Sitools2 SDO instance 
     located at IAS  
 
     Parameters
     ----------
-    dates : datetime 
-        Interval of dates within you wish to make a research, it must be 
+    server : str
+        Name of GAIA DEM server
+    dates : list
+        list of dates within you wish to make a research, it must be
         specifed and composed of 2 datetime elements d1 d2, with d2 >d1
     nb_res_max : integer
         Nbr of results you wish to display from the results 
         Must be an integer and if specified must be >0
 
-    Raise 
+    Raises
     -----
     ValueError
         Parameter is not allowed
@@ -157,11 +159,9 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
     Returns 
     -------
     gaia_data list
-
-        ..todo:: Add var server for gaia_search()
     """
 
-    #Allow lower case entries
+    # Allow lower case entries
     for k, v in iteritems(kwds):
         if k not in ['DATES', 'NB_RES_MAX']:
             raise ValueError(
@@ -172,31 +172,24 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
         elif k == 'NB_RES_MAX':
             nb_res_max = v
 
-    stdout.write("Loading GAIA-DEM Sitools2 client : %s \n" % sitools2_url)
-    if sitools2_url.startswith('http://medoc-dem'):
-        gaia_dataset = Sdo_IAS_gaia_dataset(sitools2_url + "/ws_SDO_DEM")
-    elif sitools2_url.startswith('http://idoc-medoc'):
-        gaia_dataset = Sdo_IAS_gaia_dataset(sitools2_url +
-                                            "/webs_GAIA-DEM_dataset")
-    elif sitools2_url.startswith('http://localhost'):
-        gaia_dataset = Sdo_IAS_gaia_dataset(sitools2_url +
-                                            "/webs_GAIA-DEM-dataset")
-#   print(gaia_dataset)
+    stdout.write("Loading GAIA-DEM Sitools2 client : %s \n" % server)
+    gaia_dataset = SdoIasGaiaDataset(server + "/" + gaia_dem_ds)
+    #   print(gaia_dataset)
     dates_optim = []
     if dates is None:
         raise ValueError("Error in search():\ndates entry must be specified")
     if type(dates).__name__ != 'list':
-        mess_err = ("Error in search():\nentry type for dates is : %s\ndates "
-        "must be a list type" % type(dates).__name__ )
+        mess_err = ("Error in search():\nentry type for dates is : %s\n"
+                    "dates must be a list type" % type(dates).__name__)
         raise ValueError(mess_err)
     if len(dates) != 2:
         mess_err = ("Error in search() : %d elements specified for dates\n"
-        "dates param must be specified and a list of 2 elements" % len(dates) )
+                    "dates param must be specified and a list of 2 elements" % len(dates))
         raise ValueError(mess_err)
     for date in dates:
         if type(date).__name__ != 'datetime':
-            mess_err = ("Error in search() : type for dates element is %s \n"
-            "dates list element must be a datetime type" % type(date).__name__)
+            mess_err = ("Error in search() : type for dates element is %s \n "
+                        "dates list element must be a datetime type" % type(date).__name__)
             raise TypeError(mess_err)
         elif sitools2_url.startswith('http://medoc-sdo'):
             dates_optim.append(str(date.strftime("%Y-%m-%dT%H:%M:%S")))
@@ -204,41 +197,34 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
             dates_optim.append(
                 str(date.strftime("%Y-%m-%dT%H:%M:%S")) + ".000")
     if dates[1] <= dates[0]:
-        mess_err = ("Error in search():\nd1=%s\nd2=%s\nfor dates =[d1,d2] d2 "
-        "should be > d1" % (
-            dates[1].strftime("%Y-%m-%dT%H:%M:%S"),
-            dates[2].strftime("%Y-%m-%dT%H:%M:%S")))
+        mess_err = ("Error in search():\nd1=%s\nd2=%s\nfor dates =[d1,d2] d2 should be "
+                    "> d1" % (dates[1].strftime("%Y-%m-%dT%H:%M:%S"), dates[2].strftime("%Y-%m-%dT%H:%M:%S")))
         raise ValueError(mess_err)
     dates_param = [[gaia_dataset.fields_dict['date_obs']], dates_optim,
                    'DATE_BETWEEN']
     if type(nb_res_max).__name__ != 'int':
-        mess_err = ("Error in search():\nentry type for nb_res_max is : %s\n"
-        "NB_RES_MAX must be a int type" % type(nb_res_max).__name__)
+        mess_err = ("Error in search():\nentry type for nb_res_max is : %s\n NB_RES_MAX must be "
+                    "a int type" % type(nb_res_max).__name__)
         raise ValueError(mess_err)
     if nb_res_max != -1 and nb_res_max < 0:
-        mess_err = ("Error in search():\nNB_RES_MAX= %s not allowed\n"
-        "NB_RES_MAX must be >0" % nb_res_max)
+        mess_err = ("Error in search():\nNB_RES_MAX= %s not allowed\n NB_RES_MAX must be >0" % nb_res_max)
         raise ValueError(mess_err)
-#Ask for download,date_obs,sunum_193,filename,temp_fits_rice,em_fits_rice,
+#   Ask for download,date_obs,sunum_193,filename,temp_fits_rice,em_fits_rice,
 #   width_fits_rice,chi2_fits_riceoutput_options=[gaia_dataset.fields_list[0],
 #   gaia_dataset.fields_list[1],gaia_dataset.fields_list[5],
 #   gaia_dataset.fields_list[8],gaia_dataset.fields_list[18],
 #   gaia_dataset.fields_list[19],gaia_dataset.fields_list[20],
 #   gaia_dataset.fields_list[21]]
-    output_options=[
-        gaia_dataset.fields_dict['download'], 
-        gaia_dataset.fields_dict['date_obs'], 
-        gaia_dataset.fields_dict['sunum_193'], 
-        gaia_dataset.fields_dict['filename'], 
-        gaia_dataset.fields_dict['temp_fits_rice'], 
-        gaia_dataset.fields_dict['em_fits_rice'], 
-        gaia_dataset.fields_dict['width_fits_rice'], 
-        gaia_dataset.fields_dict['chi2_fits_rice'] ]
-    #Sort date_obs ASC
+    output_options = [gaia_dataset.fields_dict['download'], gaia_dataset.fields_dict['date_obs'],
+                      gaia_dataset.fields_dict['sunum_193'], gaia_dataset.fields_dict['filename'],
+                      gaia_dataset.fields_dict['temp_fits_rice'], gaia_dataset.fields_dict['em_fits_rice'],
+                      gaia_dataset.fields_dict['width_fits_rice'], gaia_dataset.fields_dict['chi2_fits_rice']]
+
+    # Sort date_obs ASC
     #   sort_options=[[gaia_dataset.fields_list[1],'ASC']]
     sort_options = [[gaia_dataset.fields_dict['date_obs'], 'ASC']]
-    Q1 = Query(dates_param)
-    query_list = [Q1]
+    q1 = Query(dates_param)
+    query_list = [q1]
     result = gaia_dataset.search(
         query_list,
         output_options,
@@ -247,12 +233,12 @@ def gaia_search(dates=None, nb_res_max=-1, **kwds):
     gaia_data_list = []
     if len(result) != 0:
         for data in result:
-            gaia_data_list.append(Gaia_data(data))
+            gaia_data_list.append(GaiaData(data))
     stdout.write("%s results returned\n" % len(gaia_data_list))
     return gaia_data_list
 
 
-#Define decorator
+# Define decorator
 def singleton(class_def):
     """Definition de la classe SdoAiaDataset that heritates of Dataset
     This following classes will only have one instance 
@@ -260,22 +246,22 @@ def singleton(class_def):
 
     instances = {}
 
-    def get_instance(Class_heritage):
+    def get_instance(class_heritage):
         """Define a function that only return an existing instance of a Class 
         from the dictionary instances define above or add a new element to 
         instances
         """
 
         if class_def not in instances:
-            instances[class_def] = class_def(Class_heritage)
+            instances[class_def] = class_def(class_heritage)
         return instances[class_def]
 
     return get_instance
 
 
-#This following classes will only have one instance 
+# This following classes will only have one instance
 @singleton
-class Sdo_IAS_gaia_dataset(Dataset):
+class SdoIasGaiaDataset(Dataset):
     """Define  class Sdo_IAS_gaia_dataset that heritates of Dataset
     This following classes will only have one instance 
 
@@ -290,7 +276,7 @@ class Sdo_IAS_gaia_dataset(Dataset):
         Dataset.__init__(self, url)
 
     def __getSelection__(self,
-                         sunum_list=[],
+                         sunum_list=None,
                          filename=None,
                          target_dir=None,
                          download_type="TAR",
@@ -342,11 +328,11 @@ class Sdo_IAS_gaia_dataset(Dataset):
         if filename is None:
             filename = "IAS_GAIA_export_" + datetime.utcnow().strftime(
                 "%Y-%m-%dT%H:%M:%S") + "." + download_type.lower(
-                )  #if not specified this is the default name
+                )  # if not specified this is the default name
         if target_dir is not None:
             if not path.isdir(target_dir):
-                #raise ValueError("Error get_file():\nCheck the parameter 
-                #target_dir, '%s' directory does not exist." % target_dir)
+                # raise ValueError("Error get_file():\nCheck the parameter
+                # target_dir, '%s' directory does not exist." % target_dir)
                 mkdir(target_dir)
             if target_dir[-1].isalnum():
                 filename = target_dir + '/' + filename
@@ -355,26 +341,24 @@ class Sdo_IAS_gaia_dataset(Dataset):
             else:
                 raise ValueError(
                     "Warning get_file():\nCheck the param target_dir, "
-                    "special char %s at the end of target_dir is not allowed."
-                    % target_dir[-1])
+                    "special char %s at the end of target_dir is not allowed." % target_dir[-1])
 
         if download_type.upper() == "TAR":
             plugin_id = "download_tar_DEM"
         else:
             plugin_id = ""
         if not quiet:
-            stdout.write("Download %s file in progress ...\n" %
-                             download_type.lower())
+            stdout.write("Download %s file in progress ...\n" % download_type.lower())
 
     #   Dataset.execute_plugin(self,plugin_name=plugin_id, 
-    #pkey_list=sunum_list, filename=filename)
+    # pkey_list=sunum_list, filename=filename)
         try:
             Dataset.execute_plugin(
                 self,
                 plugin_name=plugin_id,
                 pkey_list=sunum_list,
                 filename=filename)
-        except:
+        except HTTPError:
             stdout.write("Error downloading selection %s \n" % filename)
         else:
             if not quiet:
@@ -382,7 +366,7 @@ class Sdo_IAS_gaia_dataset(Dataset):
                 stdout.flush()
 
 
-class Gaia_data():
+class GaiaData:
     """Definition de la classe Gaia_data 
 
     Attributes
@@ -441,12 +425,7 @@ class Gaia_data():
                self.temp_fits_rice_uri, self.em_fits_rice_uri,
                self.width_fits_rice_uri, self.chi2_fits_rice_uri))
 
-    def get_file(self,
-                 filename=None,
-                 target_dir=None,
-                 quiet=False,
-                 filetype=None,
-                 **kwds):
+    def get_file(self, filename=None, target_dir=None, quiet=False, filetype=None, **kwds):
         """Use the get_file() to retrieve data from MEDOC server  
 
         Parameters
@@ -467,14 +446,10 @@ class Gaia_data():
         -------
         MEDOC files on your current or targer_dir directory  
         """
-        url_dict={\
-        'temp': self.temp_fits_rice_uri,\
-        'em' : self.em_fits_rice_uri,\
-        'width' : self.width_fits_rice_uri,\
-        'chi2' : self.chi2_fits_rice_uri\
-        }
+        url_dict = {'temp': self.temp_fits_rice_uri, 'em': self.em_fits_rice_uri, 'width': self.width_fits_rice_uri,
+                    'chi2': self.chi2_fits_rice_uri}
         filename_dict = {}
-        #Allow upper case entries
+        # Allow upper case entries
         for k, v in iteritems(kwds):
             if k not in ['FILENAME', 'TARGET_DIR', 'QUIET', 'TYPE']:
                 raise ValueError(
@@ -500,21 +475,17 @@ class Gaia_data():
         elif filename is None and filetype is not None:
             for type_spec in filetype:
                 if type_spec not in url_dict.keys() and type_spec != 'all':
-                    raise ValueError(
-                        "Error get_file():\nfilename = %s entry for the get "
-                        "function is not allowed\nfiletype value should be in "
-                        "list 'temp','em','width','chi2', 'all'\n"
-                        % filetype)
+                    raise ValueError("Error get_file():\nfilename = %s entry for the get function is not allowed\n"
+                                     "filetype value should be in list 'temp','em','width','chi2', 'all'\n" % filetype)
                 elif type_spec == 'all':
                     for value in url_dict.values():
                         key = value.split("/")[-1]
                         value = sitools2_url + value
                         filename_dict[key] = value
                 else:
-                    for type_spec in filetype:
-                        key = url_dict[type_spec].split("/")[-1]
-                        value = sitools2_url + url_dict[type_spec]
-                        filename_dict[key] = value
+                    key = url_dict[type_spec].split("/")[-1]
+                    value = sitools2_url + url_dict[type_spec]
+                    filename_dict[key] = value
 
         elif filename is not None and filetype is not None:
             raise ValueError(
@@ -555,13 +526,11 @@ class Gaia_data():
         for (item, url) in iteritems(filename_dict):
             try:
                 urlretrieve(url, "%s%s" % (target_dir, item))
-            except:
-                stdout.write("Error downloading %s%s \n" %
-                                 (target_dir, item))
+            except HTTPError:
+                stdout.write("Error downloading %s%s \n" % (target_dir, item))
             else:
                 if not quiet:
-                    stdout.write("Download file %s%s completed\n" %
-                                     (target_dir, item))
+                    stdout.write("Download file %s%s completed\n" % (target_dir, item))
                     stdout.flush()
 
 
