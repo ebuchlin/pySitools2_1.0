@@ -6,7 +6,7 @@ This script has been designed to give python programmers an easy way to
 interrogate medoc gaia-dem sitools2 interface. You can make a search providing 
 a date range and get your selection very easilly.
 """
-__license__ = "GPL"
+__license__ = "GPLV3"
 __author__ = "Pablo ALINGERY"
 __credit__ = ["Pablo ALINGERY"]
 __maintainer__ = "Pablo ALINGERY"
