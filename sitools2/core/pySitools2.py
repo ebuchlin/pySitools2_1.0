@@ -33,7 +33,6 @@ except ImportError:
 
 try:
     from xml.dom.minidom import parseString
-
 except ImportError:
     stderr.write("Import failed in module sdo_client_medoc :\n\txml.dom.minidom module is required\n")
     raise
@@ -360,7 +359,8 @@ class Dataset:
         """Explore and list dataset resources, method=options has to be allowed
         """
         try:
-            url = urlopen(self.url + '?method=OPTIONS')
+            wadl_url = self.url + "?method=OPTIONS"
+            url = urlopen(wadl_url)
             wadl = url.read()
             domwadl = parseString(wadl)
             resources = domwadl.getElementsByTagName('resource')
@@ -627,7 +627,7 @@ class Dataset:
             phrase += "\n\t\t\t%d) %s" % (i, str(field.name))
         return phrase
 
-    def execute_plugin(self, plugin_name=None, pkey_values_list=[], filename=None, **kwargs):
+    def execute_plugin(self, plugin_name=None, pkey_values_list=None, filename=None, **kwargs):
         """Donwload a selection of data
 
         parameter
