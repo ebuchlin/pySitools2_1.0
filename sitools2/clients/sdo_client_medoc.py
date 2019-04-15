@@ -1164,16 +1164,16 @@ class SdoData:
         url = ""
         file_url = ""
         filename_pre = ""
-        filename_path = None
+        # filename_path = None
         ias_path = None
-        print("self.url : %s" % self.url)
-        print("self.ias_path : %s" % self.ias_path)
+        # print("self.url : %s" % self.url)
+        # print("self.ias_path : %s" % self.ias_path)
 
         # if ias_path ends with image_lev1.fits remove end
         if self.ias_path.endswith("/image_lev1.fits"):
             print("End with file")
             ias_path += self.ias_path.split("/image_lev1.fits")[0]
-            print("ias_path : %s" % ias_path)
+            # print("ias_path : %s" % ias_path)
         else:
             ias_path = self.ias_path
 
@@ -1189,22 +1189,22 @@ class SdoData:
             filename_pre = self.series_name + "_" + str(self.wave) + "A_" + self.date_obs.strftime('%Y-%m-%dT%H-%M-%S_'
                                                                                                    + str(self.recnum) +
                                                                                                    ".")
-            print("filename_pre : %s" % filename_pre)
+            # print("filename_pre : %s" % filename_pre)
         elif filename is None and self.series_name.startswith('hmi.sharp'):
             filename_pre = self.series_name + "_" + str(self.wave) + "A_" + \
                            self.date_obs.strftime('%Y-%m-%dT%H-%M-%S_') \
                            + str(self.harpnum) + "."
-            print("filename_pre : %s" % filename_pre)
+            # print("filename_pre : %s" % filename_pre)
 
         # Check for Ic_720s data
         elif filename is None and self.series_name.startswith('hmi'):
             filename_pre = self.series_name + "_" + str(self.wave) + "A_" + self.date_obs.strftime('%Y-%m-%dT%H-%M-%S.')
-            print("filename_pre : %s" % filename_pre)
+            # print("filename_pre : %s" % filename_pre)
 
         elif filename is not None:
             stdout.write("filename defined by user : %s\n" % filename)
             filename_pre = path.splitext(filename)[0]
-            print("filename_pre : %s" % filename_pre)
+            # print("filename_pre : %s" % filename_pre)
 
         # Define segment if it does not exist
         if segment is None and filename is None and self.series_name == 'aia.lev1':
@@ -1213,15 +1213,15 @@ class SdoData:
             kwargs.update({'segment': ','.join(segment)})
             #            print("kwargs : %s" % kwargs)
             url = self.url + ';' + urlencode(kwargs)
-            print("url : %s" % url)
+            # print("url : %s" % url)
         elif segment is None and filename is None and self.series_name.startswith('hmi.sharp'):
             segment = []
             #            #kwargs={}
             kwargs.update({'media': 'json'})
             url = self.url + '?' + urlencode(kwargs)
-            print("url : %s" % url)
+            # print("url : %s" % url)
             url_build_seg = ias_path + '?' + urlencode(kwargs)
-            print("url_build_seg : %s" % url_build_seg)
+            # print("url_build_seg : %s" % url_build_seg)
             try:
                 result = load(urlopen(url_build_seg))
             #    #result = urlretrieve(url, filename_pre+".tar")
@@ -1246,13 +1246,13 @@ class SdoData:
             segment = ['continuum']
             kwargs.update({'segment': ",".join(segment)})
             url = self.url + '/?' + urlencode(kwargs)
-            print("url : %s" % url)
+            # print("url : %s" % url)
             segment_allowed.append('continuum')
         elif segment is None and filename is None and self.series_name.startswith('hmi.m'):
             segment = ['magnetogram']
             kwargs.update({'segment': ",".join(segment)})
             url = self.url + '/?' + urlencode(kwargs)
-            print("url : %s" % url)
+            # print("url : %s" % url)
             segment_allowed.append('magnetogram')
 
         #       Segment exists
@@ -1263,9 +1263,9 @@ class SdoData:
             # url = self.ias_path
 
             url = self.url + ';' + urlencode(kwargs)
-            print("url : %s" % url)
+            # print("url : %s" % url)
             url_build_seg = ias_path + "/?" + "media=json"
-            print("url_build_seg : %s" % url_build_seg)
+            # print("url_build_seg : %s" % url_build_seg)
             try:
                 result = load(urlopen(url_build_seg))
             except HTTPError:
@@ -1287,7 +1287,7 @@ class SdoData:
             # url = self.ias_path
             segment_allowed += ['image_lev1', "spikes"]
             url = self.url + ';' + urlencode(kwargs)
-            print("url aia.lev1 : %s" % url)
+            # print("url aia.lev1 : %s" % url)
 
             #           print ("ias_path : %s" % self.ias_path)
             #           url = self.ias_path + '?' + urlencode(kwargs)
@@ -1300,9 +1300,9 @@ class SdoData:
             #           print result
             #            url = self.url + '?' + urlencode(kwargs)
             # url = self.url
-            print("ias_path : %s " % ias_path)
+            # print("ias_path : %s " % ias_path)
             url_build_seg = ias_path + "/?" + "media=json"
-            print("url_build_seg : %s" % url_build_seg)
+            # sprint("url_build_seg : %s" % url_build_seg)
             try:
                 result = load(urlopen(url_build_seg))
             except HTTPError:
@@ -1322,7 +1322,7 @@ class SdoData:
             segment = [filename]
             kwargs.update({'segment': ','.join(segment)})
             url = self.url + ';' + urlencode(kwargs)
-            print("url : %s" % url)
+            # print("url : %s" % url)
 
         # Define default segment
         #        #segment_allowed += ['image_lev1', 'spikes']
@@ -1330,7 +1330,7 @@ class SdoData:
         #        #        print ("segment : %s" % segment)
         #        #        print(segment_allowed)
         #        print("kwargs : %s" % kwargs)
-        print("url : %s" % url)
+        # print("url : %s" % url)
         for seg in segment:
             if seg not in segment_allowed and filename is None:
                 raise ValueError(
@@ -1359,17 +1359,17 @@ class SdoData:
 
         # Specification for aia.lev1 and COMPRESS param
         if not decompress and self.series_name == 'aia.lev1':
-            url = self.url + ";compress=rice"
+            url += ";compress=rice"
 
         # Define filename_path and file_url
         for seg in segment:
-            print(seg)
+            # print(seg)
             if filename is None:
-                filename_path += filename_pre + seg + '.fits'
+                filename_path = filename_pre + seg + '.fits'
             else:
-                filename_path += filename_pre + '.fits'
+                filename_path = filename_pre + '.fits'
                 file_url = url
-                print("file_url 1 : %s" % file_url)
+                # print("file_url 1 : %s" % file_url)
             if self.series_name.startswith('hmi'):
                 #   filename_path=filename_pre+seg+'.fits'
                 #   print "filename_path :", filename_path
@@ -1387,6 +1387,7 @@ class SdoData:
             #            print("filename_path : %s" % filename_path)
 
             # Retrieve data
+            # print("file url : %s"  % file_url)
             try:
                 urlretrieve(file_url, filename_path)
             except HTTPError:
@@ -1397,6 +1398,7 @@ class SdoData:
                     stdout.write("Download file %s completed\n" %
                                  filename_path)
                     stdout.flush()
+        return
 
     def metadata_search(self, server=sitools2_url, keywords=None, **kwds):
         """Provide metadata information from MEDOC server

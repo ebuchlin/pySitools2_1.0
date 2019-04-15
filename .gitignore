@@ -20,3 +20,5 @@ credits.txt
 /.cache/
 /.eggs/
 /venv/
+/.scannerwork/
+

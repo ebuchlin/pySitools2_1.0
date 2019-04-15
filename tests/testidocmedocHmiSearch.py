@@ -88,7 +88,7 @@ class Testsearch(unittest.TestCase):
         	series = 'hmi.m_720s',
         	cadence = ['12 min'] )
         print(sdo_data_list[0:3])
-        self.assertEqual( len(sdo_data_list), 94)
+        self.assertEqual( len(sdo_data_list), 120)
 
     def testSearch_sharp_cea_720s(self):
         print ("####hmi.sharp_cea_720s #############################")

@@ -88,14 +88,14 @@ def main():
     #       o1 = [ds1.fields_list[1]]
 
     # Sort date__obs ASC, wave ASC, exptime DESC
-    #       S1 = [[ds1.fields_list[5],'ASC'],[ds1.fields_list[4],'ASC'],[ds1.fields_list[8],'DESC']]
+    #       s1 = [[ds1.fields_list[5],'ASC'],[ds1.fields_list[4],'ASC'],[ds1.fields_list[8],'DESC']]
     # Sort date__obs ASC, exptime DESC
-    #       S1 = [[ds1.fields_list[4],'ASC'],[ds1.fields_list[8],'DESC']]
+    #       s1 = [[ds1.fields_list[4],'ASC'],[ds1.fields_list[8],'DESC']]
     # Sort date__obs ASC, wave ASC
-    #        S1 = [[ds1.fields_list[4],'ASC'],[ds1.fields_list[5],'ASC']]
+    #        s1 = [[ds1.fields_list[4],'ASC'],[ds1.fields_list[5],'ASC']]
 
     # Sort date__obs ASC
-    S1 = [[ds1.fields_dict['date__obs'], 'ASC']]
+    s1 = [[ds1.fields_dict['date__obs'], 'ASC']]
 
     #       for field in ds1.fields_list :
     #               field.display()
@@ -107,10 +107,10 @@ def main():
     #       Q4.display()
 
     #       print "toto :",ds1.fields_list[2].name
-    #       result = ds1.search([q1,q2,Q3,Q4],o1,S1,nbr_to_display=10)
-    #       result = ds1.search([q1,q2,Q3],o1,S1,limit_to_nb_res_max=10)
-    result = ds1.search([q1, q2], o1, S1)
-    #        result = ds1.search([q1,q2],o1,S1,limit_to_nb_res_max=10)
+    #       result = ds1.search([q1,q2,Q3,Q4],o1,s1,nbr_to_display=10)
+    #       result = ds1.search([q1,q2,Q3],o1,s1,limit_to_nb_res_max=10)
+    result = ds1.search([q1, q2], o1, s1)
+    #        result = ds1.search([q1,q2],o1,s1,limit_to_nb_res_max=10)
     if len(result) != 0:
         print("Results :")
         for i, data in enumerate(result):
@@ -134,20 +134,21 @@ def main():
     #        print recnum_list
     # recnum
     param_query_hmi = [[ds_hmi.fields_dict['recnum']], recnum_list, 'IN']
-    Q_hmi = Query(param_query_hmi)
-    Q_hmi.display()
+    q_hmi = Query(param_query_hmi)
+    q_hmi.display()
     # quality
 
-    O1_hmi = [
+    o1_hmi = [
         ds_hmi.fields_dict['sunum'], ds_hmi.fields_dict['recnum'], ds_hmi.fields_dict['harpnum']
     ]
     print("output : ", ds_hmi.fields_list[114].name)
-    S1_hmi = [[ds_hmi.fields_dict['harpnum'], 'ASC']]
+    s1_hmi = [[ds_hmi.fields_dict['harpnum'], 'ASC']]
     #       for field in ds_aia.fields_list :
     #               field.display()
-    result_hmi = ds_hmi.search([Q_hmi], O1_hmi, S1_hmi)
+    result_hmi = ds_hmi.search([q_hmi], o1_hmi, s1_hmi)
     for data in result_hmi:
         print(data)
+
 
 if __name__ == "__main__":
     main()
