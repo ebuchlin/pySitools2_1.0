@@ -1218,12 +1218,12 @@ class SdoData:
         if segment is None and filename is None and self.series_name == 'aia.lev1':
             # segment = ['image_lev1', 'spikes']
             segment = ['image_lev1']
-            stdout.write("segment : %s" % segment)
+            # stdout.write("segment : %s" % segment)
             segment_allowed.append('image_lev1')
             kwargs.update({'segment': ','.join(segment)})
             #            print("kwargs : %s" % kwargs)
             url = self.url + ';' + urlencode(kwargs)
-            stdout.write("url : %s" % url)
+            # stdout.write("url : %s" % url)
         elif segment is None and filename is None and self.series_name.startswith('hmi.sharp'):
             segment = []
             #            #kwargs={}
