@@ -16,34 +16,32 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Jean-Christophe Malapert, Pablo ALINGERY"
-__date__ ="$9 juin 2013 12:17:18$"
-
 import unittest
 from sitools2.clients.sdo_client_medoc import media_search
 from datetime import datetime, timedelta
 from sitools2.clients import constants
 
+__author__ = "Jean-Christophe Malapert, Pablo ALINGERY"
+__date__ = "$9 juin 2013 12:17:18$"
+
+
 sitools2_url = constants.SITOOLS2_URL
 functional_test = constants.FUNCTIONAL_TEST
 
 
-@unittest.skipUnless(functional_test,"Functional test "+ sitools2_url +" interface ")
+@unittest.skipUnless(functional_test, "Functional test %s interface" % sitools2_url)
 class TestMedia(unittest.TestCase):        
     
     def setUp(self):
         pass
 
     def testSearchMedia(self):
-        print ("####Test media_search #############################")
-        d1 = datetime(2012,8,10,0,0,0)
+        print("####Test media_search #############################")
+        d1 = datetime(2012, 8, 10, 0, 0, 0)
         d2 = d1 + timedelta(days=1)
-        sdo_data_list = media_search( 
-        	server=sitools2_url,
-        	dates=[d1,d2], 
-        	waves=['335','304'], 
-        	cadence=['10 min'] )
-        self.assertEqual( len(sdo_data_list), 288)                            
+        sdo_data_list = media_search(server=sitools2_url, dates=[d1, d2], waves=['335', '304'], cadence=['10 min'])
+        self.assertEqual(len(sdo_data_list), 288)
+
 
 if __name__ == "__main__":
     unittest.main()

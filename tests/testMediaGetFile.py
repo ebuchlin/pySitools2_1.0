@@ -15,13 +15,15 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
+from builtins import Exception
 
-__author__="Pablo ALINGERY"
+__author__ = "Pablo ALINGERY"
 
 
 import unittest
-from sitools2.clients.sdo_client_medoc import media_search, media_get
+from sitools2.clients.sdo_client_medoc import media_search
 from datetime import datetime, timedelta
+
 
 @unittest.skip("Functional Test medoc-sdo interface")
 class TestMediaGetFile(unittest.TestCase):
@@ -30,14 +32,16 @@ class TestMediaGetFile(unittest.TestCase):
         pass
 
     def testMediaGetFile(self):
-        print ("####Test media_get #############################")
-        d1 = datetime(2010,5,1,0,0,0)
+        print("####Test media_get #############################")
+        d1 = datetime(2010, 5, 1, 0, 0, 0)
         d2 = d1 + timedelta(days=7*365)
-        sdo_data_list = media_search( DATES=[d1,d2], series='hmi.m_720s', CADENCE=['1d'], nb_res_max=2 )
+        sdo_data_list = media_search(DATES=[d1, d2], series='hmi.m_720s', CADENCE=['1d'], nb_res_max=2)
         print(sdo_data_list[0])
-        try :
-            result  = sdo_data_list[0].get_file()
-        except :
+        try:
+            sdo_data_list[0].get_file()
+        except Exception:
             raise ValueError("Failed downloading get_file")
+
+
 if __name__ == "__main__":
     unittest.main()

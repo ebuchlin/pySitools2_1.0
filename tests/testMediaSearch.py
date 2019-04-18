@@ -15,14 +15,13 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
-
-__author__="Jean-Christophe Malapert, Pablo ALINGERY"
-__date__ ="$9 juin 2013 12:17:18$"
-
 import unittest
-from sitools2.clients.sdo_client_medoc import media_search, \
-	media_metadata_search, media_get
+from sitools2.clients.sdo_client_medoc import media_search
 from datetime import datetime, timedelta
+
+__author__ = "Jean-Christophe Malapert, Pablo ALINGERY"
+__date__ = "$9 juin 2013 12:17:18$"
+
 
 @unittest.skip("Functional Test medoc-sdo interface")
 class TestMedia(unittest.TestCase):        
@@ -31,12 +30,12 @@ class TestMedia(unittest.TestCase):
         pass
 
     def testSearchMedia(self):
-        print ("####Test media_search #############################")
-        d1 = datetime(2012,8,10,0,0,0)
+        print("####Test media_search #############################")
+        d1 = datetime(2012, 8, 10, 0, 0, 0)
         d2 = d1 + timedelta(days=1)
-        sdo_data_list = media_search( DATES=[d1,d2], WAVES=['335','304'], 
-        	CADENCE=['10 min'] )
-        self.assertEqual( len(sdo_data_list), 288)                            
+        sdo_data_list = media_search(DATES=[d1, d2], WAVES=['335', '304'], CADENCE=['10 min'])
+        self.assertEqual(len(sdo_data_list), 288)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -16,13 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Pablo ALINGERY"
-__date__ ="$9 juin 2013 12:17:18$"
-
 import unittest
 from sitools2.clients.sdo_client_medoc import media_search
 from datetime import datetime, timedelta
 from sitools2.clients import constants
+
+__author__ = "Pablo ALINGERY"
+__date__ = "$9 juin 2013 12:17:18$"
 
 sitools2_url = constants.SITOOLS2_URL
 functional_test = constants.FUNCTIONAL_TEST
@@ -31,84 +31,64 @@ d1 = datetime(2016, 8, 10, 0, 0, 0)
 d2 = d1 + timedelta(days=1)
 
 
-@unittest.skipUnless(functional_test,"Functional test "+ sitools2_url +" interface ")
+@unittest.skipUnless(functional_test, "Functional test %s interface" % sitools2_url)
 class Testsearch(unittest.TestCase):
-    
+
     def setUp(self):
-        print ("####Test "+ sitools2_url +"_search #############################")
+        print("####Test " + sitools2_url + "_search #############################")
 
     def testSearch_sharp_720s_nrt(self):
-        print ("#### hmi.sharp_720s_nrt ################################")
+        print("#### hmi.sharp_720s_nrt ################################")
 
-        sdo_data_list = media_search( 
-        	server=sitools2_url,
-        	dates = [d1,d2],
-        	series = 'hmi.sharp_720s_nrt',
-        	cadence = ['12 min'] )
+        sdo_data_list = media_search(
+            server=sitools2_url,
+            dates=[d1, d2],
+            series='hmi.sharp_720s_nrt',
+            cadence=['12 min'])
         print(sdo_data_list[0:3])
-        self.assertEqual( len(sdo_data_list), 861)
+        self.assertEqual(len(sdo_data_list), 861)
 
     def testSearch_sharp_cea_720s_nrt(self):
         print("#### hmi.sharp_cea_720s_nrt ################################")
-        sdo_data_list = media_search(
-            server = sitools2_url,
-            dates = [d1, d2],
-            series = 'hmi.sharp_cea_720s_nrt',
-            cadence = ['12 min'])
+        sdo_data_list = media_search(server=sitools2_url, dates=[d1, d2], series='hmi.sharp_cea_720s_nrt',
+                                     cadence=['12 min'])
         print(sdo_data_list[0:3])
         self.assertEqual(len(sdo_data_list), 861)
 
     def testSearch_ic_nolimbdark_720s_nrt(self):
         print("####hmi.ic_nolimbdark_720s_nrt #########################")
-        sdo_data_list = media_search(
-        	server = sitools2_url,
-        	dates = [d1,d2],
-        	series = 'hmi.ic_nolimbdark_720s_nrt',
-        	cadence = ['12 min'] )
+        sdo_data_list = media_search(server=sitools2_url, dates=[d1, d2], series='hmi.ic_nolimbdark_720s_nrt',
+                                     cadence=['12 min'])
         print(sdo_data_list[0:3])
-        self.assertEqual( len(sdo_data_list), 120)
-
+        self.assertEqual(len(sdo_data_list), 120)
 
     def testSearch_sharp_720s(self):
-        print ("####hmi.sharp_720s #############################")
-        sdo_data_list = media_search(
-        	server = sitools2_url,
-        	dates = [d1,d2],
-        	series = 'hmi.sharp_720s',
-        	cadence = ['12 min'] )
+        print("####hmi.sharp_720s #############################")
+        sdo_data_list = media_search(server=sitools2_url, dates=[d1, d2], series='hmi.sharp_720s',
+                                     cadence=['12 min'])
         print(sdo_data_list[0:3])
-        self.assertEqual( len(sdo_data_list), 720)
-
+        self.assertEqual(len(sdo_data_list), 720)
 
     def testSearch_m_720s(self):
-        print ("####hmi.m_720s #########################################")
-        sdo_data_list = media_search(
-        	server = sitools2_url,
-        	dates = [d1,d2],
-        	series = 'hmi.m_720s',
-        	cadence = ['12 min'] )
+        print("####hmi.m_720s #########################################")
+        sdo_data_list = media_search(server=sitools2_url, dates=[d1, d2], series='hmi.m_720s',
+                                     cadence=['12 min'])
         print(sdo_data_list[0:3])
-        self.assertEqual( len(sdo_data_list), 120)
+        self.assertEqual(len(sdo_data_list), 120)
 
     def testSearch_sharp_cea_720s(self):
-        print ("####hmi.sharp_cea_720s #############################")
-        sdo_data_list = media_search(
-        	server = sitools2_url,
-        	dates = [d1,d2],
-        	series = 'hmi.sharp_cea_720s',
-        	cadence = ['12 min'] )
+        print("####hmi.sharp_cea_720s #############################")
+        sdo_data_list = media_search(server=sitools2_url, dates=[d1, d2], series='hmi.sharp_cea_720s',
+                                     cadence=['12 min'])
         print(sdo_data_list[0:3])
-        self.assertEqual( len(sdo_data_list), 119)
+        self.assertEqual(len(sdo_data_list), 119)
 
     def testSearch_m_720s_nrt(self):
-        print ("####hmi.m_720s_nrt #########################")
-        sdo_data_list = media_search(
-        	server = sitools2_url,
-        	dates = [d1,d2],
-        	series = 'hmi.m_720s_nrt',
-        	cadence = ['12 min'] )
+        print("####hmi.m_720s_nrt #########################")
+        sdo_data_list = media_search(server=sitools2_url, dates=[d1, d2], series='hmi.m_720s_nrt', cadence=['12 min'])
         print(sdo_data_list[0:3])
-        self.assertEqual( len(sdo_data_list), 120)
+        self.assertEqual(len(sdo_data_list), 120)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -44,10 +44,10 @@ idoc_medoc_get(MEDIA_DATA_LIST=sdo_data_list, target_dir="results")
 
 # Search meta data info
 # for item in sdo_data_list:
- # print item.date_obs
- # my_meta_search = item.metadata_search(KEYWORDS=['date__obs','quality',
- # 'cdelt1','cdelt2','crval1'])
-  # print my_meta_search
-  # if (my_meta_search['quality'] == 0) :
-      # item.display()
-      # item.get_file(TARGET_DIR='results')
+# print item.date_obs
+# my_meta_search = item.metadata_search(KEYWORDS=['date__obs','quality',
+# 'cdelt1','cdelt2','crval1'])
+# print my_meta_search
+# if (my_meta_search['quality'] == 0) :
+# item.display()
+# item.get_file(TARGET_DIR='results')

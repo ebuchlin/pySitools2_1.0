@@ -35,8 +35,6 @@ class MyTestCase(unittest.TestCase):
             pass
         except AssertionError:
             self.fail("AssertionError")
-        except Exception:
-            pass
 
     def test_metadata_search(self):
         try:

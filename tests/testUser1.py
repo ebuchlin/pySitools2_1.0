@@ -16,11 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Eric Buchlin, Pablo ALINGERY"
-__date__ ="$8 mars 2017 10:22:22$"
-
 import unittest
 import sitools2.clients.sdo_client_medoc as md
+
+
+__author__ = "Eric Buchlin, Pablo ALINGERY"
+__date__ = "$8 mars 2017 10:22:22$"
+
 
 @unittest.skip("Functional Test medoc-sdo interface")
 class TestUser1(unittest.TestCase):
@@ -29,16 +31,15 @@ class TestUser1(unittest.TestCase):
         pass
 
     def testUser1(self):
-        print ("####User Test media_search & metadata_search #############################")
-        l = md.media_search(dates=[md.datetime(2016,1,1,0,0,0),
-        	md.datetime(2016,1,1,1,0,0)], waves=['193'])
-        rnlist = [str (a.recnum) for a in l]
-        print(l[0:3])
-        m=md.media_metadata_search(keywords=['date__obs', 'quality'],
-        	recnum_list=rnlist, series='aia.lev1')
-#        print m
-        print (m[0:3])
+        print("####User Test media_search & metadata_search #############################")
+        results_list = md.media_search(dates=[md.datetime(2016, 1, 1, 0, 0, 0), md.datetime(2016, 1, 1, 1, 0, 0)],
+                                       waves=['193'])
+        rnlist = [int(a.recnum) for a in results_list]
+        print(results_list[0:3])
+        m = md.media_metadata_search(keywords=['date__obs', 'quality'], recnum_list=rnlist, series='aia.lev1')
+        print(m[0:3])
         self.assertEqual(len(m), 60)
+
 
 if __name__ == "__main__":
     unittest.main()

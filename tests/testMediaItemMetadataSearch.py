@@ -16,12 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Pablo ALINGERY"
-__date__ ="$9 juin 2013 12:17:18$"
-
 import unittest
-from sitools2.clients.sdo_client_medoc import media_search, media_get
+from sitools2.clients.sdo_client_medoc import media_search
 from datetime import datetime, timedelta
+
+__author__ = "Pablo ALINGERY"
+__date__ = "$9 juin 2013 12:17:18$"
+
 
 @unittest.skip("Functional Test medoc-sdo interface")
 class TestMediaItemMetadataSearch(unittest.TestCase):
@@ -30,15 +31,17 @@ class TestMediaItemMetadataSearch(unittest.TestCase):
         pass
 
     def testMediaItemMetadataSearch(self):
-        print ("####Test metadata_search #############################")
-        d1 = datetime(2010,1,1,0,0,0)
+        print("####Test metadata_search #############################")
+        d1 = datetime(2010, 1, 1, 0, 0, 0)
         d2 = d1 + timedelta(days=365)
-        sdo_data_list = media_search( DATES=[d1,d2], waves=['304'], CADENCE=['1d'], nb_res_max=2 )
+        sdo_data_list = media_search(DATES=[d1, d2], waves=['304'], CADENCE=['1d'], nb_res_max=2)
         print(sdo_data_list[0])
-        try :
-            result  = sdo_data_list[0].metadata_search(keywords=['datamedn', 'exptime', 'quality'])
+        try:
+            result = sdo_data_list[0].metadata_search(keywords=['datamedn', 'exptime', 'quality'])
             print(result)
-        except :
+        except Exception:
             raise ValueError("Failed metadata_search()")
+
+
 if __name__ == "__main__":
     unittest.main()

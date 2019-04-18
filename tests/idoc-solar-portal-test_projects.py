@@ -15,16 +15,16 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
-
-__author__="Pablo ALINGERY"
-__date__ ="$8 janvier 2015 19:38:58$"
-
 import unittest
 from sitools2.core.pySitools2 import *
 from sitools2.clients import constants
 
+__author__ = "Pablo ALINGERY"
+__date__ = "$8 janvier 2015 19:38:58$"
+
 sitools2_url = constants.SITOOLS2_URL
 functional_test = constants.FUNCTIONAL_TEST
+
 
 @unittest.skipUnless(functional_test, 'Functional test skipped')
 class TestSitools2Core(unittest.TestCase):        
@@ -33,12 +33,12 @@ class TestSitools2Core(unittest.TestCase):
         pass
     
     def testNbProjects(self):
-        print ("####Test "+sitools2_url +" nbr projects ###############")
+        print("####Test " + sitools2_url + " nbr projects ###############")
         sitools2 = Sitools2Instance(sitools2_url)
         projects = sitools2.list_project()
         print(projects)
-        self.assertEqual( len(projects), 1)           
+        self.assertEqual(len(projects), 1)
+
 
 if __name__ == '__main__':
     unittest.main()
-

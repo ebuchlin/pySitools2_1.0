@@ -16,11 +16,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Jean-Christophe Malapert"
-__date__ ="$9 juin 2013 11:38:58$"
-
 import unittest
 from sitools2.core.pySitools2 import *
+
+__author__ = "Jean-Christophe Malapert"
+__date__ = "$9 juin 2013 11:38:58$"
+
 
 @unittest.skip("Functional Test medoc-sdo interface")
 class TestSitools2Core(unittest.TestCase):        
@@ -29,10 +30,10 @@ class TestSitools2Core(unittest.TestCase):
         pass
     
     def testNbProjects(self):
-        print ("####Test media nbr projects #################################")
+        print("####Test media nbr projects #################################")
         sitools2 = Sitools2Instance('http://medoc-sdo.ias.u-psud.fr')
         projects = sitools2.list_project()
-        self.assertEqual( len(projects), 2)           
+        self.assertEqual(len(projects), 2)
     
 
 if __name__ == '__main__':

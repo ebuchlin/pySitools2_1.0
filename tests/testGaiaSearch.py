@@ -16,29 +16,32 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__="Jean-Christophe Malapert"
-__date__ ="$9 juin 2013 12:17:18$"
-
 import unittest
 from sitools2.clients.gaia_client_medoc import *
 from datetime import datetime, timedelta
 from sitools2.clients import constants
 
+__author__ = "Jean-Christophe Malapert"
+__date__ = "$9 juin 2013 12:17:18$"
+
+
 sitools2_url = constants.SITOOLS2_URL
 functional_test = constants.FUNCTIONAL_TEST
 
-@unittest.skipUnless(functional_test,"Functional Test gaia-dem interface skipped ")
-class TestGaia(unittest.TestCase):        
+
+@unittest.skipUnless(functional_test, "Functional Test gaia-dem interface skipped ")
+class TestGaia(unittest.TestCase):
     
     def setUp(self):
         pass
     
     def testSearchGaia(self):
-        print ("####Test gaia_search#############################")
-        d1 = datetime(2012,8,10,0,0,0)
+        print("####Test gaia_search#############################")
+        d1 = datetime(2012, 8, 10, 0, 0, 0)
         d2 = d1 + timedelta(days=1)
-        gaia_data_list = gaia_search( DATES=[d1,d2], NB_RES_MAX=10 )
-        self.assertEqual( len(gaia_data_list), 10)                            
+        gaia_data_list = gaia_search(DATES=[d1, d2], NB_RES_MAX=10)
+        self.assertEqual(len(gaia_data_list), 10)
+
 
 if __name__ == "__main__":
     unittest.main()

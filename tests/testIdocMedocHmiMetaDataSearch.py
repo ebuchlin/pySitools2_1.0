@@ -16,12 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses
 
-__author__ = "Pablo ALINGERY"
-__date__ = "$9 juin 2013 12:17:18$"
-
 import unittest
 from sitools2.clients.sdo_client_medoc import media_metadata_search
 from sitools2.clients import constants
+
+__author__ = "Pablo ALINGERY"
+__date__ = "$9 juin 2013 12:17:18$"
+
 
 sitools2_url = constants.SITOOLS2_URL
 functional_test = constants.FUNCTIONAL_TEST
@@ -37,8 +38,8 @@ class Testidocmedoc(unittest.TestCase):
         print("\n####Test " + sitools2_url + " meta-data-search #######################")
         print("\n####hmi.sharp_cea_720s_nrt #################################")
         print("Test media_metadata_search")
-        recnum_list = ['2075898', '2075899', '2075900', '2075902', '2075903', '2075904', '2075905', '2075940',
-                       '2075938', '2075939']
+        recnum_list = [2075898, 2075899, 2075900, 2075902, 2075903, 2075904, 2075905, 2075940,
+                       2075938, 2075939]
         print(recnum_list)
         meta = media_metadata_search(keywords=['recnum', 'sunum', 'date__obs', 'quality', 'cdelt1', 'cdelt2', 'crval1'],
                                      series="hmi.sharp_cea_720s_nrt", recnum_list=recnum_list, server=sitools2_url)
